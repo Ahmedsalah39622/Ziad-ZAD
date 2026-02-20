@@ -1,0 +1,258 @@
+<!-- ============================================================ -->
+<!-- ZAD HOMEPAGE — index.liquid                                  -->
+<!-- ============================================================ -->
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <!-- Animated background glow -->
+  <div class="hero__bg-glow" aria-hidden="true"></div>
+  <div class="hero__bg-grain" aria-hidden="true"></div>
+  <div class="hero__bg-orb hero__bg-orb--top-right" aria-hidden="true"></div>
+  <div class="hero__bg-orb hero__bg-orb--bottom-left" aria-hidden="true"></div>
+
+  <!-- Mobile Layout -->
+  <div class="hero__mobile">
+    <div class="hero__badge">
+      <span class="hero__badge-dot" aria-hidden="true"></span>
+      <span class="hero__badge-text">New Drop</span>
+    </div>
+
+    <div class="hero__image-wrap">
+      <div class="hero__image-glow" aria-hidden="true"></div>
+      {%- if section.settings.hero_image != blank -%}
+        <img
+          src="{{ section.settings.hero_image | image_url: width: 600 }}"
+          alt="{{ section.settings.hero_heading | default: shop.name }}"
+          class="hero__image"
+          loading="eager"
+          fetchpriority="high"
+        >
+      {%- endif -%}
+    </div>
+
+    <h1 class="hero__heading">
+      <span class="hero__heading-line hero__heading-line--white">WEAR</span>
+      <span class="hero__heading-line hero__heading-line--white">THE</span>
+      <span class="hero__heading-line hero__heading-line--gradient">IMPOSSIBLE</span>
+    </h1>
+
+    <p class="hero__description">
+      Premium streetwear built for those who refuse to blend in.
+      <strong>ZAD</strong> — engineered for movement, designed for impact.
+    </p>
+
+    <div class="hero__cta-group">
+      <a href="/collections/all" class="btn btn--primary">Shop Now</a>
+      <a href="#features" class="btn btn--ghost">Explore</a>
+    </div>
+
+    <div class="hero__stats">
+      <div class="hero__stat">
+        <span class="hero__stat-value">L.E 599</span>
+        <span class="hero__stat-label">Starting</span>
+      </div>
+      <div class="hero__stat-divider" aria-hidden="true"></div>
+      <div class="hero__stat">
+        <div class="hero__stars" aria-label="5 stars">
+          {%- for i in (1..5) -%}
+            <svg class="hero__star" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          {%- endfor -%}
+        </div>
+        <span class="hero__stat-label">2.4k reviews</span>
+      </div>
+      <div class="hero__stat-divider" aria-hidden="true"></div>
+      <div class="hero__stat">
+        <span class="hero__stat-value">LTD</span>
+        <span class="hero__stat-label">Edition</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Layout -->
+  <div class="hero__desktop">
+    <div class="hero__bg-text" aria-hidden="true">JUST DROP</div>
+
+    <div class="hero__content">
+      <!-- Left -->
+      <div class="hero__text">
+        <div class="hero__badge">
+          <span class="hero__badge-dot" aria-hidden="true"></span>
+          <span class="hero__badge-text">New Release</span>
+        </div>
+
+        <h1 class="hero__heading">
+          <span class="hero__heading-line hero__heading-line--white">WEAR</span>
+          <span class="hero__heading-line hero__heading-line--white">THE</span>
+          <span class="hero__heading-line hero__heading-line--gradient">IMPOSSIBLE</span>
+        </h1>
+
+        <p class="hero__description">
+          Premium streetwear built for those who refuse to blend in.
+          <strong>ZAD</strong> — engineered for movement, designed for impact.
+        </p>
+
+        <div class="hero__cta-group">
+          <a href="/collections/all" class="btn btn--primary btn--glow">Shop Now</a>
+          <a href="#features" class="btn btn--ghost">Explore Tech</a>
+        </div>
+
+        <div class="hero__social-proof">
+          <div class="hero__avatars" aria-hidden="true">
+            {%- for i in (1..4) -%}
+              <div class="hero__avatar">{{ 'ABCD' | slice: forloop.index0, 1 }}</div>
+            {%- endfor -%}
+          </div>
+          <div>
+            <div class="hero__stars" aria-label="5 stars">
+              {%- for i in (1..5) -%}
+                <svg class="hero__star" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+              {%- endfor -%}
+            </div>
+            <span class="hero__social-label">2.4k+ reviews</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Product -->
+      <div class="hero__product">
+        <div class="hero__ring hero__ring--outer" aria-hidden="true"></div>
+        <div class="hero__ring hero__ring--inner" aria-hidden="true"></div>
+        <div class="hero__float">
+          {%- if section.settings.hero_image != blank -%}
+            <img
+              src="{{ section.settings.hero_image | image_url: width: 800 }}"
+              alt="{{ shop.name }}"
+              class="hero__product-img"
+              loading="eager"
+            >
+          {%- endif -%}
+        </div>
+        <div class="hero__price-tag">
+          <span class="hero__price-label">Starting at</span>
+          <span class="hero__price-value">L.E 599</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      {%- assign ticker_items = 'Free Shipping L.E 1000+,30-Day Returns,Secure Checkout,Premium Quality,24/7 Support,Worldwide Delivery,Satisfaction Guaranteed,Exclusive Designs' | split: ',' -%}
+      {%- for item in ticker_items -%}
+        <span class="ticker__item"><span class="ticker__dot"></span>{{ item }}</span>
+      {%- endfor -%}
+      {%- for item in ticker_items -%}
+        <span class="ticker__item"><span class="ticker__dot"></span>{{ item }}</span>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<!-- ========== FEATURED PRODUCTS ========== -->
+{%- assign featured = collections['frontpage'] -%}
+{%- if featured and featured.products.size > 0 -%}
+<section class="section-featured" id="shop">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-eyebrow">Genesis Collection</p>
+      <h2 class="section-title">Featured Pieces</h2>
+    </div>
+    <div class="product-grid">
+      {%- for product in featured.products limit: 4 -%}
+        <a href="{{ product.url }}" class="product-card">
+          <div class="product-card__image-wrap">
+            {%- if product.featured_image -%}
+              <img
+                src="{{ product.featured_image | image_url: width: 600 }}"
+                alt="{{ product.featured_image.alt | default: product.title }}"
+                class="product-card__image"
+                loading="lazy"
+              >
+            {%- else -%}
+              <div class="product-card__placeholder">{{ product.title | slice: 0, 2 | upcase }}</div>
+            {%- endif -%}
+            <span class="product-card__badge">New</span>
+          </div>
+          <div class="product-card__info">
+            <h3 class="product-card__name">{{ product.title }}</h3>
+            <p class="product-card__price">{{ product.price | money }}</p>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+    <div class="section-cta">
+      <a href="/collections/all" class="btn btn--ghost btn--wide">View Full Collection</a>
+    </div>
+  </div>
+</section>
+{%- endif -%}
+
+<!-- ========== FEATURES ========== -->
+<section class="section-features" id="features">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-eyebrow">Why ZAD</p>
+      <h2 class="section-title">Engineered Differently</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Premium Materials</h3>
+        <p class="feature-card__desc">Sourced from the finest mills globally — fabrics that perform and last.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Thoughtful Design</h3>
+        <p class="feature-card__desc">Every stitch, seam, and silhouette crafted to make a statement.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Global Delivery</h3>
+        <p class="feature-card__desc">Shipped worldwide with full tracking and 30-day returns guaranteed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.951.69h4.913c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        </div>
+        <h3 class="feature-card__title">Limited Editions</h3>
+        <p class="feature-card__desc">Exclusive drops in restricted quantities — own something truly rare.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== QUOTE ========== -->
+<section class="section-quote">
+  <div class="container">
+    <blockquote class="quote">
+      <p class="quote__text">"We don't follow trends. We set the standard for what streetwear means in the next generation."</p>
+      <cite class="quote__author">— ZAD Creative Director</cite>
+    </blockquote>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Homepage",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero Product Image"
+    },
+    {
+      "type": "text",
+      "id": "hero_heading",
+      "label": "Hero Alt Text",
+      "default": "ZAD Genesis Collection"
+    }
+  ]
+}
+{% endschema %}

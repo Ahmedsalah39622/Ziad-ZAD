@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+
+  <title>
+    {%- if template == 'index' -%}
+      {{ shop.name }} — Premium Streetwear
+    {%- elsif page_title == blank -%}
+      {{ shop.name }}
+    {%- else -%}
+      {{ page_title }} — {{ shop.name }}
+    {%- endif -%}
+  </title>
+
+  {%- if page_description -%}
+    <meta name="description" content="{{ page_description | escape }}">
+  {%- endif -%}
+
+  {{ content_for_header }}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  {{ 'zad.css' | asset_url | stylesheet_tag }}
+</head>
+
+<body class="zad-body">
+
+  {%- render 'header' -%}
+
+  <main id="main-content" role="main">
+    {{ content_for_layout }}
+  </main>
+
+  {%- render 'footer' -%}
+
+  <!-- Cart Drawer Overlay -->
+  <div id="cart-overlay" class="cart-overlay" onclick="closeCartDrawer()"></div>
+
+  <!-- Cart Drawer -->
+  <div id="cart-drawer" class="cart-drawer" role="dialog" aria-label="Shopping Cart">
+    <div class="cart-drawer__header">
+      <h2 class="cart-drawer__title">Your Cart</h2>
+      <button class="cart-drawer__close" onclick="closeCartDrawer()" aria-label="Close cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div id="cart-drawer-body" class="cart-drawer__body">
+      <!-- Filled by JS -->
+    </div>
+    <div class="cart-drawer__footer">
+      <div class="cart-drawer__totals">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">{{ cart.total_price | money }}</span>
+      </div>
+      <a href="/cart" class="btn btn--primary btn--full">View Full Cart</a>
+      <a href="/checkout" class="btn btn--outline btn--full">Checkout</a>
+    </div>
+  </div>
+
+  {{ 'zad.js' | asset_url | script_tag }}
+
+</body>
+</html>

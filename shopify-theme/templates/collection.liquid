@@ -1,0 +1,138 @@
+<!-- ============================================================ -->
+<!-- COLLECTION PAGE — collection.liquid                          -->
+<!-- ============================================================ -->
+
+<div class="collection-page">
+
+  <!-- Editorial Header -->
+  <div class="collection-hero">
+    <div class="container collection-hero__inner">
+      <div class="collection-hero__heading-group">
+        <div class="collection-hero__line-wrap">
+          <h1 class="collection-hero__word collection-hero__word--white">The</h1>
+        </div>
+        <div class="collection-hero__line-wrap collection-hero__line-wrap--row">
+          <h1 class="collection-hero__word collection-hero__word--gradient">
+            {{ collection.title | default: 'Collection' }}
+          </h1>
+          <span class="collection-hero__collection-num">/001</span>
+        </div>
+      </div>
+
+      <div class="collection-hero__meta">
+        <p class="collection-hero__desc">
+          {{ collection.description | default: 'Premium streetwear engineered for those who refuse to blend in. Every piece is built for movement, designed for impact.' }}
+        </p>
+        <div class="collection-hero__tags">
+          <span>Genesis Edition</span>
+          <span class="collection-hero__dash"></span>
+          <span>2026</span>
+        </div>
+      </div>
+
+      <div class="collection-hero__divider"></div>
+    </div>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="filters-bar">
+    <div class="container filters-bar__inner">
+      <div class="filters-bar__left">
+        <span class="filters-bar__count">{{ collection.products_count }} Pieces</span>
+      </div>
+      <div class="filters-bar__right">
+        <span class="filters-bar__label">Sort by</span>
+        <select class="filters-bar__select" onchange="location.href=this.value">
+          <option value="{{ collection.url }}?sort_by=manual" {% if collection.sort_by == 'manual' %}selected{% endif %}>Featured</option>
+          <option value="{{ collection.url }}?sort_by=price-ascending" {% if collection.sort_by == 'price-ascending' %}selected{% endif %}>Price: Low → High</option>
+          <option value="{{ collection.url }}?sort_by=price-descending" {% if collection.sort_by == 'price-descending' %}selected{% endif %}>Price: High → Low</option>
+          <option value="{{ collection.url }}?sort_by=created-descending" {% if collection.sort_by == 'created-descending' %}selected{% endif %}>Newest</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Grid -->
+  <div class="container">
+    {%- if collection.products.size > 0 -%}
+      <div class="product-grid">
+        {%- for product in collection.products -%}
+          <a href="{{ product.url }}" class="product-card">
+            <div class="product-card__image-wrap">
+              {%- if product.featured_image -%}
+                <img
+                  src="{{ product.featured_image | image_url: width: 600 }}"
+                  alt="{{ product.featured_image.alt | default: product.title }}"
+                  class="product-card__image"
+                  loading="lazy"
+                  width="600"
+                  height="750"
+                >
+                {%- if product.images.size > 1 -%}
+                  <img
+                    src="{{ product.images[1] | image_url: width: 600 }}"
+                    alt="{{ product.title }}"
+                    class="product-card__image product-card__image--hover"
+                    loading="lazy"
+                    width="600"
+                    height="750"
+                  >
+                {%- endif -%}
+              {%- else -%}
+                <div class="product-card__placeholder">
+                  {{ product.title | slice: 0, 2 | upcase }}
+                </div>
+              {%- endif -%}
+
+              {%- if product.available == false -%}
+                <span class="product-card__badge product-card__badge--sold-out">Sold Out</span>
+              {%- elsif product.compare_at_price > product.price -%}
+                <span class="product-card__badge product-card__badge--sale">Sale</span>
+              {%- else -%}
+                <span class="product-card__badge">New</span>
+              {%- endif -%}
+
+              <div class="product-card__actions">
+                <button
+                  class="product-card__quick-add"
+                  data-product-id="{{ product.variants.first.id }}"
+                  onclick="quickAddToCart(event, '{{ product.variants.first.id }}')"
+                  aria-label="Quick add {{ product.title }}"
+                >
+                  + Quick Add
+                </button>
+              </div>
+            </div>
+            <div class="product-card__info">
+              <div class="product-card__meta">
+                <h3 class="product-card__name">{{ product.title }}</h3>
+                <div class="product-card__pricing">
+                  {%- if product.compare_at_price > product.price -%}
+                    <span class="product-card__price product-card__price--sale">{{ product.price | money }}</span>
+                    <span class="product-card__compare">{{ product.compare_at_price | money }}</span>
+                  {%- else -%}
+                    <span class="product-card__price">{{ product.price | money }}</span>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+          </a>
+        {%- endfor -%}
+      </div>
+
+      <!-- Pagination -->
+      {%- if paginate.pages > 1 -%}
+        <div class="pagination">
+          {{ paginate | default_pagination }}
+        </div>
+      {%- endif -%}
+
+    {%- else -%}
+      <div class="empty-state">
+        <p class="empty-state__text">No products found in this collection.</p>
+        <a href="/collections/all" class="btn btn--primary">Browse All</a>
+      </div>
+    {%- endif -%}
+  </div>
+
+</div>

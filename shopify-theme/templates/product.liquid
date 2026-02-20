@@ -1,0 +1,261 @@
+<!-- ============================================================ -->
+<!-- PRODUCT PAGE — product.liquid                               -->
+<!-- ============================================================ -->
+
+<div class="product-page">
+  <div class="container product-page__inner">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/" class="breadcrumb__link">Home</a>
+      <span class="breadcrumb__sep">/</span>
+      <a href="{{ product.collections.first.url | default: '/collections/all' }}" class="breadcrumb__link">
+        {{ product.collections.first.title | default: 'Shop' }}
+      </a>
+      <span class="breadcrumb__sep">/</span>
+      <span class="breadcrumb__current">{{ product.title }}</span>
+    </nav>
+
+    <div class="product-layout">
+
+      <!-- LEFT: Images -->
+      <div class="product-gallery">
+        <div class="product-gallery__main" id="main-image">
+          {%- if product.featured_image -%}
+            <img
+              id="product-main-img"
+              src="{{ product.featured_image | image_url: width: 900 }}"
+              alt="{{ product.featured_image.alt | default: product.title }}"
+              class="product-gallery__main-img"
+              loading="eager"
+            >
+          {%- else -%}
+            <div class="product-gallery__placeholder">{{ product.title | slice: 0, 2 | upcase }}</div>
+          {%- endif -%}
+        </div>
+
+        {%- if product.images.size > 1 -%}
+          <div class="product-gallery__thumbs">
+            {%- for image in product.images -%}
+              <button
+                class="product-gallery__thumb {% if forloop.first %}product-gallery__thumb--active{% endif %}"
+                onclick="setMainImage('{{ image | image_url: width: 900 }}', this)"
+                aria-label="View image {{ forloop.index }}"
+              >
+                <img
+                  src="{{ image | image_url: width: 120 }}"
+                  alt="{{ image.alt | default: product.title }}"
+                  loading="lazy"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- RIGHT: Details -->
+      <div class="product-details">
+
+        <!-- Tags / Category -->
+        {%- if product.tags.size > 0 -%}
+          <p class="product-details__category">
+            {{ product.tags.first | upcase }}
+          </p>
+        {%- endif -%}
+
+        <h1 class="product-details__title">{{ product.title }}</h1>
+
+        <!-- Price -->
+        <div class="product-details__price-row">
+          {%- if product.compare_at_price > product.price -%}
+            <span class="product-details__price product-details__price--sale">{{ product.price | money }}</span>
+            <span class="product-details__price-compare">{{ product.compare_at_price | money }}</span>
+            <span class="product-details__price-badge">
+              SAVE {{ product.compare_at_price | minus: product.price | money }}
+            </span>
+          {%- else -%}
+            <span class="product-details__price">{{ product.price | money }}</span>
+          {%- endif -%}
+        </div>
+
+        <!-- Short Description -->
+        {%- if product.description != blank -%}
+          <div class="product-details__description">
+            {{ product.description | strip_html | truncate: 200 }}
+          </div>
+        {%- endif -%}
+
+        <!-- Add to Cart Form -->
+        {%- form 'product', product, id: 'product-form', class: 'product-form' -%}
+
+          {%- unless product.has_only_default_variant -%}
+
+            {%- for option in product.options_with_values -%}
+              <div class="product-form__option-group">
+                <div class="product-form__option-header">
+                  <label class="product-form__option-label">{{ option.name }}</label>
+                  {%- if option.name == 'Size' -%}
+                    <a href="/pages/size-guide" class="product-form__size-guide" target="_blank">Size Guide</a>
+                  {%- endif -%}
+                </div>
+
+                <div class="product-form__option-values" data-option-index="{{ forloop.index0 }}">
+                  {%- for value in option.values -%}
+                    <button
+                      type="button"
+                      class="product-form__option-btn {% if option.selected_value == value %}product-form__option-btn--selected{% endif %}"
+                      data-value="{{ value }}"
+                      data-option="{{ option.name }}"
+                      onclick="selectOption(this)"
+                    >
+                      {{ value }}
+                    </button>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+
+          {%- endunless -%}
+
+          <!-- Hidden variant selector (updated by JS) -->
+          <select name="id" id="variant-select" class="product-form__variant-select" aria-label="Variant">
+            {%- for variant in product.variants -%}
+              <option
+                value="{{ variant.id }}"
+                {% unless variant.available %}disabled{% endunless %}
+                {% if variant == product.selected_or_first_available_variant %}selected{% endif %}
+              >
+                {{ variant.title }} — {{ variant.price | money }}
+              </option>
+            {%- endfor -%}
+          </select>
+
+          <!-- Quantity -->
+          <div class="product-form__qty-group">
+            <label class="product-form__option-label">Quantity</label>
+            <div class="product-form__qty">
+              <button type="button" class="product-form__qty-btn" onclick="changeQty(-1)" aria-label="Decrease">−</button>
+              <input
+                type="number"
+                name="quantity"
+                id="qty-input"
+                value="1"
+                min="1"
+                class="product-form__qty-input"
+                aria-label="Quantity"
+              >
+              <button type="button" class="product-form__qty-btn" onclick="changeQty(1)" aria-label="Increase">+</button>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          {%- if product.available -%}
+            <button type="submit" name="add" class="btn btn--primary btn--full btn--large product-form__submit" id="add-to-cart-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+              Add to Cart
+            </button>
+          {%- else -%}
+            <button type="button" class="btn btn--disabled btn--full btn--large" disabled>Sold Out</button>
+          {%- endif -%}
+
+        {%- endform -%}
+
+        <!-- Trust badges -->
+        <div class="product-trust">
+          <div class="product-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <span>Secure Checkout</span>
+          </div>
+          <div class="product-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span>30-Day Returns</span>
+          </div>
+          <div class="product-trust__item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+            <span>Free Shipping L.E 1,000+</span>
+          </div>
+        </div>
+
+        <!-- Full Description -->
+        {%- if product.description != blank -%}
+          <details class="product-details__full-desc">
+            <summary class="product-details__full-desc-toggle">Product Details <span>+</span></summary>
+            <div class="product-details__full-desc-body">
+              {{ product.description }}
+            </div>
+          </details>
+        {%- endif -%}
+
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    {%- assign related_products = product.collections.first.products | where: 'id', '!=', product.id -%}
+    {%- if related_products.size > 0 -%}
+      <section class="related-products">
+        <h2 class="related-products__title">You May Also Like</h2>
+        <div class="product-grid product-grid--compact">
+          {%- for rp in related_products limit: 4 -%}
+            <a href="{{ rp.url }}" class="product-card">
+              <div class="product-card__image-wrap">
+                {%- if rp.featured_image -%}
+                  <img src="{{ rp.featured_image | image_url: width: 400 }}" alt="{{ rp.title }}" class="product-card__image" loading="lazy">
+                {%- else -%}
+                  <div class="product-card__placeholder">{{ rp.title | slice: 0, 2 | upcase }}</div>
+                {%- endif -%}
+              </div>
+              <div class="product-card__info">
+                <h3 class="product-card__name">{{ rp.title }}</h3>
+                <p class="product-card__price">{{ rp.price | money }}</p>
+              </div>
+            </a>
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+
+  </div>
+</div>
+
+<script>
+  // Variant selection logic
+  const variantData = {{ product.variants | json }};
+  let selectedOptions = {};
+
+  function selectOption(btn) {
+    const option = btn.dataset.option;
+    const value = btn.dataset.value;
+    const group = btn.closest('.product-form__option-values');
+
+    // Update active state
+    group.querySelectorAll('.product-form__option-btn').forEach(b => b.classList.remove('product-form__option-btn--selected'));
+    btn.classList.add('product-form__option-btn--selected');
+
+    selectedOptions[option] = value;
+    updateVariant();
+  }
+
+  function updateVariant() {
+    const matching = variantData.find(v => {
+      return v.options.every((opt, i) => {
+        const keys = Object.keys(selectedOptions);
+        return !keys[i] || selectedOptions[keys[i]] === opt;
+      });
+    });
+    if (matching) {
+      document.getElementById('variant-select').value = matching.id;
+    }
+  }
+
+  function changeQty(delta) {
+    const input = document.getElementById('qty-input');
+    const newVal = Math.max(1, parseInt(input.value) + delta);
+    input.value = newVal;
+  }
+
+  function setMainImage(src, btn) {
+    document.getElementById('product-main-img').src = src;
+    document.querySelectorAll('.product-gallery__thumb').forEach(t => t.classList.remove('product-gallery__thumb--active'));
+    btn.classList.add('product-gallery__thumb--active');
+  }
+</script>

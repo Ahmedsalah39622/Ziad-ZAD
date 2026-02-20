@@ -1,0 +1,50 @@
+<header class="site-header" id="site-header">
+  <div class="site-header__inner">
+
+    <!-- Logo -->
+    <a href="/" class="site-header__logo" aria-label="{{ shop.name }}">
+      {%- if settings.logo != blank -%}
+        <img src="{{ settings.logo | image_url: width: 160 }}" alt="{{ shop.name }}" width="80" height="32">
+      {%- else -%}
+        <span class="site-header__logo-text">ZAD</span>
+      {%- endif -%}
+    </a>
+
+    <!-- Nav Links -->
+    <nav class="site-header__nav" role="navigation" aria-label="Main navigation">
+      <a href="/" class="site-header__nav-link">Home</a>
+      <a href="/collections/all" class="site-header__nav-link">Shop</a>
+      <a href="/pages/about" class="site-header__nav-link">About</a>
+    </nav>
+
+    <!-- Right actions -->
+    <div class="site-header__actions">
+      <button
+        class="site-header__cart-btn"
+        onclick="openCartDrawer()"
+        aria-label="Open cart"
+        id="cart-icon-btn"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span id="cart-count" class="site-header__cart-count" style="display:none">{{ cart.item_count }}</span>
+      </button>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="site-header__menu-btn" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <nav class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+    <a href="/" class="mobile-menu__link">Home</a>
+    <a href="/collections/all" class="mobile-menu__link">Shop</a>
+    <a href="/pages/about" class="mobile-menu__link">About</a>
+    <a href="/cart" class="mobile-menu__link">Cart ({{ cart.item_count }})</a>
+  </nav>
+</header>
