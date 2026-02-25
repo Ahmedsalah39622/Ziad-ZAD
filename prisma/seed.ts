@@ -165,6 +165,15 @@ async function main() {
         }
     }
 
+    // sample discount codes
+    await prisma.discountCode.createMany({
+        data: [
+            { code: "WELCOME10", discountPct: 10, usesPerCode: 100 },
+            { code: "SPRING25", discountPct: 25, usesPerCode: 50, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+        ],
+        skipDuplicates: true,
+    });
+
     console.log("✅ Seed completed successfully!");
     console.log("   Admin: admin@zad.com / Admin123!");
 }

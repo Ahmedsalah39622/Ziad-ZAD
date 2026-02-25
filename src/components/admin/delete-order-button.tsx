@@ -34,7 +34,7 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
             size="icon"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="h-8 w-8 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+            className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
             title="Delete Order"
         >
             {isDeleting ? (

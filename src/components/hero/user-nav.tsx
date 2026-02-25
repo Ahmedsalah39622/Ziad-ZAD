@@ -33,22 +33,22 @@ export function UserNav() {
         <div className="relative" ref={containerRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 p-1 rounded-full hover:bg-white/5 transition-colors group relative"
+                className="flex items-center gap-2 p-1 rounded-full hover:bg-foreground/5 transition-colors group relative"
             >
                 <div className="relative">
-                    <Avatar className="h-8 w-8 border border-white/10 group-hover:border-emerald-500/50 transition-colors">
+                    <Avatar className="h-8 w-8 border border-border group-hover:border-foreground/50 transition-colors">
                         <AvatarImage src={image || ""} alt={name || "User"} />
-                        <AvatarFallback className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">
+                        <AvatarFallback className="bg-foreground/10 text-foreground text-[10px] font-bold">
                             {initials}
                         </AvatarFallback>
                     </Avatar>
                     {isAdmin && (
-                        <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5 border border-black shadow-lg">
-                            <ShieldCheck className="w-2.5 h-2.5 text-white" />
+                        <div className="absolute -top-1 -right-1 bg-foreground rounded-full p-0.5 border border-background shadow-lg">
+                            <ShieldCheck className="w-2.5 h-2.5 text-background" />
                         </div>
                     )}
                 </div>
-                <ChevronDown className={cn("w-4 h-4 text-neutral-500 transition-transform duration-300", isOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform duration-300", isOpen && "rotate-180")} />
             </button>
 
             <AnimatePresence>
@@ -60,12 +60,12 @@ export function UserNav() {
                         transition={{ duration: 0.2, ease: "easeOut" }}
                         className="absolute right-0 mt-2 w-64 z-[100] origin-top-right overflow-hidden"
                     >
-                        <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-1.5 ring-1 ring-white/5">
+                        <div className="bg-background/80 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-1.5 ring-1 ring-border/5">
                             {/* User Info Header */}
-                            <div className="px-3 py-3 border-b border-white/5 mb-1">
-                                <p className="text-xs font-black uppercase tracking-widest text-emerald-400 mb-0.5">Account</p>
-                                <p className="text-sm font-bold text-white truncate">{name}</p>
-                                <p className="text-[10px] text-neutral-500 truncate">{email}</p>
+                            <div className="px-3 py-3 border-b border-border/5 mb-1">
+                                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Account</p>
+                                <p className="text-sm font-bold text-foreground truncate">{name}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{email}</p>
                             </div>
 
                             {/* Action Links */}
@@ -74,28 +74,28 @@ export function UserNav() {
                                     <Link
                                         href="/admin"
                                         onClick={() => setIsOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-500 transition-all group"
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-foreground transition-all group"
                                     >
-                                        <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:text-white" />
-                                        <span className="text-xs font-bold text-neutral-300 group-hover:text-white uppercase tracking-wider">Admin</span>
+                                        <ShieldCheck className="w-4 h-4 text-foreground group-hover:text-background" />
+                                        <span className="text-xs font-bold text-muted-foreground group-hover:text-background uppercase tracking-wider">Admin</span>
                                     </Link>
                                 )}
 
                                 <Link
                                     href="/profile"
                                     onClick={() => setIsOpen(false)}
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-foreground/5 transition-all group"
                                 >
-                                    <User className="w-4 h-4 text-neutral-500 group-hover:text-white" />
-                                    <span className="text-xs font-bold text-neutral-300 group-hover:text-white uppercase tracking-wider">My Profile</span>
+                                    <User className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
+                                    <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground uppercase tracking-wider">My Profile</span>
                                 </Link>
 
                                 <button
                                     onClick={() => signOut()}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-all group text-left"
                                 >
-                                    <LogOut className="w-4 h-4 text-neutral-500 group-hover:text-red-400" />
-                                    <span className="text-xs font-bold text-neutral-300 group-hover:text-red-400 uppercase tracking-wider">Sign Out</span>
+                                    <LogOut className="w-4 h-4 text-muted-foreground group-hover:text-red-400" />
+                                    <span className="text-xs font-bold text-muted-foreground group-hover:text-red-400 uppercase tracking-wider">Sign Out</span>
                                 </button>
                             </div>
                         </div>

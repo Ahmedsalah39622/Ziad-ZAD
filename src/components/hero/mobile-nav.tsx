@@ -28,14 +28,14 @@ export function MobileNav({ items, className, variant = "default" }: Props) {
 
   return (
     <nav className={cn("flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3", className)}>
-      <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", isTransparent ? "text-white" : "text-black")}>
+      <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", "text-foreground")}>
         ZAD
       </Link>
       <div className="flex items-center gap-3">
         {isAdmin && (
           <Link
             href="/admin"
-            className={cn("flex items-center justify-center size-10 rounded-full transition-colors", isTransparent ? "text-white bg-white/5" : "text-black bg-black/5")}
+            className={cn("flex items-center justify-center size-10 rounded-full transition-colors", "text-foreground bg-foreground/5")}
             title="Dashboard"
           >
             <ShieldCheck className="w-5 h-5" />
@@ -44,16 +44,16 @@ export function MobileNav({ items, className, variant = "default" }: Props) {
         {!user && (
           <Link
             href="/login"
-            className={cn("p-2 transition-colors", isTransparent ? "text-white hover:text-white/80" : "text-black hover:text-black/80")}
+            className={cn("p-2 transition-colors", "text-foreground hover:text-foreground/80")}
             title="Login"
           >
             <User className="w-5 h-5" />
           </Link>
         )}
-        <Link href="/cart" className={cn("relative p-2 transition-colors", isTransparent ? "text-white" : "text-black")}>
+        <Link href="/cart" className={cn("relative p-2 transition-colors", "text-foreground")}>
           <ShoppingBag className="w-5 h-5" />
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-foreground text-background text-[10px] font-bold rounded-full flex items-center justify-center">
               {totalItems}
             </span>
           )}
@@ -61,46 +61,46 @@ export function MobileNav({ items, className, variant = "default" }: Props) {
         <Drawer direction="top">
           <DrawerTrigger className="relative -m-2 cursor-pointer p-2">
             <span className="sr-only">Open menu</span>
-            <Menu className={cn("h-6 w-6", isTransparent ? "text-white" : "text-black")} />
+            <Menu className={cn("h-6 w-6", "text-foreground")} />
           </DrawerTrigger>
-          <DrawerContent className="flex flex-col gap-4 p-8 bg-black border-white/10 rounded-b-3xl">
+          <DrawerContent className="flex flex-col gap-4 p-8 bg-background border-foreground/10 rounded-b-3xl">
             <DrawerTitle className="sr-only">Menu</DrawerTitle>
 
             {user && (
-              <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 mb-2">
-                <Avatar className="h-12 w-12 border border-white/10">
+              <div className="flex items-center gap-4 p-4 bg-foreground/5 rounded-2xl border border-foreground/5 mb-2">
+                <Avatar className="h-12 w-12 border border-foreground/10">
                   <AvatarImage src={user.image || ""} alt={user.name || "User"} />
-                  <AvatarFallback className="bg-emerald-500/10 text-emerald-400 font-bold">
+                  <AvatarFallback className="bg-foreground/10 text-foreground font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col min-w-0">
-                  <p className="text-white font-black uppercase tracking-widest truncate">{user.name}</p>
-                  <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                  <p className="text-foreground font-black uppercase tracking-widest truncate">{user.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-1 gap-2">
               {items.map((item) => (
-                <Link key={item.href} href={item.href} className="text-white text-2xl font-black uppercase tracking-tighter py-2 hover:text-emerald-400 transition-colors">
+                <Link key={item.href} href={item.href} className="text-foreground text-2xl font-black uppercase tracking-tighter py-2 hover:opacity-70 transition-colors">
                   {item.label}
                 </Link>
               ))}
             </div>
 
-            <div className="h-px bg-white/10 my-2" />
+            <div className="h-px bg-foreground/10 my-2" />
 
             <div className="flex flex-col gap-3">
               {isAdmin ? (
-                <Link href="/admin" className="text-emerald-400 text-lg font-black uppercase tracking-widest flex items-center gap-4 py-2 hover:text-white transition-colors">
-                  <div className="size-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <Link href="/admin" className="text-foreground text-lg font-black uppercase tracking-widest flex items-center gap-4 py-2 hover:opacity-70 transition-colors">
+                  <div className="size-10 rounded-full bg-foreground/10 flex items-center justify-center">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   Admin
                 </Link>
               ) : !user ? (
-                <Link href="/login" className="text-white text-lg font-black uppercase tracking-widest flex items-center gap-3 py-2">
+                <Link href="/login" className="text-foreground text-lg font-black uppercase tracking-widest flex items-center gap-3 py-2">
                   <User className="h-5 w-5" />
                   Sign In
                 </Link>
@@ -117,7 +117,7 @@ export function MobileNav({ items, className, variant = "default" }: Props) {
               )}
             </div>
 
-            <Link href="/cart" className="text-white text-lg font-bold tracking-tighter flex items-center gap-2">
+            <Link href="/cart" className="text-foreground text-lg font-bold tracking-tighter flex items-center gap-2">
               <ShoppingBag className="h-5 w-5" />
               Cart {totalItems > 0 && `(${totalItems})`}
             </Link>

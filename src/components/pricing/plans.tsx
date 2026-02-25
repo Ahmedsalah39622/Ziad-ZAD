@@ -22,8 +22,8 @@ export function Plans() {
       <ul className="mt-4 mb-8 w-full space-y-3 md:mx-auto md:max-w-xs">
         {features.map((feature, index) => (
           <li key={index} className="text-foreground/60 flex items-center text-base">
-            <div className="bg-success mr-2 grid place-items-center rounded-full p-0.5">
-              <CheckIcon className="size-4 p-0.5 text-white" />
+            <div className="bg-foreground mr-2 grid place-items-center rounded-full p-0.5">
+              <CheckIcon className="size-4 p-0.5 text-background" />
             </div>
             {feature}
           </li>

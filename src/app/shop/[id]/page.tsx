@@ -9,10 +9,10 @@ export default async function ProductPage({ params }: { params: { id: string } }
 
     if (!productData) {
         return (
-            <div className="bg-[#0a0a0a] min-h-screen flex items-center justify-center text-white">
+            <div className="bg-background min-h-screen flex items-center justify-center text-foreground">
                 <div className="text-center">
                     <h1 className="text-4xl font-black mb-4">Product Not Found</h1>
-                    <Link href="/shop" className="text-neutral-400 hover:text-white underline underline-offset-4">
+                    <Link href="/shop" className="text-muted-foreground hover:text-foreground underline underline-offset-4">
                         Back to Shop
                     </Link>
                 </div>
@@ -32,8 +32,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
     };
 
     return (
-        <div className="bg-[#0a0a0a] min-h-screen text-white">
-            <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl">
+        <div className="bg-background min-h-screen text-foreground">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
                 <Nav variant="transparent" />
             </div>
 

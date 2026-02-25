@@ -72,7 +72,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             price: parseFloat(price),
             description,
             details: details.filter(d => d.trim() !== ""),
-            images: images.map(img => JSON.stringify(img)),
+            images, // already objects
             sizes: ["S", "M", "L", "XL", "XXL"], // Default sizes
             colors: colors.filter(c => c.name.trim() !== ""),
             categoryId,
@@ -84,7 +84,8 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             if (initialData) {
                 await updateProduct(initialData.id, data);
             } else {
-                await createProduct(data);
+                // send as a single JSON string to avoid nested arrays
+                await createProduct({ payload: JSON.stringify(data) });
             }
             router.push("/admin/products");
             router.refresh();
@@ -100,22 +101,22 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             {/* Left Column - Core Info */}
             <div className="lg:col-span-2 space-y-8">
                 {/* Basic Info */}
-                <div className="rounded-xl border border-white/10 bg-zinc-950 p-8 space-y-6 shadow-2xl">
-                    <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em] mb-4">Basic Information</h3>
+                <div className="rounded-xl border border-border bg-card p-8 space-y-6 shadow-2xl">
+                    <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">Basic Information</h3>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Product Name</Label>
+                            <Label htmlFor="name" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Product Name</Label>
                             <Input
                                 id="name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="e.g. Genesis Hoodie"
                                 required
-                                className="border-white/5 bg-zinc-900/50 text-white placeholder:text-zinc-700 h-12 focus:ring-emerald-500/20"
+                                className="border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground h-12 focus:ring-foreground/10"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="description" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Description</Label>
+                            <Label htmlFor="description" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Description</Label>
                             <Textarea
                                 id="description"
                                 value={description}
@@ -123,55 +124,55 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 placeholder="Describe the soul of this product..."
                                 rows={4}
                                 required
-                                className="border-white/5 bg-zinc-900/50 text-white placeholder:text-zinc-700 focus:ring-emerald-500/20"
+                                className="border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:ring-foreground/10"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Colors & Multi-Images */}
-                <div className="rounded-xl border border-white/10 bg-zinc-950 p-8 space-y-8 shadow-2xl">
-                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                        <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em]">Colors & Variants</h3>
-                        <Button type="button" onClick={addColor} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                <div className="rounded-xl border border-border bg-card p-8 space-y-8 shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-border pb-4">
+                        <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Colors & Variants</h3>
+                        <Button type="button" onClick={addColor} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-foreground/5 transition-all">
                             <Plus className="w-3 h-3 mr-2" /> Add Color
                         </Button>
                     </div>
 
                     <div className="grid gap-4">
                         {colors.map((color, index) => (
-                            <div key={index} className="flex gap-4 items-end bg-white/5 p-4 rounded-xl border border-white/5">
+                            <div key={index} className="flex gap-4 items-end bg-foreground/5 p-4 rounded-xl border border-border">
                                 <div className="flex-1 space-y-2">
-                                    <Label className="text-[9px] text-zinc-500 uppercase font-black">Color Name</Label>
+                                    <Label className="text-[9px] text-muted-foreground uppercase font-black">Color Name</Label>
                                     <Input
                                         value={color.name}
                                         onChange={(e) => updateColor(index, "name", e.target.value)}
-                                        placeholder="e.g. Forest Green"
-                                        className="h-10 bg-black/50 border-white/5"
+                                        placeholder="e.g. Stealth Black"
+                                        className="h-10 bg-background/50 border-border"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-[9px] text-zinc-500 uppercase font-black">Hex Code</Label>
+                                    <Label className="text-[9px] text-muted-foreground uppercase font-black">Hex Code</Label>
                                     <div className="flex gap-2">
-                                        <div className="w-10 h-10 rounded-lg border border-white/10 shrink-0" style={{ backgroundColor: color.hex }} />
+                                        <div className="w-10 h-10 rounded-lg border border-border shrink-0" style={{ backgroundColor: color.hex }} />
                                         <Input
                                             value={color.hex}
                                             onChange={(e) => updateColor(index, "hex", e.target.value)}
                                             placeholder="#1a472a"
-                                            className="h-10 w-28 bg-black/50 border-white/5 font-mono text-xs"
+                                            className="h-10 w-28 bg-background/50 border-border font-mono text-xs"
                                         />
                                     </div>
                                 </div>
-                                <Button type="button" onClick={() => removeColor(index)} variant="ghost" size="icon" className="h-10 w-10 text-zinc-600 hover:text-red-400 hover:bg-red-400/10">
+                                <Button type="button" onClick={() => removeColor(index)} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground/60 hover:text-red-400 hover:bg-red-400/10">
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
                             </div>
                         ))}
                     </div>
 
-                    <div className="flex items-center justify-between border-b border-white/5 pb-4 pt-4">
-                        <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em]">Multimedia Gallery</h3>
-                        <Button type="button" onClick={addImage} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                    <div className="flex items-center justify-between border-b border-border pb-4 pt-4">
+                        <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Multimedia Gallery</h3>
+                        <Button type="button" onClick={addImage} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-foreground/5 transition-all">
                             <Plus className="w-3 h-3 mr-2" /> Add Image URL
                         </Button>
                     </div>
@@ -180,15 +181,15 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                     <div
                         onDragOver={(e) => {
                             e.preventDefault();
-                            e.currentTarget.classList.add("border-emerald-500/50", "bg-emerald-500/5");
+                            e.currentTarget.classList.add("border-foreground/50", "bg-foreground/5");
                         }}
                         onDragLeave={(e) => {
                             e.preventDefault();
-                            e.currentTarget.classList.remove("border-emerald-500/50", "bg-emerald-500/5");
+                            e.currentTarget.classList.remove("border-foreground/50", "bg-foreground/5");
                         }}
                         onDrop={(e) => {
                             e.preventDefault();
-                            e.currentTarget.classList.remove("border-emerald-500/50", "bg-emerald-500/5");
+                            e.currentTarget.classList.remove("border-foreground/50", "bg-foreground/5");
                             const files = Array.from(e.dataTransfer.files);
                             files.forEach(file => {
                                 if (file.type.startsWith("image/")) {
@@ -201,13 +202,13 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 }
                             });
                         }}
-                        className="relative border-2 border-dashed border-white/5 rounded-2xl p-12 flex flex-col items-center justify-center text-center transition-all group"
+                        className="relative border-2 border-dashed border-border rounded-2xl p-12 flex flex-col items-center justify-center text-center transition-all group"
                     >
-                        <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 group-hover:text-emerald-500 transition-colors mb-4 ring-8 ring-white/[0.02]">
+                        <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors mb-4 ring-8 ring-foreground/[0.02]">
                             <ImageIcon className="w-8 h-8" />
                         </div>
-                        <p className="text-sm font-bold text-white uppercase tracking-widest mb-1">Drag and Drop Images</p>
-                        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">or click to browse from files</p>
+                        <p className="text-sm font-bold text-foreground uppercase tracking-widest mb-1">Drag and Drop Images</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">or click to browse from files</p>
                         <input
                             type="file"
                             multiple
@@ -229,32 +230,32 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
                     <div className="grid gap-4">
                         {images.map((image, index) => (
-                            <div key={index} className="flex gap-4 items-end bg-white/5 p-4 rounded-xl border border-white/5">
-                                <div className="w-16 h-16 rounded-lg bg-black/50 border border-white/5 overflow-hidden shrink-0">
+                            <div key={index} className="flex gap-4 items-end bg-foreground/5 p-4 rounded-xl border border-border">
+                                <div className="w-16 h-16 rounded-lg bg-background/50 border border-border overflow-hidden shrink-0">
                                     {image.url ? (
                                         <img src={image.url} alt="Preview" className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-zinc-700">
+                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
                                             <ImageIcon className="w-6 h-6" />
                                         </div>
                                     )}
                                 </div>
                                 <div className="flex-1 space-y-2">
-                                    <Label className="text-[9px] text-zinc-500 uppercase font-black">Image URL / Data</Label>
+                                    <Label className="text-[9px] text-muted-foreground uppercase font-black">Image URL / Data</Label>
                                     <Input
                                         value={image.url.startsWith("data:") ? "Local File (Base64)" : image.url}
                                         readOnly={image.url.startsWith("data:")}
                                         onChange={(e) => updateImage(index, "url", e.target.value)}
                                         placeholder="Paste image URL here..."
-                                        className="h-10 bg-black/50 border-white/5"
+                                        className="h-10 bg-background/50 border-border"
                                     />
                                 </div>
                                 <div className="w-48 space-y-2">
-                                    <Label className="text-[9px] text-zinc-500 uppercase font-black">Associate with Color</Label>
+                                    <Label className="text-[9px] text-muted-foreground uppercase font-black">Associate with Color</Label>
                                     <select
                                         value={image.color}
                                         onChange={(e) => updateImage(index, "color", e.target.value)}
-                                        className="w-full h-10 rounded-lg bg-black/50 border border-white/5 text-xs text-zinc-400 px-3 focus:ring-emerald-500/20"
+                                        className="w-full h-10 rounded-lg bg-background/50 border border-border text-xs text-muted-foreground px-3 focus:ring-foreground/10"
                                     >
                                         <option value="">No Association</option>
                                         {colors.map((c, i) => (
@@ -262,7 +263,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                         ))}
                                     </select>
                                 </div>
-                                <Button type="button" onClick={() => removeImage(index)} variant="ghost" size="icon" className="h-10 w-10 text-zinc-600 hover:text-red-400 hover:bg-red-400/10">
+                                <Button type="button" onClick={() => removeImage(index)} variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground/60 hover:text-red-400 hover:bg-red-400/10">
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -271,10 +272,10 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                 </div>
 
                 {/* Details Section */}
-                <div className="rounded-xl border border-white/10 bg-zinc-950 p-8 space-y-6 shadow-2xl">
+                <div className="rounded-xl border border-border bg-card p-8 space-y-6 shadow-2xl">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em]">Product Details</h3>
-                        <Button type="button" onClick={addDetail} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-all">
+                        <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Product Details</h3>
+                        <Button type="button" onClick={addDetail} variant="ghost" className="h-8 px-3 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-foreground/5 transition-all">
                             <Plus className="w-3 h-3 mr-2" /> Add Bullet Point
                         </Button>
                     </div>
@@ -285,9 +286,9 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                     value={detail}
                                     onChange={(e) => updateDetail(index, e.target.value)}
                                     placeholder="e.g. 100% Breathable Cotton"
-                                    className="h-11 bg-zinc-900/50 border-white/5"
+                                    className="h-11 bg-secondary/50 border-border"
                                 />
-                                <Button type="button" onClick={() => removeDetail(index)} variant="ghost" size="icon" className="h-11 w-11 text-zinc-600 hover:text-red-400">
+                                <Button type="button" onClick={() => removeDetail(index)} variant="ghost" size="icon" className="h-11 w-11 text-muted-foreground/60 hover:text-red-400">
                                     <X className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -298,17 +299,17 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
             {/* Right Column - Organization & Finalize */}
             <div className="space-y-8">
-                <div className="rounded-xl border border-white/10 bg-zinc-950 p-8 space-y-6 shadow-2xl sticky top-24">
-                    <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em] mb-4">Organization</h3>
+                <div className="rounded-xl border border-border bg-card p-8 space-y-6 shadow-2xl sticky top-24">
+                    <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">Organization</h3>
 
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="categoryId" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Category</Label>
+                            <Label htmlFor="categoryId" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Category</Label>
                             <select
                                 id="categoryId"
                                 value={categoryId}
                                 onChange={(e) => setCategoryId(e.target.value)}
-                                className="w-full rounded-lg border border-white/5 bg-zinc-900/50 text-white h-12 px-3 focus:outline-none focus:ring-1 focus:ring-emerald-500/20 text-sm"
+                                className="w-full rounded-lg border border-border bg-secondary/50 text-foreground h-12 px-3 focus:outline-none focus:ring-1 focus:ring-foreground/10 text-sm"
                             >
                                 <option value="">Select Category</option>
                                 {categories.map((cat) => (
@@ -318,23 +319,23 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="tag" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Tag</Label>
+                            <Label htmlFor="tag" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Tag</Label>
                             <Input
                                 id="tag"
                                 value={tag}
                                 onChange={(e) => setTag(e.target.value)}
                                 placeholder="New, Limited, etc."
-                                className="border-white/5 bg-zinc-900/50 text-white h-12"
+                                className="border-border bg-secondary/50 text-foreground h-12"
                             />
                         </div>
                     </div>
 
-                    <div className="h-px bg-white/5" />
+                    <div className="h-px bg-border" />
 
-                    <h3 className="text-sm font-black text-emerald-400 uppercase tracking-[0.2em] mb-4">Inventory & Pricing</h3>
+                    <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">Inventory & Pricing</h3>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="price" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Price (L.E)</Label>
+                            <Label htmlFor="price" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Price (L.E)</Label>
                             <Input
                                 id="price"
                                 type="number"
@@ -342,11 +343,11 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 onChange={(e) => setPrice(e.target.value)}
                                 placeholder="599.00"
                                 required
-                                className="border-white/5 bg-zinc-900/50 text-white h-12"
+                                className="border-border bg-secondary/50 text-foreground h-12"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="stock" className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Stock Level</Label>
+                            <Label htmlFor="stock" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Stock Level</Label>
                             <Input
                                 id="stock"
                                 type="number"
@@ -354,7 +355,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 onChange={(e) => setStock(e.target.value)}
                                 placeholder="100"
                                 required
-                                className="border-white/5 bg-zinc-900/50 text-white h-12"
+                                className="border-border bg-secondary/50 text-foreground h-12"
                             />
                         </div>
                     </div>
@@ -362,7 +363,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-white text-black hover:bg-zinc-200 h-14 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.1)] group"
+                        className="w-full bg-primary text-primary-foreground hover:opacity-90 h-14 text-sm font-bold uppercase tracking-[0.2em] transition-all duration-500 shadow-3xl group"
                     >
                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                             <>

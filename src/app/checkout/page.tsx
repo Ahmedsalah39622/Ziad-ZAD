@@ -10,9 +10,9 @@ export default async function CheckoutPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black pt-20 px-4 md:px-8">
+    <main className="min-h-screen bg-background pt-20 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tighter text-white mb-8 uppercase italic border-l-4 border-white pl-4">
+        <h1 className="text-4xl font-bold tracking-tighter text-foreground mb-8 uppercase italic border-l-4 border-foreground pl-4">
           Checkout
         </h1>
         <CheckoutClient user={session.user} />

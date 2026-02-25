@@ -18,8 +18,8 @@ export function ShopGrid({ initialProducts }: ShopGridProps) {
     return (
         <div className="max-w-[1920px] mx-auto px-6 md:px-12 py-4 pb-24">
             <div className="flex items-center gap-3 mb-8">
-                <span className="text-neutral-600 text-xs font-mono tracking-wider">{products.length} Items</span>
-                <div className="flex-1 h-px bg-neutral-900" />
+                <span className="text-muted-foreground text-xs font-mono tracking-wider">{products.length} Items</span>
+                <div className="flex-1 h-px bg-border" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">

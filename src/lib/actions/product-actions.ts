@@ -40,20 +40,22 @@ export async function getProductById(id: string) {
     });
 }
 
-export async function createProduct(data: {
-    name: string;
-    price: number;
-    description: string;
-    details: string[];
-    images: string[];
-    sizes: string[];
-    colors: { name: string; hex: string }[];
-    categoryId?: string;
-    stock: number;
-    tag?: string;
-    active?: boolean;
-}) {
+export async function createProduct({ payload }: { payload: string }) {
     await requireAdmin();
+    const data = JSON.parse(payload) as {
+        name: string;
+        price: number;
+        description: string;
+        details: string[];
+        images: { url: string; color?: string }[];
+        sizes: string[];
+        colors: { name: string; hex: string }[];
+        categoryId?: string;
+        stock: number;
+        tag?: string;
+        active?: boolean;
+    };
+
     const prisma = await getPrisma();
     return prisma.product.create({
         data: {
@@ -61,15 +63,8 @@ export async function createProduct(data: {
             price: data.price,
             description: data.description,
             details: JSON.stringify(data.details),
-            // The images comes as a list of JSON strings from the client or raw strings
-            // We ensure it is stored as a valid JSON array of objects
-            images: JSON.stringify(data.images.map(img => {
-                try {
-                    return JSON.parse(img);
-                } catch {
-                    return { url: img };
-                }
-            })),
+            // The images are now objects directly
+            images: JSON.stringify(data.images),
             sizes: JSON.stringify(data.sizes),
             colors: JSON.stringify(data.colors),
             categoryId: data.categoryId || null,
@@ -87,7 +82,7 @@ export async function updateProduct(
         price?: number;
         description?: string;
         details?: string[];
-        images?: string[];
+        images?: { url: string; color?: string }[];
         sizes?: string[];
         colors?: { name: string; hex: string }[];
         categoryId?: string;
@@ -105,13 +100,7 @@ export async function updateProduct(
     if (data.description !== undefined) updateData.description = data.description;
     if (data.details !== undefined) updateData.details = JSON.stringify(data.details);
     if (data.images !== undefined) {
-        updateData.images = JSON.stringify(data.images.map(img => {
-            try {
-                return JSON.parse(img);
-            } catch {
-                return { url: img };
-            }
-        }));
+        updateData.images = JSON.stringify(data.images);
     }
     if (data.sizes !== undefined) updateData.sizes = JSON.stringify(data.sizes);
     if (data.colors !== undefined) updateData.colors = JSON.stringify(data.colors);

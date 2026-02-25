@@ -56,7 +56,7 @@ export function PlanSelect({ value, onChange }: Props) {
             className="bg-card relative flex flex-col items-center rounded-lg px-8 py-6"
           >
             {plan.tag && (
-              <span className="bg-accent border-accent-foreground absolute -top-4 left-0 rounded-full border-2 px-2 py-1 text-xs font-semibold text-white md:left-1/2 md:-translate-x-1/2">
+              <span className="bg-primary border-primary-foreground absolute -top-4 left-0 rounded-full border-2 px-2 py-1 text-xs font-semibold text-primary-foreground md:left-1/2 md:-translate-x-1/2">
                 {plan.tag}
               </span>
             )}

@@ -71,14 +71,14 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-6 py-14 md:py-25 bg-black text-white">
-      <Badge variant="secondary" className="mb-2 uppercase bg-white/10 text-white border-white/10 hover:bg-white/15">
+    <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-6 py-14 md:py-25 bg-background text-foreground">
+      <Badge variant="secondary" className="mb-2 uppercase bg-foreground/10 text-foreground border-foreground/10 hover:bg-foreground/15">
         Testimonials
       </Badge>
       <h2 className="text-center text-4xl leading-[0.9] font-black tracking-tighter uppercase sm:text-7xl">
-        Don&apos;t Take<div className="text-neutral-500">Our Word for It</div>
+        Don&apos;t Take<div className="text-muted-foreground">Our Word for It</div>
       </h2>
-      <p className="mb-3 max-w-lg text-center leading-6 tracking-tight sm:text-xl lg:mb-8 text-neutral-400">
+      <p className="mb-3 max-w-lg text-center leading-6 tracking-tight sm:text-xl lg:mb-8 text-muted-foreground">
         Real talk from real people who wear ZAD every day.
       </p>
       <div className="relative w-[calc(100%+3rem)] overflow-x-hidden py-4 lg:w-full">

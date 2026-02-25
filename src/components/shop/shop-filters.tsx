@@ -22,8 +22,8 @@ export function ShopFilters() {
                             className={cn(
                                 "px-5 py-2.5 text-xs font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 border",
                                 activeFilter === filter
-                                    ? "bg-white text-black border-white"
-                                    : "bg-transparent text-neutral-500 border-neutral-800 hover:border-neutral-600 hover:text-white"
+                                    ? "bg-foreground text-background border-foreground"
+                                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
                             )}
                         >
                             {filter}
@@ -33,12 +33,12 @@ export function ShopFilters() {
 
                 {/* Sort */}
                 <div className="items-center gap-4 hidden lg:flex shrink-0">
-                    <SlidersHorizontal className="w-4 h-4 text-neutral-600" />
-                    <select className="bg-transparent text-xs font-bold tracking-wider uppercase focus:outline-none cursor-pointer text-neutral-400">
-                        <option className="bg-[#0a0a0a]">Featured</option>
-                        <option className="bg-[#0a0a0a]">Newest</option>
-                        <option className="bg-[#0a0a0a]">Price: High-Low</option>
-                        <option className="bg-[#0a0a0a]">Price: Low-High</option>
+                    <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+                    <select className="bg-transparent text-xs font-bold tracking-wider uppercase focus:outline-none cursor-pointer text-muted-foreground/60">
+                        <option className="bg-background">Featured</option>
+                        <option className="bg-background">Newest</option>
+                        <option className="bg-background">Price: High-Low</option>
+                        <option className="bg-background">Price: Low-High</option>
                     </select>
                 </div>
 

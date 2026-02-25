@@ -5,14 +5,24 @@ import Link from "next/link";
 // Removed explicit Product type to allow pre-parsed data through props without type mismatch during refactors
 // Using any temporarily for the product prop to ensure hydration stability while syncing types
 export function ProductCard({ product }: { product: any }) {
-    return (
-        <Link href={`/shop/${product.id}`} className="group relative flex flex-col cursor-pointer">
-            {/* Image Container */}
-            <div className="aspect-[3/4] w-full overflow-hidden bg-[#111] relative">
+    const isOutOfStock = product.stock <= 0;
 
-                {product.tag && (
-                    <Badge className="absolute top-4 left-4 z-20 bg-white text-black font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
+    return (
+        <Link
+            href={`/shop/${product.id}`}
+            className={`group relative flex flex-col cursor-pointer ${isOutOfStock ? "pointer-events-none" : ""}`}
+        >
+            {/* Image Container */}
+            <div className="aspect-[3/4] w-full overflow-hidden bg-secondary relative">
+
+                {product.tag && !isOutOfStock && (
+                    <Badge className="absolute top-4 left-4 z-20 bg-primary text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
                         {product.tag}
+                    </Badge>
+                )}
+                {isOutOfStock && (
+                    <Badge className="absolute top-4 left-4 z-20 bg-rose-600 text-background font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
+                        Out of Stock
                     </Badge>
                 )}
 
@@ -28,19 +38,22 @@ export function ProductCard({ product }: { product: any }) {
                             />
                         </div>
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neutral-700 font-bold text-xs tracking-[0.2em] uppercase group-hover:scale-110 transition-transform duration-[800ms] ease-out">
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 font-bold text-xs tracking-[0.2em] uppercase group-hover:scale-110 transition-transform duration-[800ms] ease-out">
                             {product.name}
                         </div>
                     )}
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-foreground/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {isOutOfStock && (
+                    <div className="absolute inset-0 bg-background/60" />
+                )}
 
                 {/* Arrow Icon on Hover */}
                 <div className="absolute bottom-4 right-4 z-20 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                    <div className="w-10 h-10 border border-white/20 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                        <ArrowUpRight className="w-4 h-4 text-white" />
+                    <div className="w-10 h-10 border border-foreground/20 flex items-center justify-center bg-background/40 backdrop-blur-sm">
+                        <ArrowUpRight className="w-4 h-4 text-foreground" />
                     </div>
                 </div>
             </div>
@@ -48,12 +61,12 @@ export function ProductCard({ product }: { product: any }) {
             {/* Product Info */}
             <div className="flex justify-between items-start pt-4 pb-1">
                 <div>
-                    <h3 className="text-sm font-bold text-white tracking-wide uppercase">
+                    <h3 className="text-sm font-bold text-foreground tracking-wide uppercase">
                         {product.name}
                     </h3>
-                    <p className="text-xs text-neutral-600 font-medium mt-1 tracking-wider">{product.category}</p>
+                    <p className="text-xs text-muted-foreground font-medium mt-1 tracking-wider">{product.category}</p>
                 </div>
-                <p className="text-sm font-bold text-neutral-300 tabular-nums">{product.priceDisplay}</p>
+                <p className="text-sm font-bold text-foreground tabular-nums">{product.priceDisplay}</p>
             </div>
 
             {/* Color Swatches */}
@@ -62,7 +75,7 @@ export function ProductCard({ product }: { product: any }) {
                     {product.colors.map((color: { hex: string }, i: number) => (
                         <div
                             key={i}
-                            className="w-3 h-3 rounded-full border border-white/10 transition-transform duration-200 hover:scale-125"
+                            className="w-3 h-3 rounded-full border border-foreground/10 transition-transform duration-200 hover:scale-125"
                             style={{ backgroundColor: color.hex }}
                         />
                     ))}
@@ -70,7 +83,7 @@ export function ProductCard({ product }: { product: any }) {
             )}
 
             {/* Bottom accent line */}
-            <div className="w-0 group-hover:w-full h-px bg-gradient-to-r from-white/40 to-transparent transition-all duration-500 mt-3" />
+            <div className="w-0 group-hover:w-full h-px bg-gradient-to-r from-foreground/40 to-transparent transition-all duration-500 mt-3" />
         </Link>
     );
 }

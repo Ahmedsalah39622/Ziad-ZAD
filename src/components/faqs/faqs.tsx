@@ -9,7 +9,7 @@ function AccordionItemFAQs(props: React.ComponentProps<typeof AccordionItem>) {
     <AccordionItem
       {...props}
       className={cn(
-        "bg-white/[0.04] data-[state=open]:bg-white/[0.08] data-[state=open]:border-white/10 rounded-lg border border-white/[0.06] px-5 py-2 transition-colors data-[state=open]:shadow-sm lg:px-7",
+        "bg-foreground/[0.04] data-[state=open]:bg-foreground/[0.08] data-[state=open]:border-foreground/10 rounded-lg border border-foreground/[0.06] px-5 py-2 transition-colors data-[state=open]:shadow-sm lg:px-7",
         props.className,
       )}
     />
@@ -20,31 +20,31 @@ function AccordionTriggerFAQs(props: React.ComponentProps<typeof AccordionTrigge
   return (
     <AccordionTrigger
       {...props}
-      className={cn("[&[data-state=open]>svg]:text-white text-base lg:text-lg text-neutral-200", props.className)}
+      className={cn("[&[data-state=open]>svg]:text-foreground text-base lg:text-lg text-muted-foreground", props.className)}
     />
   );
 }
 
 function AccordionContentFAQs(props: React.ComponentProps<typeof AccordionContent>) {
-  return <AccordionContent {...props} className={cn("text-neutral-400 lg:text-base", props.className)} />;
+  return <AccordionContent {...props} className={cn("text-muted-foreground/80 lg:text-base", props.className)} />;
 }
 
 export function FAQs() {
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-6 py-14 md:grid-cols-2 md:gap-14 md:px-10 md:py-25 bg-black text-white">
+    <div className="mx-auto grid max-w-6xl gap-6 px-6 py-14 md:grid-cols-2 md:gap-14 md:px-10 md:py-25 bg-background text-foreground">
       <div className="flex w-full flex-col gap-6">
-        <Badge variant="secondary" className="mb-2 uppercase bg-white/10 text-white border-white/10 hover:bg-white/15">
+        <Badge variant="secondary" className="mb-2 uppercase bg-foreground/10 text-foreground border-foreground/10 hover:bg-foreground/15">
           FAQ
         </Badge>
         <h2 className="text-4xl leading-[0.9] font-black tracking-tighter uppercase sm:text-7xl">
           Frequently
           <br />
-          Asked <span className="text-neutral-500">Questions</span>
+          Asked <span className="text-muted-foreground/60">Questions</span>
         </h2>
-        <p className="max-w-lg text-xs leading-6 tracking-tight sm:text-base text-neutral-400">
+        <p className="max-w-lg text-xs leading-6 tracking-tight sm:text-base text-muted-foreground/80">
           Got questions? We&apos;ve got answers.
         </p>
-        <Button className="w-fit bg-white text-black hover:bg-neutral-200 rounded-none font-bold uppercase tracking-widest" size="lg" asChild>
+        <Button className="w-fit bg-primary text-primary-foreground hover:opacity-90 rounded-none font-bold uppercase tracking-widest" size="lg" asChild>
           <Link href="/shop">Shop Now</Link>
         </Button>
       </div>

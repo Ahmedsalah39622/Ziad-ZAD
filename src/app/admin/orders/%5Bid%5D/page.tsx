@@ -51,19 +51,19 @@ export default async function OrderDetailPage({
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <Link href="/admin/orders">
-                        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full border border-white/5 bg-zinc-900/50 text-zinc-400 hover:text-white">
+                        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full border border-border bg-foreground/5 text-muted-foreground hover:text-foreground">
                             <ArrowLeft className="h-6 w-6" />
                         </Button>
                     </Link>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black tracking-tighter uppercase tracking-[-0.02em]">Order <span className="text-emerald-500">#{id.substring(0, 8).toUpperCase()}</span></h1>
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
+                            <h1 className="text-3xl font-black uppercase tracking-tighter">Order <span className="text-foreground">#{id.substring(0, 8).toUpperCase()}</span></h1>
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-rose-500/20 text-rose-500' : 'bg-foreground text-background'
                                 }`}>
                                 {order.status}
                             </span>
                         </div>
-                        <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">
                             <Calendar className="h-3 w-3" />
                             <span>Placed on {new Date(order.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })} at {new Date(order.createdAt).toLocaleTimeString(undefined, { timeStyle: 'short' })}</span>
                         </div>
@@ -71,9 +71,9 @@ export default async function OrderDetailPage({
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" className="border-white/10 bg-zinc-900/50 text-zinc-300 hover:bg-zinc-800" asChild>
+                    <Button variant="outline" className="border-border bg-foreground/5 text-foreground hover:bg-foreground/10" asChild>
                         <Link href={whatsappLink} target="_blank">
-                            <MessageSquare className="mr-2 h-4 w-4 text-emerald-500" />
+                            <MessageSquare className="mr-2 h-4 w-4 text-foreground" />
                             Contact via WhatsApp
                         </Link>
                     </Button>
@@ -84,18 +84,18 @@ export default async function OrderDetailPage({
                 {/* Left Column: Products & Status */}
                 <div className="lg:col-span-8 space-y-8">
                     {/* Status Timeline Card */}
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8 shadow-2xl overflow-hidden relative">
+                    <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl overflow-hidden relative">
                         {/* Background Glow */}
-                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-foreground/5 rounded-full blur-3xl pointer-events-none" />
 
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-8 flex items-center gap-2">
-                            <div className="w-1 h-3 bg-emerald-500" /> Fulfillment Status
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-8 flex items-center gap-2">
+                            <div className="w-1 h-3 bg-foreground" /> Fulfillment Status
                         </h2>
 
                         <div className="relative flex justify-between mb-12 max-w-2xl mx-auto">
-                            <div className="absolute left-[5%] top-1/2 h-0.5 w-[90%] -translate-y-1/2 bg-zinc-900" />
+                            <div className="absolute left-[5%] top-1/2 h-0.5 w-[90%] -translate-y-1/2 bg-secondary" />
                             <div
-                                className="absolute left-[5%] top-1/2 h-0.5 -translate-y-1/2 bg-emerald-500 transition-all duration-700"
+                                className="absolute left-[5%] top-1/2 h-0.5 -translate-y-1/2 bg-foreground transition-all duration-700"
                                 style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 90}%` }}
                             />
 
@@ -104,11 +104,11 @@ export default async function OrderDetailPage({
                                 const isCurrent = index === currentStepIndex;
                                 return (
                                     <div key={step.id} className="relative z-10 flex flex-col items-center">
-                                        <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-500 ${isCompleted ? 'border-emerald-500 bg-emerald-500 text-black scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'border-zinc-800 bg-zinc-950 text-zinc-700'
+                                        <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-500 ${isCompleted ? 'border-foreground bg-foreground text-background scale-110 shadow-3xl' : 'border-border bg-card text-muted-foreground/40'
                                             }`}>
                                             <step.icon className="h-5 w-5" />
                                         </div>
-                                        <span className={`mt-3 text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-white' : 'text-zinc-700'
+                                        <span className={`mt-3 text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-foreground' : 'text-muted-foreground/40'
                                             }`}>{step.label}</span>
                                     </div>
                                 )
@@ -122,7 +122,7 @@ export default async function OrderDetailPage({
                                     const nextStatus = statusSteps[currentStepIndex + 1]?.id;
                                     if (nextStatus) await updateOrderStatus(order.id, nextStatus);
                                 }}>
-                                    <Button className="bg-white text-black hover:bg-emerald-400 hover:text-black font-bold uppercase text-xs tracking-widest px-8">
+                                    <Button className="bg-primary text-primary-foreground hover:opacity-90 font-bold uppercase text-xs tracking-widest px-8">
                                         Mark as {statusSteps[currentStepIndex + 1]?.label}
                                     </Button>
                                 </form>
@@ -132,7 +132,7 @@ export default async function OrderDetailPage({
                                     "use server";
                                     await updateOrderStatus(order.id, 'CANCELLED');
                                 }}>
-                                    <Button variant="ghost" className="text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 font-bold uppercase text-xs tracking-widest">
+                                    <Button variant="ghost" className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-bold uppercase text-xs tracking-widest">
                                         Cancel Order
                                     </Button>
                                 </form>
@@ -141,21 +141,21 @@ export default async function OrderDetailPage({
                     </div>
 
                     {/* Order Items Card */}
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950 overflow-hidden shadow-2xl">
-                        <div className="p-8 border-b border-white/10 bg-white/[0.02]">
-                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 flex items-center gap-2">
-                                <Package className="h-4 w-4 text-emerald-500" /> Order Contents
+                    <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-2xl">
+                        <div className="p-8 border-b border-border bg-foreground/[0.02]">
+                            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                <Package className="h-4 w-4 text-foreground" /> Order Contents
                             </h2>
                         </div>
-                        <div className="divide-y divide-white/5">
+                        <div className="divide-y divide-border/5">
                             {order.items.map((item) => {
                                 const productImages = JSON.parse(item.product.images || "[]");
                                 const productImage = productImages[0]?.url;
 
                                 return (
-                                    <div key={item.id} className="p-6 flex items-center justify-between group hover:bg-white/[0.01] transition-colors">
+                                    <div key={item.id} className="p-6 flex items-center justify-between group hover:bg-foreground/[0.01] transition-colors">
                                         <div className="flex items-center gap-6">
-                                            <div className="h-24 w-20 bg-zinc-900 border border-white/5 rounded-xl overflow-hidden relative shadow-lg">
+                                            <div className="h-24 w-20 bg-secondary border border-border/5 rounded-xl overflow-hidden relative shadow-lg">
                                                 {productImage ? (
                                                     <Image
                                                         src={productImage}
@@ -164,27 +164,27 @@ export default async function OrderDetailPage({
                                                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full w-full items-center justify-center text-zinc-800">
+                                                    <div className="flex h-full w-full items-center justify-center text-muted-foreground/20">
                                                         <Package className="h-8 w-8" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-black text-white uppercase text-base mb-1 tracking-tight">{item.product.name}</p>
-                                                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                                                <p className="font-black text-foreground uppercase text-base mb-1 tracking-tight">{item.product.name}</p>
+                                                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                     {item.size && (
-                                                        <span className="bg-zinc-900 px-2 py-1 rounded border border-white/5">Size: {item.size}</span>
+                                                        <span className="bg-secondary px-2 py-1 rounded border border-border/5">Size: {item.size}</span>
                                                     )}
                                                     {item.color && (
-                                                        <span className="bg-zinc-900 px-2 py-1 rounded border border-white/5">Color: {item.color}</span>
+                                                        <span className="bg-secondary px-2 py-1 rounded border border-border/5">Color: {item.color}</span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-emerald-500/80 mt-2 font-bold tracking-widest">QTY: {item.quantity}</p>
+                                                <p className="text-xs text-muted-foreground mt-2 font-bold tracking-widest">QTY: {item.quantity}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="font-mono font-black text-white text-lg">{formatCurrency(item.price * item.quantity)}</p>
-                                            <p className="text-[10px] text-zinc-600 font-medium">{formatCurrency(item.price)} each</p>
+                                            <p className="font-mono font-black text-foreground text-lg">{formatCurrency(item.price * item.quantity)}</p>
+                                            <p className="text-[10px] text-muted-foreground font-medium">{formatCurrency(item.price)} each</p>
                                         </div>
                                     </div>
                                 );
@@ -192,20 +192,20 @@ export default async function OrderDetailPage({
                         </div>
 
                         {/* Summary Footer */}
-                        <div className="p-8 bg-zinc-900/40 mt-auto">
+                        <div className="p-8 bg-foreground/5 mt-auto">
                             <div className="max-w-xs ml-auto space-y-3">
-                                <div className="flex justify-between text-zinc-500 text-xs font-medium">
+                                <div className="flex justify-between text-muted-foreground text-xs font-medium">
                                     <span>Subtotal</span>
-                                    <span className="font-mono text-zinc-300">{formatCurrency(order.total)}</span>
+                                    <span className="font-mono text-foreground">{formatCurrency(order.total)}</span>
                                 </div>
-                                <div className="flex justify-between text-zinc-500 text-xs font-medium">
+                                <div className="flex justify-between text-muted-foreground text-xs font-medium">
                                     <span>Shipping</span>
-                                    <span className="text-emerald-500 font-bold uppercase tracking-widest">Calculated at steps</span>
+                                    <span className="text-foreground font-bold uppercase tracking-widest">Calculated at steps</span>
                                 </div>
-                                <div className="h-px bg-white/10 w-full my-2" />
+                                <div className="h-px bg-border w-full my-2" />
                                 <div className="flex justify-between items-end">
-                                    <span className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">Total Amount</span>
-                                    <span className="text-3xl font-black text-white font-mono tracking-tighter leading-none">{formatCurrency(order.total)}</span>
+                                    <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Total Amount</span>
+                                    <span className="text-3xl font-black text-foreground font-mono tracking-tighter leading-none">{formatCurrency(order.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -215,72 +215,72 @@ export default async function OrderDetailPage({
                 {/* Right Column: Customer & Shipping */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* Customer Card */}
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8 shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-foreground/5 rounded-full blur-2xl pointer-events-none" />
 
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-6 flex items-center gap-2">
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2">
                             <User className="h-3 w-3" /> Customer Profile
                         </h2>
 
                         <div className="space-y-6">
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-zinc-900 flex items-center justify-center text-emerald-500 font-black text-lg border border-emerald-500/10">
+                                <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-foreground font-black text-lg border border-foreground/10">
                                     {order.customerName.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <p className="font-black text-white uppercase tracking-tight">{order.customerName}</p>
-                                    <p className="text-[10px] text-zinc-500 font-mono tracking-tight">{order.customerEmail}</p>
+                                    <p className="font-black text-foreground uppercase tracking-tight">{order.customerName}</p>
+                                    <p className="text-[10px] text-muted-foreground font-mono tracking-tight">{order.customerEmail}</p>
                                 </div>
                             </div>
 
-                            <div className="space-y-3 pt-4 border-t border-white/5">
+                            <div className="space-y-3 pt-4 border-t border-border/5">
                                 <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.open(whatsappLink, '_blank')}>
-                                    <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black transition-colors">
+                                    <div className="p-2 rounded-lg bg-foreground/10 text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                                         <Phone className="h-4 w-4" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] uppercase font-black text-zinc-600">Phone & WhatsApp</p>
-                                        <p className="text-sm font-bold text-zinc-300">{order.customerPhone}</p>
+                                        <p className="text-[10px] uppercase font-black text-muted-foreground">Phone & WhatsApp</p>
+                                        <p className="text-sm font-bold text-foreground">{order.customerPhone}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-zinc-900 text-zinc-500">
+                                    <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
                                         <Mail className="h-4 w-4" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] uppercase font-black text-zinc-600">Email Address</p>
-                                        <p className="text-sm font-bold text-zinc-300">{order.customerEmail}</p>
+                                        <p className="text-[10px] uppercase font-black text-muted-foreground">Email Address</p>
+                                        <p className="text-sm font-bold text-foreground">{order.customerEmail}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <Button className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-xs py-6" asChild>
+                            <Button className="w-full bg-primary hover:opacity-90 text-primary-foreground font-black uppercase tracking-widest text-xs py-6" asChild>
                                 <Link href={whatsappLink} target="_blank">Send Message</Link>
                             </Button>
                         </div>
                     </div>
 
                     {/* Shipping Card */}
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8 shadow-2xl">
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-6 flex items-center gap-2">
-                            <MapPin className="h-3 w-3 text-emerald-500" /> Shipping Destination
+                    <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-6 flex items-center gap-2">
+                            <MapPin className="h-3 w-3 text-foreground" /> Shipping Destination
                         </h2>
-                        <div className="bg-zinc-900/50 p-4 rounded-xl border border-white/5">
-                            <p className="text-sm text-zinc-300 font-medium leading-relaxed mb-2">{order.address}</p>
+                        <div className="bg-secondary p-4 rounded-xl border border-border/5">
+                            <p className="text-sm text-foreground font-medium leading-relaxed mb-2">{order.address}</p>
                             <div className="flex items-center gap-2">
-                                <div className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase">City</div>
-                                <p className="font-black text-white uppercase text-sm tracking-widest">{order.city}</p>
+                                <div className="px-2 py-0.5 rounded bg-foreground/10 text-foreground text-[10px] font-black uppercase">City</div>
+                                <p className="font-black text-foreground uppercase text-sm tracking-widest">{order.city}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Order Notes */}
-                    <div className="rounded-2xl border border-white/10 bg-zinc-950 p-8 shadow-2xl">
-                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600 mb-4 flex items-center gap-2">
+                    <div className="rounded-2xl border border-border bg-card p-8 shadow-2xl">
+                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 flex items-center gap-2">
                             Notes for Handler
                         </h2>
                         <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                            <p className="text-sm text-zinc-400 italic leading-relaxed">
+                            <p className="text-sm text-muted-foreground italic leading-relaxed">
                                 {order.notes || "No special instructions provided by the customer."}
                             </p>
                         </div>

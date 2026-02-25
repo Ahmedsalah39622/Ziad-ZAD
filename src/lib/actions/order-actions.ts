@@ -123,11 +123,27 @@ export async function createOrder(data: {
         color?: string;
     }[];
     total: number;
+    discountCode?: string;
 }) {
     const session = await requireUser();
     const prisma = await getPrisma();
 
     return prisma.$transaction(async (tx) => {
+        let discountPct = 0;
+        if (data.discountCode) {
+            const dc = await tx.discountCode.findUnique({ where: { code: data.discountCode } });
+            if (!dc) throw new Error("Invalid discount code");
+            if (dc.expiresAt && dc.expiresAt < new Date()) throw new Error("Discount code has expired");
+            if (dc.usedCount >= dc.usesPerCode) throw new Error("Discount code has no uses remaining");
+            discountPct = dc.discountPct;
+            await tx.discountCode.update({
+                where: { code: data.discountCode },
+                data: { usedCount: { increment: 1 } },
+            });
+        }
+
+        const finalTotal = data.total * (1 - discountPct / 100);
+
         const order = await tx.order.create({
             data: {
                 userId: session.user?.id,
@@ -137,7 +153,9 @@ export async function createOrder(data: {
                 address: data.address,
                 city: data.city,
                 notes: data.notes,
-                total: data.total,
+                total: finalTotal,
+                discountCode: data.discountCode,
+                discountPct,
                 status: "PENDING",
                 items: {
                     create: data.items.map((item) => ({

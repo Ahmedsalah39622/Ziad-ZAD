@@ -4,7 +4,8 @@ import { ProductForm } from "@/components/admin/product-form";
 import { redirect } from "next/navigation";
 
 export default async function EditProductPage({ params }: { params: { id: string } }) {
-    const product = await getProductById(params.id);
+    const { id } = await params;
+    const product = await getProductById(id);
     const categories = await getCategories();
 
     if (!product) {
@@ -15,7 +16,7 @@ export default async function EditProductPage({ params }: { params: { id: string
         <div className="space-y-8">
             <div>
                 <h1 className="text-3xl font-bold tracking-tighter">Edit Product</h1>
-                <p className="text-zinc-500">Update details for {product.name}.</p>
+                <p className="text-muted-foreground">Update details for {product.name}.</p>
             </div>
 
             <ProductForm categories={categories} initialData={product} />

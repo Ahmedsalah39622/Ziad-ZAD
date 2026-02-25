@@ -17,9 +17,9 @@ export function TestimonialMarquee({ testimonials, reverse, className }: Props) 
       <div
         className={cn(
           "pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-10 h-[calc(100%+1rem)] w-full",
-          "bg-linear-[90deg,black,transparent_5%,transparent_95%,black]",
-          "md:bg-linear-[90deg,black,transparent_25%,transparent_75%,black]",
-          "xl:bg-linear-[90deg,black,transparent,black]",
+          "bg-linear-[90deg,var(--background),transparent_5%,transparent_95%,var(--background)]",
+          "md:bg-linear-[90deg,var(--background),transparent_25%,transparent_75%,var(--background)]",
+          "xl:bg-linear-[90deg,var(--background),transparent,var(--background)]",
         )}
       ></div>
       <InfiniteSlider speed={30} reverse={reverse}>

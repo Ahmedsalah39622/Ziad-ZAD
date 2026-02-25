@@ -31,14 +31,14 @@ export function DesktopNav({ items, className, variant = "default" }: Props & { 
 
   return (
     <nav className={cn("mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-4", className)}>
-      <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", isTransparent ? "text-white" : "text-black")}>
+      <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", "text-foreground")}>
         ZAD
       </Link>
       <NavigationMenu className="mx-auto">
         <NavigationMenuList className={cn("gap-10")}>
           {items.map((item) => (
             <NavigationMenuItem key={item.href}>
-              <NavigationMenuLink href={item.href} className={cn("text-xs font-black uppercase tracking-[0.2em] hover:text-emerald-400 transition-colors", isTransparent ? "!text-white" : "!text-black")}>
+              <NavigationMenuLink href={item.href} className={cn("text-xs font-black uppercase tracking-[0.2em] hover:opacity-70 transition-colors", "!text-foreground")}>
                 {item.label}
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -53,9 +53,7 @@ export function DesktopNav({ items, className, variant = "default" }: Props & { 
             size="icon"
             className={cn(
               "rounded-full size-10 transition-all duration-300",
-              isTransparent
-                ? "bg-white/5 border-white/10 text-white hover:bg-emerald-500 hover:border-emerald-500 hover:text-white"
-                : "bg-black/5 border-black/10 text-black hover:bg-emerald-600 hover:border-emerald-600 hover:text-white"
+              "bg-foreground/5 border-foreground/10 text-foreground hover:bg-foreground hover:border-foreground hover:text-background"
             )}
             title="Admin Dashboard"
           >
@@ -70,27 +68,27 @@ export function DesktopNav({ items, className, variant = "default" }: Props & { 
             href="/login"
             className={cn(
               "group relative flex items-center gap-2 px-6 py-2 rounded-full transition-all duration-500 overflow-hidden shrink-0",
-              "bg-white/[0.03] border border-white/[0.08] hover:border-white/20 backdrop-blur-md",
+              "bg-foreground/[0.03] border border-foreground/[0.08] hover:border-foreground/20 backdrop-blur-md",
               "text-[10px] font-black uppercase tracking-[0.2em]",
-              isTransparent ? "text-white" : "text-black border-black/10 bg-black/[0.03] hover:bg-black/5"
+              "text-foreground"
             )}
           >
-            <User className="w-3.5 h-3.5 text-emerald-400" />
+            <User className="w-3.5 h-3.5 text-foreground" />
             <span>Login</span>
           </Link>
         ) : (
           <UserNav />
         )}
 
-        <Link href="/cart" className={cn("relative p-2 transition-colors", isTransparent ? "text-white" : "text-black")}>
+        <Link href="/cart" className={cn("relative p-2 transition-colors", "text-foreground")}>
           <ShoppingBag className="w-5 h-5" />
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-[10px] font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-foreground text-background text-[10px] font-bold rounded-full flex items-center justify-center">
               {totalItems}
             </span>
           )}
         </Link>
-        <Button asChild className={cn("rounded-none hover:opacity-90 transition-opacity", isTransparent ? "bg-white text-black" : "bg-black text-white")}>
+        <Button asChild className={cn("rounded-none hover:opacity-90 transition-opacity", "bg-primary text-primary-foreground")}>
           <Link href="/shop">Shop Now</Link>
         </Button>
       </div>

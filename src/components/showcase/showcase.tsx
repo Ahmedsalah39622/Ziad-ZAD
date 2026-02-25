@@ -55,7 +55,7 @@ function StatCounter({ stat, inView }: { stat: StatItem; inView: boolean }) {
       <span className="text-6xl md:text-8xl font-black tracking-tighter leading-none">
         {displayValue}{stat.suffix}
       </span>
-      <span className="text-sm font-bold uppercase tracking-widest text-neutral-500">
+      <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
         {stat.label}
       </span>
     </div>
@@ -86,7 +86,7 @@ export function Showcase() {
   return (
     <section
       ref={sectionRef}
-      className="w-full bg-[#f5f5f5] text-black py-16 border-y border-neutral-200"
+      className="w-full bg-secondary text-foreground py-16 border-y border-border"
     >
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-20">
         {stats.map((stat) => (

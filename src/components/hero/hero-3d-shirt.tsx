@@ -62,7 +62,7 @@ export function Hero3DShirt() {
                 <div className="relative w-[130%] h-[130%] flex items-center justify-center drop-shadow-[0_35px_60px_rgba(0,0,0,0.6)] transition-transform duration-500 hover:scale-110">
                     <img
                         src="/zad_green_shirt_studio.png"
-                        alt="ZAD Genesis Green Shirt"
+                        alt="ZAD Genesis Shirt"
                         className="w-full h-full object-contain filter contrast-110 saturate-110"
                     />
                 </div>
