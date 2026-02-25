@@ -1,11 +1,12 @@
-export function formatCurrency(amount: number, currency: string) {
-  // NB. navigator doesn't look like it has all of these keys. We need to investigate if we need browserLanguage, systemLanguage and userLanguage here
-  // @ts-expect-error - navigator is not typed
-  const { language, browserLanguage, systemLanguage, userLanguage } = navigator;
+export function formatCurrency(amount: number, currency = "EGP", locale = "ar-EG") {
+  // If in browser, try to get browser locale
+  let finalLocale = locale;
+  if (typeof window !== "undefined") {
+    const nav = window.navigator as any;
+    finalLocale = nav.language || nav.browserLanguage || nav.systemLanguage || nav.userLanguage || locale;
+  }
 
-  const browserLocale = language || browserLanguage || systemLanguage || userLanguage || "en-US";
-
-  return amount.toLocaleString(browserLocale, {
+  return amount.toLocaleString(finalLocale, {
     style: "currency",
     currency,
   });

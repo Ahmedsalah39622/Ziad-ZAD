@@ -87,18 +87,18 @@ export function Hero() {
           </p>
 
           {/* CTA */}
-          <div className="flex gap-3 w-full max-w-[320px]">
+          <div className="flex flex-col gap-3 w-full max-w-[320px]">
             <Button
-              className="flex-1 rounded-none py-5 text-xs font-bold uppercase tracking-[0.15em] bg-white text-black hover:bg-neutral-200 transition-all duration-300"
+              className="w-full rounded-none py-7 text-xs font-black uppercase tracking-[0.2em] bg-white text-black hover:bg-emerald-400 transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] border-none"
               asChild
             >
-              <Link href="/shop">Shop Now</Link>
+              <Link href="/shop">Shop Collection</Link>
             </Button>
             <Button
-              className="flex-1 rounded-none py-5 text-xs font-bold uppercase tracking-[0.15em] bg-transparent text-white border border-white/20 hover:border-white/50 hover:bg-white/[0.05] transition-all duration-300"
+              className="w-full rounded-none py-7 text-xs font-bold uppercase tracking-[0.15em] bg-transparent text-white border border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300"
               asChild
             >
-              <Link href="/#features">Explore</Link>
+              <Link href="/#features">Explore Tech</Link>
             </Button>
           </div>
 
@@ -185,22 +185,24 @@ export function Hero() {
             </p>
 
             {/* CTA */}
-            <div className="flex gap-4">
+            <div className="flex gap-6">
               <Button
-                className="group relative overflow-hidden rounded-none px-8 py-6 text-sm font-bold uppercase tracking-[0.15em] bg-white text-black hover:bg-white transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+                className="group relative overflow-hidden rounded-none px-12 py-8 text-sm font-black uppercase tracking-[0.25em] bg-white text-black hover:text-white transition-all duration-500 hover:shadow-[0_0_50px_rgba(52,211,153,0.3)]"
                 asChild
               >
                 <Link href="/shop">
-                  <span className="relative z-10">Shop Now</span>
-                  <span className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="absolute inset-0 bg-white group-hover:bg-transparent transition-colors duration-300" />
+                  <span className="relative z-10 transition-colors duration-500 group-hover:text-white">Shop Collection</span>
+                  <span className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                  <span className="absolute bottom-0 left-0 w-full h-1 bg-emerald-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
                 </Link>
               </Button>
               <Button
-                className="rounded-none px-8 py-6 text-sm font-bold uppercase tracking-[0.15em] bg-transparent text-white border border-white/20 hover:border-white/50 hover:bg-white/[0.05] transition-all duration-300"
+                className="group rounded-none px-12 py-8 text-sm font-bold uppercase tracking-[0.2em] bg-transparent text-white border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all duration-500"
                 asChild
               >
-                <Link href="/#features">Explore Tech</Link>
+                <Link href="/#features">
+                  <span>Explore Tech</span>
+                </Link>
               </Button>
             </div>
 

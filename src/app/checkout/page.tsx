@@ -1,65 +1,22 @@
-import { Checkout } from "@/components/checkout/checkout";
-import { CheckoutQueryParams, SnakeCaseCheckoutQueryParams } from "@/lib/types";
-import { Environments } from "@paddle/paddle-js";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { CheckoutClient } from "./checkout-client";
 
-import type { Metadata } from "next";
+export default async function CheckoutPage() {
+  const session = await auth();
 
-export const metadata: Metadata = {
-  title: "Checkout - Paddle Web Payments Starter",
-  description: "Complete your purchase securely",
-};
-
-type Props = {
-  searchParams: Promise<SnakeCaseCheckoutQueryParams>;
-};
-
-export default async function CheckoutPage({ searchParams }: Props) {
-  const clientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
-  const redirectUrl = process.env.NEXT_PUBLIC_APP_REDIRECT_URL;
-  const environment = process.env.NEXT_PUBLIC_PADDLE_ENV as Environments;
-
-  if (!clientToken || !redirectUrl || !environment) {
-    return <div className="grid place-items-center p-8 text-xl">Missing required environment variables</div>;
-  }
-
-  const {
-    app_user_id: appUserId,
-    country_code: countryCode,
-    discount_code: discountCode,
-    discount_id: discountId,
-    locale,
-    paddle_customer_id: paddleCustomerId,
-    postal_code: postalCode,
-    price_id: urlPriceId,
-    theme,
-    transaction_id: transactionId,
-    user_email: userEmail,
-  } = await searchParams;
-
-  const checkoutQueryParams: CheckoutQueryParams = {
-    appUserId,
-    countryCode,
-    discountCode,
-    discountId,
-    locale,
-    paddleCustomerId,
-    postalCode,
-    priceId: urlPriceId,
-    theme,
-    transactionId,
-    userEmail,
-  };
-
-  if (!urlPriceId && !transactionId) {
-    return <div className="grid place-items-center p-8 text-xl">Missing price ID</div>;
+  if (!session) {
+    redirect("/login?callbackUrl=/checkout");
   }
 
   return (
-    <Checkout
-      checkoutQueryParams={checkoutQueryParams}
-      environment={environment}
-      clientToken={clientToken}
-      redirectUrl={redirectUrl}
-    />
+    <main className="min-h-screen bg-black pt-20 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tighter text-white mb-8 uppercase italic border-l-4 border-white pl-4">
+          Checkout
+        </h1>
+        <CheckoutClient user={session.user} />
+      </div>
+    </main>
   );
 }

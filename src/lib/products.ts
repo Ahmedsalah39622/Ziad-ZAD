@@ -4,6 +4,7 @@ export type Product = {
     price: number;
     priceDisplay: string;
     image: string;
+    images?: string; // JSON string of images array
     tag?: string;
     colors: { name: string; hex: string }[];
     sizes: string[];

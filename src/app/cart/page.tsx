@@ -56,13 +56,13 @@ export default function CartPage() {
                                     className="flex gap-6 py-8"
                                 >
                                     {/* Product Image */}
-                                    <div className="w-28 h-36 md:w-36 md:h-44 bg-[#111] relative shrink-0 overflow-hidden">
+                                    <div className="h-20 w-20 relative rounded-lg bg-zinc-900 overflow-hidden border border-white/5">
                                         {item.product.image ? (
                                             <Image
                                                 src={item.product.image}
                                                 alt={item.product.name}
                                                 fill
-                                                className="object-contain p-4"
+                                                className="object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-neutral-700 text-xs font-bold tracking-wider uppercase">
@@ -139,7 +139,7 @@ export default function CartPage() {
                                 </div>
 
                                 <Link
-                                    href="/checkout-payment"
+                                    href="/checkout"
                                     className="w-full h-14 bg-white text-black font-bold tracking-widest uppercase text-sm flex items-center justify-center hover:bg-neutral-200 transition-colors mt-4"
                                 >
                                     Proceed to Checkout

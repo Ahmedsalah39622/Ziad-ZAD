@@ -3,24 +3,34 @@ import { ShopFilters } from "@/components/shop/shop-filters";
 import { ShopGrid } from "@/components/shop/shop-grid";
 import { Footer } from "@/components/footer/footer";
 import type { Metadata } from "next";
+import { getProducts } from "@/lib/actions/product-actions";
 
 export const metadata: Metadata = {
     title: "ZAD - Shop Collection 001",
     description: "Premium streetwear engineered with nanobana special effects.",
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+    const rawProducts = await getProducts();
+
+    // Parse JSON data on the server for stable hydration
+    const products = rawProducts.map(p => ({
+        ...p,
+        images: JSON.parse(p.images || "[]"),
+        colors: JSON.parse(p.colors || "[]"),
+        sizes: JSON.parse(p.sizes || "[]"),
+        details: JSON.parse(p.details || "[]"),
+        categoryName: p.category?.name || "Streetwear"
+    }));
+
     return (
         <div className="bg-[#0a0a0a] min-h-screen w-full flex flex-col text-white">
-            {/* Fixed Nav */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-xl">
                 <Nav variant="transparent" />
             </div>
 
-            {/* Editorial Hero */}
             <div className="relative w-full pt-32 pb-10 px-6 md:px-12">
                 <div className="max-w-[1920px] mx-auto">
-                    {/* Massive Typography */}
                     <div className="flex flex-col gap-2">
                         <div className="overflow-hidden">
                             <h1 className="text-[12vw] md:text-[8vw] font-black tracking-tighter uppercase leading-[0.85] text-white">
@@ -37,7 +47,6 @@ export default function ShopPage() {
                         </div>
                     </div>
 
-                    {/* Subtitle Row */}
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between mt-8 md:mt-12 gap-6">
                         <p className="text-neutral-500 text-sm md:text-base max-w-md leading-relaxed">
                             Premium streetwear engineered for those who refuse to blend in.
@@ -50,18 +59,14 @@ export default function ShopPage() {
                         </div>
                     </div>
 
-                    {/* Divider Line */}
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-neutral-800 to-transparent mt-10" />
                 </div>
             </div>
 
-            {/* Filters */}
             <ShopFilters />
 
-            {/* Products */}
-            <ShopGrid />
+            <ShopGrid initialProducts={products} />
 
-            {/* Footer */}
             <Footer />
         </div>
     );
