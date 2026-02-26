@@ -31,7 +31,7 @@ export function FeaturesTabs({ features, className }: Props) {
       {features.map((feature) => (
         <TabsContent key={feature.title} value={feature.title}>
           <div className="bg-card flex w-full justify-center rounded-lg border p-8 pb-0">
-            <Image src={feature.image} alt="App Image" width={304} height={445} />
+            <Image src={feature.image || feature.background || ""} alt="App Image" width={304} height={445} />
           </div>
         </TabsContent>
       ))}
