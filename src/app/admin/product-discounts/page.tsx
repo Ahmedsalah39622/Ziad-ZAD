@@ -1,4 +1,5 @@
 import { getProducts, updateProductPrices } from "@/lib/actions/product-actions";
+import { getSetting, setSetting } from "@/lib/actions/settings-actions";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Image from "next/image";
@@ -17,6 +18,8 @@ export default async function ProductDiscountsPage() {
     }
 
     const products = await getProducts();
+    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
+    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
 
     async function handleUpdate(formData: FormData) {
         "use server";
@@ -25,7 +28,24 @@ export default async function ProductDiscountsPage() {
         const compareAtPriceRaw = formData.get("compareAtPrice") as string;
         const compareAtPrice = compareAtPriceRaw ? parseFloat(compareAtPriceRaw) : null;
 
+        const ribbonText = formData.get("ribbonText") as string;
+        const ribbonColor = formData.get("ribbonColor") as string;
+
         await updateProductPrices(id, price, compareAtPrice);
+
+        // Update custom ribbon settings
+        const currentSettingsRaw = await getSetting("product_discount_ribbons", "{}");
+        const currentSettings = JSON.parse(currentSettingsRaw);
+
+        if (ribbonText) {
+            currentSettings[id] = { text: ribbonText, color: ribbonColor || "#ef4444" };
+        } else {
+            // Remove the ribbon if text is cleared
+            delete currentSettings[id];
+        }
+
+        await setSetting("product_discount_ribbons", JSON.stringify(currentSettings));
+
         revalidatePath("/admin/product-discounts");
         revalidatePath("/shop");
         revalidatePath("/");
@@ -48,6 +68,7 @@ export default async function ProductDiscountsPage() {
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4">Compare At (Original)</th>
                             <th className="px-6 py-4">Sale Price (Active)</th>
+                            <th className="px-6 py-4">Ribbon (Text & Color)</th>
                             <th className="px-6 py-4">Action</th>
                         </tr>
                     </thead>
@@ -112,6 +133,23 @@ export default async function ProductDiscountsPage() {
                                                 />
                                             </div>
 
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    name="ribbonText"
+                                                    defaultValue={ribbonSettings[product.id]?.text || ""}
+                                                    placeholder="Ribbon text..."
+                                                    className="w-32 border border-border bg-background rounded-md px-2 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                                />
+                                                <input
+                                                    type="color"
+                                                    name="ribbonColor"
+                                                    defaultValue={ribbonSettings[product.id]?.color || "#ef4444"}
+                                                    className="w-8 h-8 rounded cursor-pointer border-0 p-0 shrink-0"
+                                                    title="Ribbon Color"
+                                                />
+                                            </div>
+
                                             <button
                                                 type="submit"
                                                 className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest"
@@ -125,7 +163,7 @@ export default async function ProductDiscountsPage() {
                         })}
                         {products.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                                <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                                     No products found. Add products first.
                                 </td>
                             </tr>

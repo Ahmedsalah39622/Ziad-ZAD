@@ -4,6 +4,7 @@ import { ShopGrid } from "@/components/shop/shop-grid";
 import { Footer } from "@/components/footer/footer";
 import type { Metadata } from "next";
 import { getProducts } from "@/lib/actions/product-actions";
+import { getSetting } from "@/lib/actions/settings-actions";
 
 export const metadata: Metadata = {
     title: "ZAD - Shop Collection 001",
@@ -14,6 +15,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ShopPage() {
     const rawProducts = await getProducts();
+    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
+    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
 
     // Parse JSON data on the server for stable hydration
     const products = rawProducts.map(p => {
@@ -26,6 +29,7 @@ export default async function ShopPage() {
             details: [], // Do not send rich text details to the grid
             categoryName: p.category?.name || "Streetwear",
             stock: p.stock,
+            discountRibbon: ribbonSettings[p.id] || null,
         };
     });
 

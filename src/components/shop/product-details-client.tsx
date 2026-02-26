@@ -79,11 +79,18 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                 {/* Image & Gallery Column */}
                 <div className="space-y-4">
                     <div className="aspect-[4/5] bg-secondary/50 relative overflow-hidden rounded-2xl border border-border">
-                        {product.tag && (
+                        {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
+                            <span
+                                className="absolute top-6 left-6 z-10 font-bold uppercase text-[10px] tracking-widest px-3 py-1.5 rounded-full shadow-lg"
+                                style={{ backgroundColor: product.discountRibbon.color, color: "#ffffff" }}
+                            >
+                                {product.discountRibbon.text}
+                            </span>
+                        ) : product.tag ? (
                             <span className="absolute top-6 left-6 z-10 bg-foreground text-background text-[10px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full shadow-lg">
                                 {product.tag}
                             </span>
-                        )}
+                        ) : null}
                         {images.length > 0 ? (
                             <Image
                                 src={images[mainImageIndex]?.url || ""}

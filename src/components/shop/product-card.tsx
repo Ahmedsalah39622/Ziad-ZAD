@@ -15,9 +15,22 @@ export function ProductCard({ product }: { product: any }) {
             {/* Image Container */}
             <div className="aspect-[3/4] w-full overflow-hidden bg-secondary relative">
 
-                {product.tag && !isOutOfStock && (
+                {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
+                    <Badge
+                        className="absolute top-4 left-4 z-20 font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1 shadow-md shadow-black/20"
+                        style={{ backgroundColor: product.discountRibbon.color, color: "#ffffff" }}
+                    >
+                        {product.discountRibbon.text}
+                    </Badge>
+                ) : product.tag && !isOutOfStock ? (
                     <Badge className="absolute top-4 left-4 z-20 bg-primary text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
                         {product.tag}
+                    </Badge>
+                ) : null}
+
+                {isOutOfStock && (
+                    <Badge className="absolute top-4 left-4 z-20 bg-rose-600 text-background font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
+                        Out of Stock
                     </Badge>
                 )}
                 {isOutOfStock && (

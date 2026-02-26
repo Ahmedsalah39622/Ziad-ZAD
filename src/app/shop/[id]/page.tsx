@@ -3,6 +3,7 @@ import { Nav } from "@/components/hero/nav";
 import { Footer } from "@/components/footer/footer";
 import Link from "next/link";
 import { ProductDetailsClient } from "@/components/shop/product-details-client";
+import { getSetting } from "@/lib/actions/settings-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         );
     }
 
+    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
+    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
+
     // Parse JSON data from DB
     const product = {
         ...productData,
@@ -31,7 +35,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         images: JSON.parse(productData.images),
         sizes: JSON.parse(productData.sizes),
         colors: JSON.parse(productData.colors),
-        category: productData.category?.name || "Uncategorized"
+        category: productData.category?.name || "Uncategorized",
+        discountRibbon: ribbonSettings[productData.id] || null,
     };
 
     return (

@@ -14,6 +14,8 @@ interface RibbonSettings {
     bgHex: string;
     textHex: string;
     active: boolean;
+    timerActive?: boolean;
+    timerEndDate?: string;
 }
 
 export function RibbonForm({ initialSettings }: { initialSettings: RibbonSettings }) {
@@ -21,6 +23,8 @@ export function RibbonForm({ initialSettings }: { initialSettings: RibbonSetting
     const [bgHex, setBgHex] = useState(initialSettings.bgHex || "#ef4444");
     const [textHex, setTextHex] = useState(initialSettings.textHex || "#ffffff");
     const [active, setActive] = useState(initialSettings.active ?? false);
+    const [timerActive, setTimerActive] = useState(initialSettings.timerActive ?? false);
+    const [timerEndDate, setTimerEndDate] = useState(initialSettings.timerEndDate || "");
     const [loading, setLoading] = useState(false);
     const [previewContainer, setPreviewContainer] = useState<HTMLElement | null>(null);
 
@@ -37,6 +41,8 @@ export function RibbonForm({ initialSettings }: { initialSettings: RibbonSetting
             bgHex,
             textHex,
             active,
+            timerActive,
+            timerEndDate,
         });
 
         const res = await setSetting("ribbon_settings", payload);
@@ -111,6 +117,37 @@ export function RibbonForm({ initialSettings }: { initialSettings: RibbonSetting
                             <span className="text-muted-foreground font-mono uppercase">{textHex}</span>
                         </div>
                     </div>
+                </div>
+
+                {/* Timer Settings */}
+                <div className="space-y-4 border-t border-border pt-6">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                            <Label className="font-bold">Enable Countdown Timer</Label>
+                            <p className="text-sm text-muted-foreground">
+                                Show a countdown timer next to the ribbon text.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={timerActive}
+                            onChange={(e) => setTimerActive(e.target.checked)}
+                            className="w-5 h-5 accent-primary"
+                            title="Enable Timer"
+                        />
+                    </div>
+
+                    {timerActive && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <Label htmlFor="timer-end-date">End Date & Time</Label>
+                            <Input
+                                id="timer-end-date"
+                                type="datetime-local"
+                                value={timerEndDate}
+                                onChange={(e) => setTimerEndDate(e.target.value)}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <Button type="submit" disabled={loading} className="w-full">

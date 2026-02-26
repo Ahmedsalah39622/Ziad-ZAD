@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 
 export function Ribbon() {
-    const [settings, setSettings] = useState<{ text: string, bgHex: string, textHex: string, active: boolean } | null>(null);
+    const [settings, setSettings] = useState<{ text: string, bgHex: string, textHex: string, active: boolean, timerActive?: boolean, timerEndDate?: string } | null>(null);
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -17,6 +17,8 @@ export function Ribbon() {
                 bgHex: "#ef4444",
                 textHex: "#ffffff",
                 active: false,
+                timerActive: false,
+                timerEndDate: "",
             }));
             setSettings(JSON.parse(ribbonSettingsRaw));
         }
@@ -64,9 +66,14 @@ export function Ribbon() {
                         >
                             {duplicateTexts.map((txt, i) => (
                                 <div key={i} className="flex items-center gap-12 sm:gap-16">
-                                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-sm whitespace-nowrap shrink-0">
-                                        {txt}
-                                    </span>
+                                    <div className="flex items-center shrink-0">
+                                        <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.25em] drop-shadow-sm whitespace-nowrap shrink-0">
+                                            {txt}
+                                        </span>
+                                        {settings.timerActive && settings.timerEndDate && (
+                                            <CountdownTimer endDate={settings.timerEndDate} textHex={settings.textHex} />
+                                        )}
+                                    </div>
                                     {/* Small decorative dot separator */}
                                     <span
                                         className="w-1 h-1 rounded-full opacity-40 shrink-0"
@@ -90,3 +97,50 @@ export function Ribbon() {
         </AnimatePresence>
     );
 }
+
+function CountdownTimer({ endDate, textHex }: { endDate: string, textHex: string }) {
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+        const target = new Date(endDate).getTime();
+        if (isNaN(target)) return;
+
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const difference = target - now;
+
+            if (difference > 0) {
+                setTimeLeft({
+                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                    minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+                    seconds: Math.floor((difference % (1000 * 60)) / 1000),
+                });
+            } else {
+                setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            }
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+    }, [endDate]);
+
+    if (!isMounted) return null;
+
+    const target = new Date(endDate).getTime();
+    if (isNaN(target) || target - new Date().getTime() <= 0) return null;
+
+    return (
+        <span
+            className="inline-flex items-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-xs font-bold leading-none px-2 py-1 rounded bg-black/10 tabular-nums shrink-0 ml-4 lg:ml-6 tracking-normal"
+        >
+            {timeLeft.days > 0 && <span>{timeLeft.days}d</span>}
+            <span>{timeLeft.hours.toString().padStart(2, '0')}:{timeLeft.minutes.toString().padStart(2, '0')}:{timeLeft.seconds.toString().padStart(2, '0')}</span>
+        </span>
+    );
+}
+
