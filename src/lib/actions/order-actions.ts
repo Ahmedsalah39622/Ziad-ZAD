@@ -114,7 +114,28 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
             prisma.order.findMany({
                 where,
                 orderBy: { createdAt: "desc" },
-                include: { items: { include: { product: true } } }
+                select: {
+                    id: true,
+                    total: true,
+                    status: true,
+                    customerName: true,
+                    customerEmail: true,
+                    customerPhone: true,
+                    createdAt: true,
+                    items: {
+                        select: {
+                            productId: true,
+                            quantity: true,
+                            price: true,
+                            product: {
+                                select: {
+                                    name: true,
+                                    price: true
+                                }
+                            }
+                        }
+                    }
+                }
             })
         ]);
 

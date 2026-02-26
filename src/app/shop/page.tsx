@@ -14,15 +14,18 @@ export default async function ShopPage() {
     const rawProducts = await getProducts();
 
     // Parse JSON data on the server for stable hydration
-    const products = rawProducts.map(p => ({
-        ...p,
-        images: JSON.parse(p.images || "[]"),
-        colors: JSON.parse(p.colors || "[]"),
-        sizes: JSON.parse(p.sizes || "[]"),
-        details: JSON.parse(p.details || "[]"),
-        categoryName: p.category?.name || "Streetwear",
-        stock: p.stock,
-    }));
+    const products = rawProducts.map(p => {
+        const parsedImages = JSON.parse(p.images || "[]");
+        return {
+            ...p,
+            images: parsedImages.length > 0 ? [parsedImages[0]] : [],
+            colors: JSON.parse(p.colors || "[]"),
+            sizes: JSON.parse(p.sizes || "[]"),
+            details: [], // Do not send rich text details to the grid
+            categoryName: p.category?.name || "Streetwear",
+            stock: p.stock,
+        };
+    });
 
     return (
         <div className="bg-background min-h-screen w-full flex flex-col text-foreground">

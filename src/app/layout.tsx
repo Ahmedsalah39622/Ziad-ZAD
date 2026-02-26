@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+// const inter = Inter({
+//   variable: "--font-inter",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "ZAD Premium Streetwear",
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`antialiased`}>
         <AuthProvider>
           <CartProvider>
             {children}
