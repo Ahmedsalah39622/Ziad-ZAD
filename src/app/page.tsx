@@ -1,5 +1,3 @@
-"use client";
-
 import { FAQs } from "@/components/faqs/faqs";
 import { Features } from "@/components/features/features";
 import { Footer } from "@/components/footer/footer";
@@ -9,10 +7,11 @@ import { Showcase } from "@/components/showcase/showcase";
 import { Testimonials } from "@/components/testimonials/testimonials";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
-import { useRedirectWarning } from "@/lib/redirect";
+import { getSetting } from "@/lib/actions/settings-actions";
 
-export default function Home() {
-  useRedirectWarning();
+export default async function Home() {
+  const settingsRaw = await getSetting("feature_settings", "{}");
+  const settings = JSON.parse(settingsRaw);
 
   return (
     <SmoothScroll>
@@ -24,7 +23,7 @@ export default function Home() {
         <Quote />
       </ScrollReveal>
       <ScrollReveal delay={100}>
-        <Features />
+        <Features settings={settings} />
       </ScrollReveal>
       <ScrollReveal delay={100}>
         <Testimonials />

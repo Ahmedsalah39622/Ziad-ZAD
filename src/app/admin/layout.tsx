@@ -36,6 +36,7 @@ export default async function AdminLayout({
         { label: "Promo Codes", href: "/admin/discounts", icon: "Tag" },
         { label: "Product Sales", href: "/admin/product-discounts", icon: "BadgePercent" },
         { label: "New Releases", href: "/admin/new-releases", icon: "Sparkles" },
+        { label: "Features", href: "/admin/features", icon: "Layout" },
         { label: "Ribbon", href: "/admin/ribbon", icon: "Megaphone" },
         { label: "Reports", href: "/admin/reports", icon: "BarChart3" },
         { label: "Settings", href: "/admin/settings", icon: "Settings" },

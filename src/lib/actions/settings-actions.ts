@@ -63,3 +63,26 @@ export async function uploadHeroImage(base64Data: string, fileName: string) {
         return { success: false, error: "Upload failed." };
     }
 }
+
+/**
+ * Upload a feature background image from base64 and return the public path.
+ */
+export async function uploadFeatureImage(base64Data: string, fileName: string) {
+    try {
+        const base64Content = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
+        const buffer = Buffer.from(base64Content, "base64");
+        const uploadDir = path.join(process.cwd(), "public", "uploads", "features");
+
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, buffer);
+
+        return { success: true, path: `/uploads/features/${fileName}` };
+    } catch (error) {
+        console.error("Feature upload failed:", error);
+        return { success: false, error: "Upload failed." };
+    }
+}
