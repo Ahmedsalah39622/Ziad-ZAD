@@ -1,5 +1,5 @@
 import { getOrders } from "@/lib/actions/order-actions";
-import { Search, Eye, Filter, Package, ShoppingBag } from "lucide-react";
+import { Search, Eye, Filter, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/format-currency";

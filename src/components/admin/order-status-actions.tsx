@@ -22,8 +22,8 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             await updateOrderStatus(orderId, status);
             toast.success(`Order marked as ${status.toLowerCase()}`);
             router.refresh();
-        } catch (err: any) {
-            toast.error(err.message || "Failed to update status");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to update status");
         } finally {
             setIsLoading(null);
         }

@@ -1,5 +1,5 @@
 import { getProducts } from "@/lib/actions/product-actions";
-import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
+import { Plus, Search, Edit, Package } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,14 +66,14 @@ export default async function ProductsPage() {
                                                         if (images && images.length > 0 && images[0].url) {
                                                             return <img src={images[0].url} alt={product.name} className="h-full w-full object-cover" />;
                                                         }
-                                                    } catch (e) { }
+                                                    } catch { }
                                                     return <Package className="h-5 w-5" />;
                                                 })()}
                                             </div>
                                             <span className="font-medium text-foreground">{product.name}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">{(product.category as any)?.name || "Uncategorized"}</td>
+                                    <td className="px-6 py-4">{(product.category as { name?: string })?.name || "Uncategorized"}</td>
                                     <td className="px-6 py-4 font-mono">{formatCurrency(product.price)}</td>
                                     <td className="px-6 py-4">{product.stock}</td>
                                     <td className="px-6 py-4">

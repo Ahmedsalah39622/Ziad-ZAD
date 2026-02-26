@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
                 router.refresh();
             }
         } catch (err) {
-            toast.error("An unexpected error occurred.");
+            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
         } finally {
             setIsLoading(false);
         }

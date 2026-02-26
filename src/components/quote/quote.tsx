@@ -13,10 +13,10 @@ export function Quote() {
         <QuoteIcon className="w-12 h-12 text-muted-foreground/40 mb-4" />
 
         <blockquote className="text-4xl md:text-7xl font-black tracking-tighter leading-[0.9] uppercase">
-          "We don't just designs clothes. <br />
+          &quot;We don&apos;t just designs clothes. <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-muted-foreground to-foreground">
             We engineer movement.
-          </span>"
+          </span>&quot;
         </blockquote>
 
         <div className="w-24 h-1 bg-foreground/10 mt-4"></div>

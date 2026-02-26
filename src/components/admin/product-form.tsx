@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X, Image as ImageIcon, Check, Save, Loader2 } from "lucide-react";
+import { Plus, Trash2, X, Image as ImageIcon, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createProduct, updateProduct } from "@/lib/actions/product-actions";
 import { useRouter } from "next/navigation";
-import { Category } from "@prisma/client";
+import { Category, Product } from "@prisma/client";
 
 interface ProductFormProps {
     categories: Category[];
-    initialData?: any;
+    initialData?: Partial<Product>;
 }
 
 export function ProductForm({ categories, initialData }: ProductFormProps) {
@@ -81,7 +81,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         };
 
         try {
-            if (initialData) {
+            if (initialData?.id) {
                 await updateProduct(initialData.id, data);
             } else {
                 // send as a single JSON string to avoid nested arrays

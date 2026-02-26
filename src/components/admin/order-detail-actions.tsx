@@ -26,8 +26,8 @@ export function OrderDetailActions({
         try {
             await updateOrderStatus(orderId, status);
             toast.success(`Order marked as ${status.toLowerCase()}`);
-        } catch (err: any) {
-            toast.error(err.message || "Failed to update status");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to update status");
         } finally {
             setIsLoading(null);
         }

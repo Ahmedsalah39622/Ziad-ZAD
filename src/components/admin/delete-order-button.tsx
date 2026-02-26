@@ -21,8 +21,8 @@ export function DeleteOrderButton({ orderId }: { orderId: string }) {
             await deleteOrder(orderId);
             toast.success("Order deleted successfully");
             router.refresh();
-        } catch (error: any) {
-            toast.error(error.message || "Failed to delete order");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to delete order");
         } finally {
             setIsDeleting(false);
         }

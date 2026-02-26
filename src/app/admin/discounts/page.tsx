@@ -1,29 +1,31 @@
 import { generateDiscountCodes, getDiscountCodes } from "@/lib/actions/discount-actions";
 import { DiscountCode } from "@prisma/client";
-import { redirect } from "next/navigation";
 
 export const metadata = {
     title: "Discount Codes - Admin",
 };
 
-// server action invoked by the form
-export async function createCodes(formData: FormData) {
-    'use server';
-    const quantity = parseInt(formData.get('quantity') as string) || 1;
-    const discountPct = parseFloat(formData.get('discountPct') as string) || 0;
-    const validDays = parseInt(formData.get('validDays') as string) || 0;
-    const usesPerCode = parseInt(formData.get('usesPerCode') as string) || 1;
-
-    await generateDiscountCodes({ quantity, discountPct, validDays: validDays || undefined, usesPerCode });
-}
+import { revalidatePath } from "next/cache";
 
 export default async function DiscountsPage() {
+    // server action invoked by the form
+    async function createCodes(formData: FormData) {
+        'use server';
+        const quantity = parseInt(formData.get('quantity') as string) || 1;
+        const discountPct = parseFloat(formData.get('discountPct') as string) || 0;
+        const validDays = parseInt(formData.get('validDays') as string) || 0;
+        const usesPerCode = parseInt(formData.get('usesPerCode') as string) || 1;
+
+        await generateDiscountCodes({ quantity, discountPct, validDays: validDays || undefined, usesPerCode });
+        revalidatePath("/admin/discounts");
+    }
+
     let codes: DiscountCode[] = [];
     let loadError: string | null = null;
     try {
         codes = await getDiscountCodes();
-    } catch (e: any) {
-        loadError = e.message || String(e);
+    } catch (e) {
+        loadError = e instanceof Error ? e.message : String(e);
         console.error("Failed to load discount codes:", e);
     }
 

@@ -3,7 +3,7 @@ import { getCategories } from "@/lib/actions/category-actions";
 import { ProductForm } from "@/components/admin/product-form";
 import { redirect } from "next/navigation";
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const product = await getProductById(id);
     const categories = await getCategories();

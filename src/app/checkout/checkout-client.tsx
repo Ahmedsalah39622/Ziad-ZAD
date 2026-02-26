@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CreditCard, Truck, Package } from "lucide-react";
 import Image from "next/image";
 
-export function CheckoutClient({ user }: { user: any }) {
+export function CheckoutClient({ user }: { user: { name?: string | null; email?: string | null } | null }) {
     const { items, totalItems, totalPrice, clearCart } = useCart();
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
@@ -56,9 +56,9 @@ export function CheckoutClient({ user }: { user: any }) {
             const dc = await validateDiscountCode(formData.discountCode);
             setAppliedDiscount({ code: dc.code, pct: dc.discountPct });
             toast.success(`Discount code "${dc.code}" applied! (${dc.discountPct}% off)`);
-        } catch (err: any) {
+        } catch (err) {
             setAppliedDiscount(null);
-            toast.error(err.message || "Failed to apply discount code");
+            toast.error(err instanceof Error ? err.message : "Failed to apply discount code");
         } finally {
             setIsValidating(false);
         }
@@ -91,8 +91,8 @@ export function CheckoutClient({ user }: { user: any }) {
             // navigate first, then clear the cart so the checkout page doesn't briefly show empty state
             await router.push(`/checkout/success?id=${result.id}`);
             clearCart();
-        } catch (err: any) {
-            toast.error(err.message || "Failed to place order. Please try again.");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to place order. Please try again.");
         } finally {
             setIsLoading(false);
         }

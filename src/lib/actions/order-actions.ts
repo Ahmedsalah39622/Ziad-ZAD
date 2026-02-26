@@ -33,6 +33,7 @@ async function requireUser() {
 
 export async function getOrders(options?: { status?: string; startDate?: Date; endDate?: Date }) {
     const { status, startDate, endDate } = options || {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
     if (status && status !== "ALL") where.status = status;
     if (startDate || endDate) {
@@ -43,7 +44,10 @@ export async function getOrders(options?: { status?: string; startDate?: Date; e
         }
         if (endDate) {
             const d = new Date(endDate);
-            if (!isNaN(d.getTime())) where.createdAt.lte = d;
+            if (!isNaN(d.getTime())) {
+                d.setHours(23, 59, 59, 999);
+                where.createdAt.lte = d;
+            }
         }
     }
     const prisma = await getPrisma();
@@ -92,6 +96,7 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
     const { startDate, endDate } = options || {};
     await requireAdmin();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
     if (startDate || endDate) {
         where.createdAt = {};
@@ -101,7 +106,10 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
         }
         if (endDate) {
             const d = new Date(endDate);
-            if (!isNaN(d.getTime())) where.createdAt.lte = d;
+            if (!isNaN(d.getTime())) {
+                d.setHours(23, 59, 59, 999);
+                where.createdAt.lte = d;
+            }
         }
     }
 

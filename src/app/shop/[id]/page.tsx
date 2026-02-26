@@ -4,8 +4,9 @@ import { Footer } from "@/components/footer/footer";
 import Link from "next/link";
 import { ProductDetailsClient } from "@/components/shop/product-details-client";
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-    const productData = await getProductById(params.id);
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const productData = await getProductById(id);
 
     if (!productData) {
         return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,27 +12,41 @@ import {
     Printer,
     FileSpreadsheet
 } from "lucide-react";
+import * as XLSX from "xlsx";
 
 interface ReportFiltersProps {
     totalCount: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data?: any[];
+    activeTab?: string;
 }
 
-export function ReportFilters({ totalCount }: ReportFiltersProps) {
+export function ReportFilters({ totalCount, data, activeTab }: ReportFiltersProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const activeTab = searchParams.get("tab") || "revenue";
     const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+    const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
+    const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
+
+    // Sync state with URL changes (e.g. from tabs or reset)
+    useEffect(() => {
+        setSearchQuery(searchParams.get("q") || "");
+        setStartDate(searchParams.get("startDate") || "");
+        setEndDate(searchParams.get("endDate") || "");
+    }, [searchParams]);
 
     const createQueryString = useCallback(
         (paramsToUpdate: Record<string, string | null>) => {
             const params = new URLSearchParams(searchParams.toString());
             Object.entries(paramsToUpdate).forEach(([name, value]) => {
-                if (value) {
-                    params.set(name, value);
-                } else {
-                    params.delete(name);
+                if (value !== undefined) { // Handle empty string for deletion
+                    if (value) {
+                        params.set(name, value);
+                    } else {
+                        params.delete(name);
+                    }
                 }
             });
             return params.toString();
@@ -47,6 +61,61 @@ export function ReportFilters({ totalCount }: ReportFiltersProps) {
     const handleReset = () => {
         setSearchQuery("");
         router.push(pathname + (activeTab !== "revenue" ? `?tab=${activeTab}` : ""));
+    };
+
+    const handleExportExcel = () => {
+        if (!data || data.length === 0) return;
+
+        // Transform data based on active tab for a clean Excel sheet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const exportData = data.map((item: any) => {
+            if (activeTab === "revenue") {
+                return {
+                    "Date": item.date,
+                    "Transactions": item.orders,
+                    "Gross Revenue (L.E)": item.revenue
+                };
+            } else if (activeTab === "clients") {
+                return {
+                    "Client Name": item.name,
+                    "Email": item.email,
+                    "Phone": item.phone,
+                    "Total Orders": item.orderCount,
+                    "Total Spent (L.E)": item.totalSpent
+                };
+            } else if (activeTab === "orders") {
+                return {
+                    "Order ID": item.id,
+                    "Customer": item.customerName,
+                    "Date": new Date(item.createdAt).toLocaleDateString(),
+                    "Amount (L.E)": item.total,
+                    "Status": item.status
+                };
+            } else if (activeTab === "products") {
+                return {
+                    "Product Name": item.name,
+                    "Quantity Sold": item.quantity,
+                    "Income (L.E)": item.quantity * item.price
+                };
+            }
+            return item;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, activeTab || "Report");
+
+        // Set column widths for better readability
+        const wscols = [
+            { wch: 25 },
+            { wch: 20 },
+            { wch: 20 },
+            { wch: 15 },
+            { wch: 15 }
+        ];
+        worksheet["!cols"] = wscols;
+
+        XLSX.writeFile(workbook, `Ziad-ZAD_${activeTab}_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     const getTabLabel = () => {
@@ -85,6 +154,8 @@ export function ReportFilters({ totalCount }: ReportFiltersProps) {
                         variant="outline"
                         size="sm"
                         className="h-9 gap-2 border-emerald-500/50 text-emerald-500 hover:bg-emerald-500/10 font-black uppercase text-[10px]"
+                        onClick={handleExportExcel}
+                        disabled={!data || data.length === 0}
                     >
                         <FileSpreadsheet className="h-4 w-4" /> Export Excel
                     </Button>
@@ -109,8 +180,11 @@ export function ReportFilters({ totalCount }: ReportFiltersProps) {
                             <Input
                                 type="date"
                                 className="pl-9 h-10 text-xs font-medium bg-background border-border"
-                                defaultValue={searchParams.get("startDate") || ""}
-                                onChange={(e) => router.push(`${pathname}?${createQueryString({ startDate: e.target.value })}`)}
+                                value={startDate}
+                                onChange={(e) => {
+                                    setStartDate(e.target.value);
+                                    router.push(`${pathname}?${createQueryString({ startDate: e.target.value })}`);
+                                }}
                             />
                         </div>
                     </div>
@@ -122,8 +196,11 @@ export function ReportFilters({ totalCount }: ReportFiltersProps) {
                             <Input
                                 type="date"
                                 className="pl-9 h-10 text-xs font-medium bg-background border-border"
-                                defaultValue={searchParams.get("endDate") || ""}
-                                onChange={(e) => router.push(`${pathname}?${createQueryString({ endDate: e.target.value })}`)}
+                                value={endDate}
+                                onChange={(e) => {
+                                    setEndDate(e.target.value);
+                                    router.push(`${pathname}?${createQueryString({ endDate: e.target.value })}`);
+                                }}
                             />
                         </div>
                     </div>

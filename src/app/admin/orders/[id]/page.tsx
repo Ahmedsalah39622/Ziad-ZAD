@@ -1,4 +1,4 @@
-import { getOrderById, updateOrderStatus } from "@/lib/actions/order-actions";
+import { getOrderById } from "@/lib/actions/order-actions";
 import { notFound } from "next/navigation";
 import {
     ArrowLeft,
@@ -8,11 +8,9 @@ import {
     Mail,
     MapPin,
     Calendar,
-    CreditCard,
     CheckCircle2,
     Clock,
     Truck,
-    XCircle,
     MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -111,7 +109,6 @@ export default async function OrderDetailPage({
 
                             {statusSteps.map((step, index) => {
                                 const isCompleted = index <= currentStepIndex;
-                                const isCurrent = index === currentStepIndex;
                                 return (
                                     <div key={step.id} className="relative z-10 flex flex-col items-center">
                                         <div className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-500 ${isCompleted ? 'border-foreground bg-foreground text-background scale-110 shadow-3xl' : 'border-border bg-card text-muted-foreground/40'
@@ -148,7 +145,7 @@ export default async function OrderDetailPage({
                                     productImages = typeof item.product.images === 'string'
                                         ? JSON.parse(item.product.images)
                                         : (item.product.images || []);
-                                } catch (e) {
+                                } catch {
                                     productImages = [];
                                 }
                                 const productImage = productImages[0]?.url;

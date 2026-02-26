@@ -22,12 +22,11 @@ type Props = {
   className?: string;
 };
 
-export function DesktopNav({ items, className, variant = "default" }: Props & { variant?: "default" | "transparent" }) {
+export function DesktopNav({ items, className }: Props) {
   const { data: session } = useSession();
   const user = session?.user;
-  const isTransparent = variant === "transparent";
   const { totalItems } = useCart();
-  const isAdmin = (user as any)?.role === "ADMIN";
+  const isAdmin = (user as { role?: string })?.role === "ADMIN";
 
   return (
     <nav className={cn("mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-4", className)}>

@@ -49,7 +49,7 @@ export function Features() {
             </h2>
           </div>
           <p className="max-w-md text-lg text-muted-foreground font-medium leading-relaxed">
-            We don't just make clothes. We engineer experiences using proprietary nanobana technology.
+            We don&apos;t just make clothes. We engineer experiences using proprietary nanobana technology.
           </p>
         </div>
 

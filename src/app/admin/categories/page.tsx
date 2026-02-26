@@ -1,7 +1,6 @@
 import { getCategories } from "@/lib/actions/category-actions";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export default async function CategoriesPage() {
     const categories = await getCategories();
@@ -39,7 +38,7 @@ export default async function CategoriesPage() {
                                 <tr key={cat.id} className="hover:bg-foreground/5 transition-colors">
                                     <td className="px-6 py-4 font-medium text-foreground">{cat.name}</td>
                                     <td className="px-6 py-4 font-mono text-muted-foreground/40 text-xs">{cat.slug}</td>
-                                    <td className="px-6 py-4 text-muted-foreground">{(cat as any)._count?.products || 0}</td>
+                                    <td className="px-6 py-4 text-muted-foreground">{(cat as { _count?: { products: number } })._count?.products || 0}</td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">

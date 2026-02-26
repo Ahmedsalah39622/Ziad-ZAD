@@ -13,9 +13,7 @@ export function UserNav() {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    if (!session?.user) return null;
-
-    const { name, email, image, role } = session.user;
+    const { name, email, image, role } = session?.user || {};
     const initials = name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
     const isAdmin = (role as string) === "ADMIN";
 
@@ -28,6 +26,8 @@ export function UserNav() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    if (!session?.user) return null;
 
     return (
         <div className="relative" ref={containerRef}>

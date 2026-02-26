@@ -24,7 +24,7 @@ export default async function AdminLayout({
     const session = await auth();
 
     // Strict Role-Based Access Control
-    if (!session?.user || (session.user as any).role !== "ADMIN") {
+    if (!session?.user || (session.user as { role: string }).role !== "ADMIN") {
         redirect("/");
     }
 

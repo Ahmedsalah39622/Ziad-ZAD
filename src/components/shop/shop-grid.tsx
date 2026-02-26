@@ -3,6 +3,7 @@
 import { ProductCard } from "@/components/shop/product-card";
 
 interface ShopGridProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     initialProducts: any[];
 }
 
@@ -22,7 +23,7 @@ export function ShopGrid({ initialProducts }: ShopGridProps) {
                 <div className="flex-1 h-px bg-border" />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
                 {products.map((product) => (
                     <ProductCard key={product.id} product={product} />
                 ))}

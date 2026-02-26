@@ -14,15 +14,13 @@ type Props = {
     href: string;
   }[];
   className?: string;
-  variant?: "default" | "transparent";
 };
 
-export function MobileNav({ items, className, variant = "default" }: Props) {
+export function MobileNav({ items, className }: Props) {
   const { data: session } = useSession();
   const user = session?.user;
-  const isTransparent = variant === "transparent";
   const { totalItems } = useCart();
-  const isAdmin = (user as any)?.role === "ADMIN";
+  const isAdmin = (user as { role?: string })?.role === "ADMIN";
 
   const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
 

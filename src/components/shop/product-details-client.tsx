@@ -1,19 +1,21 @@
 "use client";
 
 import { useCart } from "@/lib/cart-context";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Minus, Plus, ShoppingBag, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Minus, Plus, ShoppingBag, Check } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProductDetailsClientProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     product: any;
 }
 
 export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     const router = useRouter();
-    const { addItem, totalItems } = useCart();
+    const { addItem } = useCart();
 
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -24,13 +26,14 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     const [mainImageIndex, setMainImageIndex] = useState(0);
 
     // Filter images by color or show all
-    const images = product.images || [];
-    const colors = product.colors || [];
+    const images = useMemo(() => product.images || [], [product.images]);
+    const colors = useMemo(() => product.colors || [], [product.colors]);
 
     // When color changes, try to find an associated image
     useEffect(() => {
         const selectedColor = colors[selectedColorIndex];
         if (selectedColor) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const associatedImageIndex = images.findIndex((img: any) => img.color === selectedColor.name);
             if (associatedImageIndex !== -1) {
                 setMainImageIndex(associatedImageIndex);
@@ -99,6 +102,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     {/* Thumbnails */}
                     {images.length > 1 && (
                         <div className="grid grid-cols-5 gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {images.map((img: any, i: number) => (
                                 <button
                                     key={i}
@@ -140,6 +144,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                                     Available Colors — <span className="text-foreground">{colors[selectedColorIndex]?.name}</span>
                                 </p>
                                 <div className="flex gap-4">
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                     {colors.map((color: any, i: number) => (
                                         <button
                                             key={color.name}

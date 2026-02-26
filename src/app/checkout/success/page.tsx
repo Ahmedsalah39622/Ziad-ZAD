@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Package, ArrowRight, Home } from "lucide-react";
+import { CheckCircle2, ArrowRight, Home } from "lucide-react";
 import Link from "next/link";
 import { getOrderById } from "@/lib/actions/order-actions";
 import { notFound } from "next/navigation";
 
-export default async function SuccessPage({ searchParams }: { searchParams: any }) {
-    const id = (await searchParams).id;
+export default async function SuccessPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+    const params = await searchParams;
+    const id = params.id;
     if (!id) notFound();
 
     const order = await getOrderById(id);

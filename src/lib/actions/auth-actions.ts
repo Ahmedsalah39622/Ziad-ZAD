@@ -4,13 +4,13 @@ import bcrypt from "bcryptjs";
 
 // Dynamic imports for server-only dependencies - prevents bundling them into client code
 async function getPrisma() {
-    const module = await import("@/lib/prisma");
-    return module.prisma;
+    const prismaModule = await import("@/lib/prisma");
+    return prismaModule.prisma;
 }
 
 async function getAuthHelpers() {
-    const module = await import("@/lib/auth");
-    return { signIn: module.signIn, signOut: module.signOut, auth: module.auth };
+    const authModule = await import("@/lib/auth");
+    return { signIn: authModule.signIn, signOut: authModule.signOut, auth: authModule.auth };
 }
 
 export async function adminLoginAction(email: string, password: string) {
@@ -42,15 +42,15 @@ export async function adminLoginAction(email: string, password: string) {
 export async function loginAction(email: string, password: string) {
     try {
         const { signIn } = await getAuthHelpers();
-        const result = await signIn("credentials", {
+        await signIn("credentials", {
             email,
             password,
             redirect: false,
         });
 
         return { success: true };
-    } catch (err: any) {
-        if (err.type === "CredentialsSignin") {
+    } catch (err) {
+        if (err && typeof err === 'object' && 'type' in err && err.type === "CredentialsSignin") {
             return { error: "Invalid credentials" };
         }
         return { error: "Something went wrong" };
@@ -84,9 +84,9 @@ export async function registerAction(data: {
         });
 
         return { success: true };
-    } catch (err: any) {
+    } catch (err) {
         console.error("Registration error:", err);
-        return { error: err?.message || "Registration failed. Please check your connection and try again." };
+        return { error: err instanceof Error ? err.message : "Registration failed. Please check your connection and try again." };
     }
 }
 

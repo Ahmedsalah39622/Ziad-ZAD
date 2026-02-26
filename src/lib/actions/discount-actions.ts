@@ -40,7 +40,7 @@ export async function generateDiscountCodes(options: {
 export async function getDiscountCodes() {
     try {
         return await prisma.discountCode.findMany({ orderBy: { createdAt: 'desc' } });
-    } catch (e: any) {
+    } catch (e) {
         console.error("prisma.getDiscountCodes error", e);
         throw e;
     }

@@ -1,21 +1,8 @@
-import { getDashboardStats, getOrders } from "@/lib/actions/order-actions";
+import { getDashboardStats } from "@/lib/actions/order-actions";
 import { formatCurrency } from "@/lib/format-currency";
-import {
-    Printer,
-    ArrowLeft,
-    TrendingUp,
-    Users,
-    ShoppingBag,
-    Activity,
-    Calendar,
-    FileText,
-    Star,
-    CreditCard,
-    Package
-} from "lucide-react";
+import { ArrowLeft, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ReportActions } from "@/components/admin/report-actions";
 import { ReportFilters } from "@/components/admin/report-filters";
 import { ReportTabs } from "@/components/admin/report-tabs";
 
@@ -37,9 +24,14 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     const startDate = params.startDate ? new Date(params.startDate) : undefined;
     const endDate = params.endDate ? new Date(params.endDate) : undefined;
 
-    let stats: any;
+    let stats: {
+        dailyStats: { date: string, orders: number, revenue: number }[];
+        clientStats: { name: string, email: string, phone: string, orderCount: number, totalSpent: number }[];
+        topProducts: { id: string, name: string, quantity: number, price: number }[];
+        allOrders: { id: string, customerName: string, customerEmail: string, createdAt: Date, total: number, status: string }[];
+    };
     try {
-        stats = await getDashboardStats({ startDate, endDate });
+        stats = await getDashboardStats({ startDate, endDate }) as typeof stats;
     } catch (error) {
         console.error("Reports Page Fetch Error:", error);
         return (
@@ -67,29 +59,29 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         : "All Time Performance";
 
     // Filtering logic for the active tab
-    let filteredData: any[] = [];
+    let filteredData: Array<Record<string, unknown>> = [];
     let tabTitle = "";
 
     if (activeTab === "revenue") {
         tabTitle = "Revenue Ledger";
-        filteredData = stats.dailyStats.filter((d: any) => d.date.includes(searchQuery));
+        filteredData = stats.dailyStats.filter((d: { date: string }) => d.date.includes(searchQuery));
     } else if (activeTab === "clients") {
         tabTitle = "Client Database";
-        filteredData = stats.clientStats.filter((c: any) =>
+        filteredData = stats.clientStats.filter((c: { name: string; email: string; phone: string }) =>
             c.name.toLowerCase().includes(searchQuery) ||
             c.email.toLowerCase().includes(searchQuery) ||
             c.phone.includes(searchQuery)
         );
     } else if (activeTab === "orders") {
         tabTitle = "Order Registry";
-        filteredData = orders.filter((o: any) =>
+        filteredData = orders.filter((o: { id: string; customerName: string; customerEmail: string }) =>
             o.id.toLowerCase().includes(searchQuery) ||
             o.customerName.toLowerCase().includes(searchQuery) ||
             o.customerEmail.toLowerCase().includes(searchQuery)
         );
     } else if (activeTab === "products") {
         tabTitle = "Product Performance";
-        filteredData = stats.topProducts.filter((p: any) =>
+        filteredData = stats.topProducts.filter((p: { name: string; id: string }) =>
             p.name.toLowerCase().includes(searchQuery) ||
             p.id.toLowerCase().includes(searchQuery)
         );
@@ -139,7 +131,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             </div>
 
             <ReportTabs />
-            <ReportFilters totalCount={filteredData.length} />
+            <ReportFilters totalCount={filteredData.length} data={filteredData} activeTab={activeTab} />
 
             {/* Print Only Header (WESCO Style) */}
             <div className="hidden blue-print-header items-center">
@@ -202,45 +194,45 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                         )}
                     </thead>
                     <tbody className="divide-y divide-border/5">
-                        {activeTab === "revenue" && filteredData.map((d: any, i: number) => (
+                        {activeTab === "revenue" && filteredData.map((d: { date?: string; orders?: number; revenue?: number; }, i: number) => (
                             <tr key={i} className="hover:bg-foreground/[0.01]">
-                                <td className="px-6 py-4 font-bold font-mono tracking-tighter">{d.date}</td>
-                                <td className="px-6 py-4 text-center font-black">{d.orders} Transactions</td>
-                                <td className="px-6 py-4 text-right font-black font-mono text-blue-600">{formatCurrency(d.revenue)}</td>
+                                <td className="px-6 py-4 font-bold font-mono tracking-tighter">{d.date as string}</td>
+                                <td className="px-6 py-4 text-center font-black">{d.orders as number} Transactions</td>
+                                <td className="px-6 py-4 text-right font-black font-mono text-blue-600">{formatCurrency(d.revenue as number)}</td>
                             </tr>
                         ))}
-                        {activeTab === "clients" && filteredData.map((c: any, i: number) => (
+                        {activeTab === "clients" && filteredData.map((c: { name?: string; phone?: string; email?: string; orderCount?: number; totalSpent?: number; }, i: number) => (
                             <tr key={i} className="hover:bg-foreground/[0.01]">
                                 <td className="px-6 py-4">
-                                    <div className="font-black uppercase text-[11px] underline decoration-blue-500/30">{c.name}</div>
-                                    <div className="text-[9px] text-muted-foreground font-mono">{c.phone} • {c.email}</div>
+                                    <div className="font-black uppercase text-[11px] underline decoration-blue-500/30">{c.name as string}</div>
+                                    <div className="text-[9px] text-muted-foreground font-mono">{c.phone as string} • {c.email as string}</div>
                                 </td>
-                                <td className="px-6 py-4 text-center font-black">{c.orderCount}</td>
-                                <td className="px-6 py-4 text-right font-black font-mono text-emerald-600">{formatCurrency(c.totalSpent)}</td>
-                                <td className="px-6 py-4 text-right text-muted-foreground font-medium italic">{(c.totalSpent / c.orderCount).toFixed(0)} avg. purchase</td>
+                                <td className="px-6 py-4 text-center font-black">{c.orderCount as number}</td>
+                                <td className="px-6 py-4 text-right font-black font-mono text-emerald-600">{formatCurrency(c.totalSpent as number)}</td>
+                                <td className="px-6 py-4 text-right text-muted-foreground font-medium italic">{((c.totalSpent as number) / (c.orderCount as number)).toFixed(0)} avg. purchase</td>
                             </tr>
                         ))}
-                        {activeTab === "orders" && filteredData.map((o: any) => (
-                            <tr key={o.id} className="hover:bg-foreground/[0.01]">
-                                <td className="px-6 py-4 font-mono text-[10px]">#{o.id.substring(0, 8).toUpperCase()}</td>
+                        {activeTab === "orders" && filteredData.map((o: { id?: string; customerName?: string; createdAt?: string; total?: number; status?: string; }) => (
+                            <tr key={o.id as string} className="hover:bg-foreground/[0.01]">
+                                <td className="px-6 py-4 font-mono text-[10px]">#{(o.id as string).substring(0, 8).toUpperCase()}</td>
                                 <td className="px-6 py-4">
-                                    <div className="font-bold uppercase">{o.customerName}</div>
-                                    <div className="text-[9px] text-muted-foreground">{new Date(o.createdAt).toLocaleDateString()}</div>
+                                    <div className="font-bold uppercase">{o.customerName as string}</div>
+                                    <div className="text-[9px] text-muted-foreground">{new Date(o.createdAt as string).toLocaleDateString()}</div>
                                 </td>
-                                <td className="px-6 py-4 text-right font-black font-mono text-blue-600">{formatCurrency(o.total)}</td>
+                                <td className="px-6 py-4 text-right font-black font-mono text-blue-600">{formatCurrency(o.total as number)}</td>
                                 <td className="px-6 py-4 text-right">
-                                    <span className="text-[9px] font-black uppercase tracking-tighter bg-foreground/5 px-2 py-0.5 rounded italic">{o.status}</span>
+                                    <span className="text-[9px] font-black uppercase tracking-tighter bg-foreground/5 px-2 py-0.5 rounded italic">{o.status as string}</span>
                                 </td>
                             </tr>
                         ))}
-                        {activeTab === "products" && filteredData.map((p: any, i: number) => (
+                        {activeTab === "products" && filteredData.map((p: { name?: string; id?: string; quantity?: number; price?: number; }, i: number) => (
                             <tr key={i} className="hover:bg-foreground/[0.01]">
                                 <td className="px-6 py-4">
-                                    <div className="font-black uppercase text-[11px]">{p.name}</div>
-                                    <div className="text-[9px] text-muted-foreground font-mono italic">Ref: {p.id.substring(0, 8)}</div>
+                                    <div className="font-black uppercase text-[11px]">{p.name as string}</div>
+                                    <div className="text-[9px] text-muted-foreground font-mono italic">Ref: {(p.id as string).substring(0, 8)}</div>
                                 </td>
-                                <td className="px-6 py-4 text-center font-black">{p.quantity} Units</td>
-                                <td className="px-6 py-4 text-right font-black font-mono text-emerald-600">{formatCurrency(p.quantity * p.price)}</td>
+                                <td className="px-6 py-4 text-center font-black">{p.quantity as number} Units</td>
+                                <td className="px-6 py-4 text-right font-black font-mono text-emerald-600">{formatCurrency((p.quantity as number) * (p.price as number))}</td>
                             </tr>
                         ))}
                     </tbody>

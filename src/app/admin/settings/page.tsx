@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { formatCurrency } from "@/lib/format-currency";
 import {
     User,
     ShieldCheck,
@@ -49,7 +48,7 @@ export default async function SettingsPage() {
                             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Access Level</p>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="inline-flex items-center rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-bold text-foreground uppercase">
-                                    {(user as any).role}
+                                    {(user as { role: string }).role}
                                 </span>
                                 <span className="text-[10px] text-muted-foreground italic">Full administrative privileges</span>
                             </div>

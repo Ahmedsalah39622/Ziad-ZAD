@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 // Removed explicit Product type to allow pre-parsed data through props without type mismatch during refactors
-// Using any temporarily for the product prop to ensure hydration stability while syncing types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ProductCard({ product }: { product: any }) {
     const isOutOfStock = product.stock <= 0;
 
@@ -59,14 +59,14 @@ export function ProductCard({ product }: { product: any }) {
             </div>
 
             {/* Product Info */}
-            <div className="flex justify-between items-start pt-4 pb-1">
+            <div className="flex justify-between items-start pt-6 pb-2">
                 <div>
-                    <h3 className="text-sm font-bold text-foreground tracking-wide uppercase">
+                    <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tight uppercase">
                         {product.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground font-medium mt-1 tracking-wider">{product.category}</p>
+                    <p className="text-sm text-muted-foreground font-medium mt-2 tracking-widest uppercase">{product.category}</p>
                 </div>
-                <p className="text-sm font-bold text-foreground tabular-nums">{product.priceDisplay}</p>
+                <p className="text-xl md:text-2xl font-black text-foreground tabular-nums">{product.priceDisplay}</p>
             </div>
 
             {/* Color Swatches */}
