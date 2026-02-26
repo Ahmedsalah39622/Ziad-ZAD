@@ -52,8 +52,7 @@ export function MobileHeader({ navItems }: MobileHeaderProps) {
                     <nav className="space-y-1 px-4 py-6">
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
-                            // @ts-ignore - Dynamic icon rendering
-                            const IconComponent = Icons[item.icon] as React.ElementType;
+                            const IconComponent = Icons[item.icon as keyof typeof Icons] as React.ElementType;
 
                             return (
                                 <Link

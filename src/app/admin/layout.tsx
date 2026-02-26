@@ -1,19 +1,13 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import * as Icons from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 import {
-    LayoutDashboard,
-    Package,
-    ListTree,
-    ShoppingCart,
-    Tag,
-    Settings,
     LogOut,
-    ChevronRight,
-    BarChart3
+    ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth-actions";
@@ -54,8 +48,9 @@ export default async function AdminLayout({
 
                 <nav className="space-y-1 px-4 py-6">
                     {navItems.map((item) => {
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore - Dynamic icon rendering
-                        const IconComponent = require("lucide-react")[item.icon];
+                        const IconComponent = Icons[item.icon] as React.ElementType;
                         return (
                             <Link
                                 key={item.href}
