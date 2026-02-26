@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,8 +56,8 @@ export function MobileHeader({ navItems }: MobileHeaderProps) {
                                     href={item.href}
                                     onClick={() => setOpen(false)}
                                     className={`group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                            ? "bg-secondary text-foreground"
-                                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                        ? "bg-secondary text-foreground"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
