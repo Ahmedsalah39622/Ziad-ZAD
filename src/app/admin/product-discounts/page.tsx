@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProductDiscountsPage() {
     const session = await auth();
-    if (!session?.user || (session.user as any).role !== "ADMIN") {
+    if (!session?.user || (session.user as { role?: string }).role !== "ADMIN") {
         redirect("/");
     }
 
@@ -36,7 +36,7 @@ export default async function ProductDiscountsPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tighter">Product Discounts & Sales</h1>
                 <p className="text-muted-foreground mt-2">
-                    Set a "Compare at Price" to put an item on sale. The item will show a discount badge, and the original price will be crossed out in the store.
+                    Set a &quot;Compare at Price&quot; to put an item on sale. The item will show a discount badge, and the original price will be crossed out in the store.
                 </p>
             </div>
 
@@ -57,7 +57,7 @@ export default async function ProductDiscountsPage() {
                             try {
                                 const parsed = JSON.parse(product.images || "[]");
                                 if (parsed.length > 0) imgUrl = parsed[0].url;
-                            } catch (e) { }
+                            } catch { }
 
                             const isOnSale = product.compareAtPrice && product.compareAtPrice > product.price;
 
