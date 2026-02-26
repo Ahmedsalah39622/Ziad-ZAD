@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     description: "Premium streetwear engineered with nanobana special effects.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage() {
     const rawProducts = await getProducts();
 
