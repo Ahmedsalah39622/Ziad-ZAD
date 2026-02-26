@@ -273,3 +273,71 @@ body {
     background: radial-gradient(var(--tw-gradient-stops));
   }
 }
+
+@media print {
+  @page {
+    margin: 20mm;
+  }
+
+  /* Hide UI elements */
+  nav,
+  aside,
+  header,
+  footer,
+  .no-print,
+  button,
+  .button,
+  [role="button"],
+  .sidebar-trigger,
+  .command-menu {
+    display: none !important;
+  }
+
+  /* Reset layout */
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 12pt;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Style order details */
+  .order-print-container {
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure text is readable */
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  td,
+  th {
+    color: black !important;
+  }
+
+  /* Hide decorative elements */
+  .blur-3xl,
+  .blur-2xl,
+  .bg-foreground\/5 {
+    display: none !important;
+  }
+
+  /* Show borders for structure */
+  .border,
+  .border-b,
+  .border-t,
+  .divide-y>* {
+    border-color: #eee !important;
+  }
+}

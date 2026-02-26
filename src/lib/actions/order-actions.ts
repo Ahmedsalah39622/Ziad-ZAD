@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 // Lazy imports to keep server logic out of client bundles
 async function getPrisma() {
     const m = await import("@/lib/prisma");
@@ -29,8 +31,21 @@ async function requireUser() {
     return session;
 }
 
-export async function getOrders(status?: string) {
-    const where = status && status !== "ALL" ? { status } : {};
+export async function getOrders(options?: { status?: string; startDate?: Date; endDate?: Date }) {
+    const { status, startDate, endDate } = options || {};
+    const where: any = {};
+    if (status && status !== "ALL") where.status = status;
+    if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) {
+            const d = new Date(startDate);
+            if (!isNaN(d.getTime())) where.createdAt.gte = d;
+        }
+        if (endDate) {
+            const d = new Date(endDate);
+            if (!isNaN(d.getTime())) where.createdAt.lte = d;
+        }
+    }
     const prisma = await getPrisma();
     return prisma.order.findMany({
         where,
@@ -58,10 +73,13 @@ export async function getOrderById(id: string) {
 export async function updateOrderStatus(id: string, status: string) {
     await requireAdmin();
     const prisma = await getPrisma();
-    return prisma.order.update({
+    const result = await prisma.order.update({
         where: { id },
         data: { status },
     });
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${id}`);
+    return result;
 }
 
 export async function deleteOrder(id: string) {
@@ -70,42 +88,126 @@ export async function deleteOrder(id: string) {
     return prisma.order.delete({ where: { id } });
 }
 
-export async function getDashboardStats() {
+export async function getDashboardStats(options?: { startDate?: Date; endDate?: Date }) {
+    const { startDate, endDate } = options || {};
     await requireAdmin();
 
+    const where: any = {};
+    if (startDate || endDate) {
+        where.createdAt = {};
+        if (startDate) {
+            const d = new Date(startDate);
+            if (!isNaN(d.getTime())) where.createdAt.gte = d;
+        }
+        if (endDate) {
+            const d = new Date(endDate);
+            if (!isNaN(d.getTime())) where.createdAt.lte = d;
+        }
+    }
+
     const prisma = await getPrisma();
-    const [totalProducts, totalOrders, totalRevenue, recentOrders, ordersByStatus] =
-        await Promise.all([
+
+    try {
+        // Fetch only the essentials: Product count and the main Order data
+        const [totalProducts, allOrders] = await Promise.all([
             prisma.product.count({ where: { active: true } }),
-            prisma.order.count(),
-            prisma.order.aggregate({ _sum: { total: true } }),
             prisma.order.findMany({
-                take: 5,
+                where,
                 orderBy: { createdAt: "desc" },
-                include: { items: { include: { product: true } } },
-            }),
-            prisma.order.groupBy({
-                by: ["status"],
-                _count: { id: true },
-            }),
+                include: { items: { include: { product: true } } }
+            })
         ]);
 
-    const totalCustomers = await prisma.order.findMany({
-        distinct: ["customerEmail"],
-        select: { customerEmail: true },
-    });
+        // Aggregate everything in a single JS pass
+        let totalRevenue = 0;
+        const statusMap = new Map<string, number>();
+        const productMap = new Map<string, { id: string; name: string; quantity: number; price: number }>();
+        const clientMap = new Map<string, { name: string; email: string; phone: string; totalSpent: number; orderCount: number; lastOrder: Date }>();
+        const dailyRevenueMap = new Map<string, { date: string; revenue: number; orders: number }>();
 
-    return {
-        totalProducts,
-        totalOrders,
-        totalRevenue: totalRevenue._sum.total || 0,
-        totalCustomers: totalCustomers.length,
-        recentOrders,
-        ordersByStatus: ordersByStatus.map((s) => ({
-            status: s.status,
-            count: s._count.id,
-        })),
-    };
+        allOrders.forEach(order => {
+            // Basic counters
+            totalRevenue += order.total;
+            statusMap.set(order.status, (statusMap.get(order.status) || 0) + 1);
+
+            // Client aggregation
+            const client = clientMap.get(order.customerEmail);
+            if (client) {
+                client.totalSpent += order.total;
+                client.orderCount += 1;
+                if (order.createdAt > client.lastOrder) client.lastOrder = order.createdAt;
+            } else {
+                clientMap.set(order.customerEmail, {
+                    name: order.customerName,
+                    email: order.customerEmail,
+                    phone: order.customerPhone,
+                    totalSpent: order.total,
+                    orderCount: 1,
+                    lastOrder: order.createdAt
+                });
+            }
+
+            // Daily aggregation
+            const dayKey = order.createdAt.toISOString().split('T')[0];
+            const daily = dailyRevenueMap.get(dayKey);
+            if (daily) {
+                daily.revenue += order.total;
+                daily.orders += 1;
+            } else {
+                dailyRevenueMap.set(dayKey, {
+                    date: dayKey,
+                    revenue: order.total,
+                    orders: 1
+                });
+            }
+
+            // Product aggregation
+            order.items.forEach(item => {
+                const existing = productMap.get(item.productId);
+                if (existing) {
+                    existing.quantity += item.quantity;
+                } else {
+                    productMap.set(item.productId, {
+                        id: item.productId,
+                        name: item.product.name,
+                        quantity: item.quantity,
+                        price: item.product.price
+                    });
+                }
+            });
+        });
+
+        const topProducts = Array.from(productMap.values())
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 50);
+
+        const clientStats = Array.from(clientMap.values())
+            .sort((a, b) => b.totalSpent - a.totalSpent);
+
+        const dailyStats = Array.from(dailyRevenueMap.values())
+            .sort((a, b) => b.date.localeCompare(a.date));
+
+        const ordersByStatus = Array.from(statusMap.entries()).map(([status, count]) => ({
+            status,
+            count
+        }));
+
+        return {
+            totalProducts,
+            totalOrders: allOrders.length,
+            totalRevenue,
+            totalCustomers: clientMap.size,
+            recentOrders: allOrders.slice(0, 5),
+            ordersByStatus,
+            topProducts,
+            clientStats,
+            dailyStats,
+            allOrders // Exposed to avoid redundant fetch on the page
+        };
+    } catch (error) {
+        console.error("Failed to fetch dashboard stats:", error);
+        throw new Error("Unable to generate report data. Please check your data or try again.");
+    }
 }
 
 export async function createOrder(data: {

@@ -3,6 +3,7 @@
 import { useCart } from "@/lib/cart-context";
 import { useState } from "react";
 import { createOrder } from "@/lib/actions/order-actions";
+import { validateDiscountCode } from "@/lib/actions/discount-actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,9 @@ export function CheckoutClient({ user }: { user: any }) {
         discountCode: "",
     });
 
+    const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; pct: number } | null>(null);
+    const [isValidating, setIsValidating] = useState(false);
+
     // show empty cart only if there really are no items and we're not currently submitting
     if (items.length === 0 && !isLoading) {
         return (
@@ -40,6 +44,28 @@ export function CheckoutClient({ user }: { user: any }) {
             </div>
         );
     }
+
+    const handleApplyDiscount = async () => {
+        if (!formData.discountCode) {
+            toast.error("Please enter a discount code");
+            return;
+        }
+
+        setIsValidating(true);
+        try {
+            const dc = await validateDiscountCode(formData.discountCode);
+            setAppliedDiscount({ code: dc.code, pct: dc.discountPct });
+            toast.success(`Discount code "${dc.code}" applied! (${dc.discountPct}% off)`);
+        } catch (err: any) {
+            setAppliedDiscount(null);
+            toast.error(err.message || "Failed to apply discount code");
+        } finally {
+            setIsValidating(false);
+        }
+    };
+
+    const discountAmount = appliedDiscount ? (totalPrice * appliedDiscount.pct) / 100 : 0;
+    const finalTotal = totalPrice - discountAmount;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,6 +82,7 @@ export function CheckoutClient({ user }: { user: any }) {
 
             const result = await createOrder({
                 ...formData,
+                discountCode: appliedDiscount?.code || undefined,
                 items: orderItems,
                 total: totalPrice,
             });
@@ -149,13 +176,28 @@ export function CheckoutClient({ user }: { user: any }) {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="discountCode" className="text-muted-foreground text-xs font-medium uppercase tracking-widest">Discount Code</Label>
-                            <Input
-                                id="discountCode"
-                                value={formData.discountCode}
-                                onChange={(e) => setFormData({ ...formData, discountCode: e.target.value.trim() })}
-                                placeholder="Enter code (optional)"
-                                className="border-border bg-secondary/50 text-foreground rounded-xl h-12"
-                            />
+                            <div className="flex gap-2">
+                                <Input
+                                    id="discountCode"
+                                    value={formData.discountCode}
+                                    onChange={(e) => setFormData({ ...formData, discountCode: e.target.value.trim().toUpperCase() })}
+                                    placeholder="Enter code (optional)"
+                                    className="border-border bg-secondary/50 text-foreground rounded-xl h-12"
+                                />
+                                <Button
+                                    type="button"
+                                    onClick={handleApplyDiscount}
+                                    disabled={isValidating || !formData.discountCode}
+                                    className="h-12 px-6 rounded-xl bg-foreground text-background hover:bg-foreground/90 font-bold uppercase text-xs tracking-widest"
+                                >
+                                    {isValidating ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                                </Button>
+                            </div>
+                            {appliedDiscount && (
+                                <p className="text-primary text-xs font-bold uppercase tracking-widest mt-2 px-1">
+                                    Code applied: {appliedDiscount.code} ({appliedDiscount.pct}% off)
+                                </p>
+                            )}
                         </div>
 
                         <div className="pt-6 border-t border-border">
@@ -213,13 +255,19 @@ export function CheckoutClient({ user }: { user: any }) {
                             <span>Subtotal ({totalItems} items)</span>
                             <span>L.E {totalPrice.toLocaleString()}</span>
                         </div>
+                        {appliedDiscount && (
+                            <div className="flex justify-between items-center text-primary font-bold">
+                                <span>Discount ({appliedDiscount.pct}%)</span>
+                                <span>- L.E {discountAmount.toLocaleString()}</span>
+                            </div>
+                        )}
                         <div className="flex justify-between items-center text-muted-foreground">
                             <span>Shipping</span>
                             <span className="text-foreground font-black">FREE</span>
                         </div>
                         <div className="flex justify-between items-center text-2xl font-bold text-foreground pt-2">
                             <span>Total</span>
-                            <span>L.E {totalPrice.toLocaleString()}</span>
+                            <span>L.E {finalTotal.toLocaleString()}</span>
                         </div>
 
                         <Button

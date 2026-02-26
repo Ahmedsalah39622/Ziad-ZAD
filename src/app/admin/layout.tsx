@@ -10,7 +10,8 @@ import {
     Settings,
     LogOut,
     ChevronRight,
-    Menu
+    Menu,
+    BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth-actions";
@@ -33,6 +34,7 @@ export default async function AdminLayout({
         { label: "Categories", href: "/admin/categories", icon: ListTree },
         { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
         { label: "Discounts", href: "/admin/discounts", icon: Tag },
+        { label: "Reports", href: "/admin/reports", icon: BarChart3 },
         { label: "Settings", href: "/admin/settings", icon: Settings },
     ];
 

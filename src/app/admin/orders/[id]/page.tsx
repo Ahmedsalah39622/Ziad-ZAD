@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { formatCurrency } from "@/lib/format-currency";
+import { OrderDetailActions } from "@/components/admin/order-detail-actions";
 
 export default async function OrderDetailPage({
     params,
@@ -35,11 +36,18 @@ export default async function OrderDetailPage({
     const statusSteps = [
         { id: 'PENDING', label: 'Pending', icon: Clock },
         { id: 'CONFIRMED', label: 'Confirmed', icon: CheckCircle2 },
+        { id: 'DONE', label: 'Done', icon: CheckCircle2 },
         { id: 'SHIPPED', label: 'Shipped', icon: Truck },
         { id: 'DELIVERED', label: 'Delivered', icon: Package },
     ];
 
     const currentStepIndex = statusSteps.findIndex(s => s.id === order.status);
+    const nextStep = statusSteps[currentStepIndex + 1];
+
+    // Calculate subtotal from items to ensure accuracy
+    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const discountAmount = order.discountPct > 0 ? (subtotal * order.discountPct) / 100 : 0;
+    const finalTotal = order.total; // The order.total already has the discount applied from the database
 
     // Format WhatsApp Link
     const whatsappNumber = order.customerPhone.replace(/\D/g, ""); // Remove non-numeric
@@ -58,7 +66,9 @@ export default async function OrderDetailPage({
                     <div>
                         <div className="flex items-center gap-3 mb-1">
                             <h1 className="text-3xl font-black uppercase tracking-tighter">Order <span className="text-foreground">#{id.substring(0, 8).toUpperCase()}</span></h1>
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-rose-500/20 text-rose-500' : 'bg-foreground text-background'
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${order.status === 'CANCELLED' ? 'bg-rose-500/20 text-rose-500' :
+                                order.status === 'DONE' ? 'bg-emerald-500/20 text-emerald-500' :
+                                    'bg-foreground text-background'
                                 }`}>
                                 {order.status}
                             </span>
@@ -96,7 +106,7 @@ export default async function OrderDetailPage({
                             <div className="absolute left-[5%] top-1/2 h-0.5 w-[90%] -translate-y-1/2 bg-secondary" />
                             <div
                                 className="absolute left-[5%] top-1/2 h-0.5 -translate-y-1/2 bg-foreground transition-all duration-700"
-                                style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 90}%` }}
+                                style={{ width: `${(Math.max(0, currentStepIndex) / (statusSteps.length - 1)) * 90}%` }}
                             />
 
                             {statusSteps.map((step, index) => {
@@ -115,29 +125,12 @@ export default async function OrderDetailPage({
                             })}
                         </div>
 
-                        <div className="flex flex-wrap gap-3">
-                            {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
-                                <form action={async () => {
-                                    "use server";
-                                    const nextStatus = statusSteps[currentStepIndex + 1]?.id;
-                                    if (nextStatus) await updateOrderStatus(order.id, nextStatus);
-                                }}>
-                                    <Button className="bg-primary text-primary-foreground hover:opacity-90 font-bold uppercase text-xs tracking-widest px-8">
-                                        Mark as {statusSteps[currentStepIndex + 1]?.label}
-                                    </Button>
-                                </form>
-                            )}
-                            {order.status !== 'CANCELLED' && (
-                                <form action={async () => {
-                                    "use server";
-                                    await updateOrderStatus(order.id, 'CANCELLED');
-                                }}>
-                                    <Button variant="ghost" className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 font-bold uppercase text-xs tracking-widest">
-                                        Cancel Order
-                                    </Button>
-                                </form>
-                            )}
-                        </div>
+                        <OrderDetailActions
+                            orderId={order.id}
+                            currentStatus={order.status}
+                            nextStatusId={nextStep?.id}
+                            nextStatusLabel={nextStep?.label}
+                        />
                     </div>
 
                     {/* Order Items Card */}
@@ -149,7 +142,15 @@ export default async function OrderDetailPage({
                         </div>
                         <div className="divide-y divide-border/5">
                             {order.items.map((item) => {
-                                const productImages = JSON.parse(item.product.images || "[]");
+                                // Safe JSON parsing
+                                let productImages = [];
+                                try {
+                                    productImages = typeof item.product.images === 'string'
+                                        ? JSON.parse(item.product.images)
+                                        : (item.product.images || []);
+                                } catch (e) {
+                                    productImages = [];
+                                }
                                 const productImage = productImages[0]?.url;
 
                                 return (
@@ -196,16 +197,22 @@ export default async function OrderDetailPage({
                             <div className="max-w-xs ml-auto space-y-3">
                                 <div className="flex justify-between text-muted-foreground text-xs font-medium">
                                     <span>Subtotal</span>
-                                    <span className="font-mono text-foreground">{formatCurrency(order.total)}</span>
+                                    <span className="font-mono text-foreground">{formatCurrency(subtotal)}</span>
                                 </div>
+                                {order.discountCode && (
+                                    <div className="flex justify-between text-primary text-xs font-black uppercase tracking-widest">
+                                        <span>Discount ({order.discountCode})</span>
+                                        <span className="font-mono">- {formatCurrency(discountAmount)}</span>
+                                    </div>
+                                )}
                                 <div className="flex justify-between text-muted-foreground text-xs font-medium">
                                     <span>Shipping</span>
-                                    <span className="text-foreground font-bold uppercase tracking-widest">Calculated at steps</span>
+                                    <span className="text-foreground font-bold uppercase tracking-widest">FREE</span>
                                 </div>
                                 <div className="h-px bg-border w-full my-2" />
                                 <div className="flex justify-between items-end">
                                     <span className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Total Amount</span>
-                                    <span className="text-3xl font-black text-foreground font-mono tracking-tighter leading-none">{formatCurrency(order.total)}</span>
+                                    <span className="text-3xl font-black text-foreground font-mono tracking-tighter leading-none">{formatCurrency(finalTotal)}</span>
                                 </div>
                             </div>
                         </div>
@@ -234,7 +241,7 @@ export default async function OrderDetailPage({
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-border/5">
-                                <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.open(whatsappLink, '_blank')}>
+                                <Link href={whatsappLink} target="_blank" className="flex items-center gap-3 group">
                                     <div className="p-2 rounded-lg bg-foreground/10 text-foreground group-hover:bg-foreground group-hover:text-background transition-colors">
                                         <Phone className="h-4 w-4" />
                                     </div>
@@ -242,7 +249,7 @@ export default async function OrderDetailPage({
                                         <p className="text-[10px] uppercase font-black text-muted-foreground">Phone & WhatsApp</p>
                                         <p className="text-sm font-bold text-foreground">{order.customerPhone}</p>
                                     </div>
-                                </div>
+                                </Link>
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-lg bg-secondary text-muted-foreground">
                                         <Mail className="h-4 w-4" />

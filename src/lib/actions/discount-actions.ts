@@ -64,3 +64,17 @@ export async function redeemDiscountCode(code: string) {
     });
     return dc;
 }
+// called when a customer attempts to apply a code to see if it's valid
+export async function validateDiscountCode(code: string) {
+    const dc = await prisma.discountCode.findUnique({ where: { code } });
+    if (!dc) {
+        throw new Error('Invalid discount code');
+    }
+    if (dc.expiresAt && dc.expiresAt < new Date()) {
+        throw new Error('Discount code has expired');
+    }
+    if (dc.usedCount >= dc.usesPerCode) {
+        throw new Error('Discount code has no uses remaining');
+    }
+    return dc;
+}
