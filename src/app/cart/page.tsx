@@ -14,7 +14,7 @@ export default function CartPage() {
         <div className="bg-background min-h-screen text-foreground">
             {/* Nav */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                <Nav variant="transparent" />
+                <Nav />
             </div>
 
             <div className="pt-20 px-6 md:px-12 max-w-5xl mx-auto min-h-[80vh]">

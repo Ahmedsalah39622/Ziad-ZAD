@@ -30,7 +30,7 @@ export default async function ShopPage() {
     return (
         <div className="bg-background min-h-screen w-full flex flex-col text-foreground">
             <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                <Nav variant="transparent" />
+                <Nav />
             </div>
 
             <div className="relative w-full pt-32 pb-10 px-6 md:px-12">

@@ -45,7 +45,7 @@ export default function CheckoutPaymentPage() {
         return (
             <div className="bg-background min-h-screen text-foreground flex flex-col">
                 <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                    <Nav variant="transparent" />
+                    <Nav />
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-6 pt-20">
                     <h1 className="text-3xl font-black uppercase tracking-tighter">Cart is Empty</h1>
@@ -61,7 +61,7 @@ export default function CheckoutPaymentPage() {
         return (
             <div className="bg-background min-h-screen text-foreground flex flex-col">
                 <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                    <Nav variant="transparent" />
+                    <Nav />
                 </div>
                 <div className="flex-1 flex flex-col items-center justify-center gap-6 pt-20 px-6">
                     <div className="w-20 h-20 rounded-full bg-foreground flex items-center justify-center mb-4">
@@ -86,7 +86,7 @@ export default function CheckoutPaymentPage() {
     return (
         <div className="bg-background min-h-screen text-foreground">
             <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                <Nav variant="transparent" />
+                <Nav />
             </div>
 
             <div className="pt-20 px-6 md:px-12 max-w-6xl mx-auto pb-20">

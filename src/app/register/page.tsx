@@ -11,7 +11,9 @@ import { Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function RegisterPage() {
+import { Suspense } from "react";
+
+function RegisterForm() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -183,5 +185,17 @@ export default function RegisterPage() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        }>
+            <RegisterForm />
+        </Suspense>
     );
 }

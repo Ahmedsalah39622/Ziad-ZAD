@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     return (
         <div className="bg-background min-h-screen text-foreground">
             <div className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl">
-                <Nav variant="transparent" />
+                <Nav />
             </div>
 
             <div className="pt-20">

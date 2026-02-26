@@ -13,7 +13,9 @@ import { Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-export default function LoginPage() {
+import { Suspense } from "react";
+
+function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -175,5 +177,17 @@ export default function LoginPage() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     );
 }

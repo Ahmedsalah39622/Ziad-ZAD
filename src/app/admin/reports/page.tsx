@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ReportFilters } from "@/components/admin/report-filters";
 import { ReportTabs } from "@/components/admin/report-tabs";
+import { Suspense } from "react";
 
 interface ReportsPageProps {
     searchParams: Promise<{
@@ -130,8 +131,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 </div>
             </div>
 
-            <ReportTabs />
-            <ReportFilters totalCount={filteredData.length} data={filteredData} activeTab={activeTab} />
+            <Suspense fallback={<div className="h-20 w-full animate-pulse bg-foreground/5 rounded-xl mb-8" />}>
+                <ReportTabs />
+            </Suspense>
+            <Suspense fallback={<div className="h-40 w-full animate-pulse bg-foreground/5 rounded-xl mb-8" />}>
+                <ReportFilters totalCount={filteredData.length} data={filteredData} activeTab={activeTab} />
+            </Suspense>
 
             {/* Print Only Header (WESCO Style) */}
             <div className="hidden blue-print-header items-center">

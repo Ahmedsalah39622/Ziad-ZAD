@@ -14,11 +14,11 @@ const navItems = [
   },
 ];
 
-export function Nav({ variant = "transparent" }: { variant?: "default" | "transparent" }) {
+export function Nav() {
   return (
     <>
-      <MobileNav className="flex md:hidden" items={navItems} variant={variant} />
-      <DesktopNav className="hidden md:flex" items={navItems} variant={variant} />
+      <MobileNav className="flex md:hidden" items={navItems} />
+      <DesktopNav className="hidden md:flex" items={navItems} />
     </>
   );
 }

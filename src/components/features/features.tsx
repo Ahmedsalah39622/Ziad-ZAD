@@ -1,5 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { ScanFaceIcon, SparklesIcon, ShieldCheckIcon, LeafIcon } from "lucide-react";
+import React from "react";
+
+export interface Feature {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  image: string;
+  gridArea?: string;
+  bgClass?: string;
+}
 
 export function Features() {
   const features = [
