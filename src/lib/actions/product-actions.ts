@@ -54,6 +54,7 @@ export async function createProduct({ payload }: { payload: string }) {
         stock: number;
         tag?: string;
         active?: boolean;
+        compareAtPrice?: number | null;
     };
 
     const prisma = await getPrisma();
@@ -61,6 +62,7 @@ export async function createProduct({ payload }: { payload: string }) {
         data: {
             name: data.name,
             price: data.price,
+            compareAtPrice: data.compareAtPrice || null,
             description: data.description,
             details: JSON.stringify(data.details),
             // The images are now objects directly
@@ -89,6 +91,7 @@ export async function updateProduct(
         stock?: number;
         tag?: string;
         active?: boolean;
+        compareAtPrice?: number | null;
     }
 ) {
     await requireAdmin();
@@ -97,6 +100,7 @@ export async function updateProduct(
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.price !== undefined) updateData.price = data.price;
+    if (data.compareAtPrice !== undefined) updateData.compareAtPrice = data.compareAtPrice;
     if (data.description !== undefined) updateData.description = data.description;
     if (data.details !== undefined) updateData.details = JSON.stringify(data.details);
     if (data.images !== undefined) {
@@ -116,4 +120,13 @@ export async function deleteProduct(id: string) {
     await requireAdmin();
     const prisma = await getPrisma();
     return prisma.product.delete({ where: { id } });
+}
+
+export async function updateProductPrices(id: string, price: number, compareAtPrice: number | null) {
+    await requireAdmin();
+    const prisma = await getPrisma();
+    return prisma.product.update({
+        where: { id },
+        data: { price, compareAtPrice },
+    });
 }

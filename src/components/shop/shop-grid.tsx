@@ -8,11 +8,11 @@ interface ShopGridProps {
 }
 
 export function ShopGrid({ initialProducts }: ShopGridProps) {
-    // Data is already parsed on the server
     const products = initialProducts.map(p => ({
         ...p,
         image: p.images?.[0]?.url || "",
         priceDisplay: `L.E ${p.price}`,
+        compareAtPrice: p.compareAtPrice,
         category: p.categoryName || "Streetwear"
     }));
 
