@@ -16,12 +16,14 @@ import {
 interface NavItem {
     label: string;
     href: string;
-    icon: React.ElementType;
+    icon: string;
 }
 
 interface MobileHeaderProps {
     navItems: NavItem[];
 }
+
+import * as Icons from "lucide-react";
 
 export function MobileHeader({ navItems }: MobileHeaderProps) {
     const [open, setOpen] = useState(false);
@@ -50,6 +52,9 @@ export function MobileHeader({ navItems }: MobileHeaderProps) {
                     <nav className="space-y-1 px-4 py-6">
                         {navItems.map((item) => {
                             const isActive = pathname === item.href;
+                            // @ts-ignore - Dynamic icon rendering
+                            const IconComponent = Icons[item.icon] as React.ElementType;
+
                             return (
                                 <Link
                                     key={item.href}
@@ -61,7 +66,7 @@ export function MobileHeader({ navItems }: MobileHeaderProps) {
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <item.icon className="h-4 w-4" />
+                                        {IconComponent && <IconComponent className="h-4 w-4" />}
                                         {item.label}
                                     </div>
                                     <ChevronRight

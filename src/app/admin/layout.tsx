@@ -33,13 +33,13 @@ export default async function AdminLayout({
     }
 
     const navItems = [
-        { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-        { label: "Products", href: "/admin/products", icon: Package },
-        { label: "Categories", href: "/admin/categories", icon: ListTree },
-        { label: "Orders", href: "/admin/orders", icon: ShoppingCart },
-        { label: "Discounts", href: "/admin/discounts", icon: Tag },
-        { label: "Reports", href: "/admin/reports", icon: BarChart3 },
-        { label: "Settings", href: "/admin/settings", icon: Settings },
+        { label: "Dashboard", href: "/admin", icon: "LayoutDashboard" },
+        { label: "Products", href: "/admin/products", icon: "Package" },
+        { label: "Categories", href: "/admin/categories", icon: "ListTree" },
+        { label: "Orders", href: "/admin/orders", icon: "ShoppingCart" },
+        { label: "Discounts", href: "/admin/discounts", icon: "Tag" },
+        { label: "Reports", href: "/admin/reports", icon: "BarChart3" },
+        { label: "Settings", href: "/admin/settings", icon: "Settings" },
     ];
 
     return (
@@ -53,19 +53,23 @@ export default async function AdminLayout({
                 </div>
 
                 <nav className="space-y-1 px-4 py-6">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                        >
-                            <div className="flex items-center gap-3">
-                                <item.icon className="h-4 w-4" />
-                                {item.label}
-                            </div>
-                            <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                    ))}
+                    {navItems.map((item) => {
+                        // @ts-ignore - Dynamic icon rendering
+                        const IconComponent = require("lucide-react")[item.icon];
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className="group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    {IconComponent && <IconComponent className="h-4 w-4" />}
+                                    {item.label}
+                                </div>
+                                <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </Link>
+                        );
+                    })}
                 </nav>
 
                 <div className="absolute bottom-4 w-full px-4">
