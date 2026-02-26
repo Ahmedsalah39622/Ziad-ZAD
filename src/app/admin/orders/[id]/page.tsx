@@ -44,8 +44,9 @@ export default async function OrderDetailPage({
 
     // Calculate subtotal from items to ensure accuracy
     const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingFee = (order as any).shippingFee || 0;
     const discountAmount = order.discountPct > 0 ? (subtotal * order.discountPct) / 100 : 0;
-    const finalTotal = order.total; // The order.total already has the discount applied from the database
+    const finalTotal = order.total; // The order.total already has the discount AND shipping applied from the database
 
     // Format WhatsApp Link
     const whatsappNumber = order.customerPhone.replace(/\D/g, ""); // Remove non-numeric
@@ -204,7 +205,9 @@ export default async function OrderDetailPage({
                                 )}
                                 <div className="flex justify-between text-muted-foreground text-xs font-medium">
                                     <span>Shipping</span>
-                                    <span className="text-foreground font-bold uppercase tracking-widest">FREE</span>
+                                    <span className="text-foreground font-bold uppercase tracking-widest">
+                                        {shippingFee === 0 ? "FREE" : formatCurrency(shippingFee)}
+                                    </span>
                                 </div>
                                 <div className="h-px bg-border w-full my-2" />
                                 <div className="flex justify-between items-end">

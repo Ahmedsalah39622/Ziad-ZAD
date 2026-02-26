@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CreditCard, Truck, Package } from "lucide-react";
 import Image from "next/image";
 
-export function CheckoutClient({ user }: { user: { name?: string | null; email?: string | null } | null }) {
+export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: string | null; email?: string | null } | null, shippingFee?: number }) {
     const { items, totalItems, totalPrice, clearCart } = useCart();
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
@@ -65,7 +65,7 @@ export function CheckoutClient({ user }: { user: { name?: string | null; email?:
     };
 
     const discountAmount = appliedDiscount ? (totalPrice * appliedDiscount.pct) / 100 : 0;
-    const finalTotal = totalPrice - discountAmount;
+    const finalTotal = totalPrice - discountAmount + shippingFee;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,6 +85,7 @@ export function CheckoutClient({ user }: { user: { name?: string | null; email?:
                 discountCode: appliedDiscount?.code || undefined,
                 items: orderItems,
                 total: totalPrice,
+                shippingFee: shippingFee
             });
 
             toast.success("Order placed successfully!");
@@ -263,7 +264,9 @@ export function CheckoutClient({ user }: { user: { name?: string | null; email?:
                         )}
                         <div className="flex justify-between items-center text-muted-foreground">
                             <span>Shipping</span>
-                            <span className="text-foreground font-black">FREE</span>
+                            <span className="text-foreground font-medium">
+                                {shippingFee === 0 ? "FREE" : `L.E ${shippingFee.toLocaleString()}`}
+                            </span>
                         </div>
                         <div className="flex justify-between items-center text-2xl font-bold text-foreground pt-2">
                             <span>Total</span>

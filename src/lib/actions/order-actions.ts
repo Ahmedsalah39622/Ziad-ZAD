@@ -255,6 +255,7 @@ export async function createOrder(data: {
     }[];
     total: number;
     discountCode?: string;
+    shippingFee?: number;
 }) {
     const session = await requireUser();
     const prisma = await getPrisma();
@@ -273,11 +274,11 @@ export async function createOrder(data: {
             });
         }
 
-        const finalTotal = data.total * (1 - discountPct / 100);
+        const finalTotal = (data.total * (1 - discountPct / 100)) + (data.shippingFee || 0);
 
         const order = await tx.order.create({
             data: {
-                userId: session.user?.id,
+                user: session.user?.id ? { connect: { id: session.user.id } } : undefined,
                 customerName: data.customerName,
                 customerEmail: data.customerEmail,
                 customerPhone: data.customerPhone,
@@ -287,6 +288,7 @@ export async function createOrder(data: {
                 total: finalTotal,
                 discountCode: data.discountCode,
                 discountPct,
+                shippingFee: data.shippingFee || 0,
                 status: "PENDING",
                 items: {
                     create: data.items.map((item) => ({
@@ -297,7 +299,7 @@ export async function createOrder(data: {
                         color: item.color,
                     })),
                 },
-            },
+            } as any,
         });
 
         // Optional: Update stock
