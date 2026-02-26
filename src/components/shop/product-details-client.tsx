@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
+import { DiagonalRibbon } from "@/components/ui/diagonal-ribbon";
 
 interface ProductDetailsClientProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,12 +81,10 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                 <div className="space-y-4">
                     <div className="aspect-[4/5] bg-secondary/50 relative overflow-hidden rounded-2xl border border-border">
                         {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
-                            <span
-                                className="absolute top-6 left-6 z-10 font-bold uppercase text-[10px] tracking-widest px-3 py-1.5 rounded-full shadow-lg"
-                                style={{ backgroundColor: product.discountRibbon.color, color: "#ffffff" }}
-                            >
-                                {product.discountRibbon.text}
-                            </span>
+                            <DiagonalRibbon
+                                text={product.discountRibbon.text}
+                                color={product.discountRibbon.color}
+                            />
                         ) : product.tag ? (
                             <span className="absolute top-6 left-6 z-10 bg-foreground text-background text-[10px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full shadow-lg">
                                 {product.tag}

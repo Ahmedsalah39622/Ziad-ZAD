@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       // increase to 10mb to avoid repeated 3mb/5mb errors
-      bodySizeLimit: "1mb",
+      bodySizeLimit: "10mb",
     },
   },
 };

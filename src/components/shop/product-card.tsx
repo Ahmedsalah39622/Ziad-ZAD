@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight } from "lucide-react";
+import { DiagonalRibbon } from "@/components/ui/diagonal-ribbon";
 import Image from "next/image";
 import Link from "next/link";
 // Removed explicit Product type to allow pre-parsed data through props without type mismatch during refactors
@@ -16,12 +17,10 @@ export function ProductCard({ product }: { product: any }) {
             <div className="aspect-[3/4] w-full overflow-hidden bg-secondary relative">
 
                 {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
-                    <Badge
-                        className="absolute top-4 left-4 z-20 font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1 shadow-md shadow-black/20"
-                        style={{ backgroundColor: product.discountRibbon.color, color: "#ffffff" }}
-                    >
-                        {product.discountRibbon.text}
-                    </Badge>
+                    <DiagonalRibbon
+                        text={product.discountRibbon.text}
+                        color={product.discountRibbon.color}
+                    />
                 ) : product.tag && !isOutOfStock ? (
                     <Badge className="absolute top-4 left-4 z-20 bg-primary text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-none px-3 py-1">
                         {product.tag}

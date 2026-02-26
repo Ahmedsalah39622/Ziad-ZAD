@@ -11,6 +11,10 @@ const navItems = [
     href: "/shop",
   },
   {
+    label: "About",
+    href: "/about",
+  },
+  {
     label: "Features",
     href: "/#features",
   },

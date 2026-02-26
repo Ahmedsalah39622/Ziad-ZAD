@@ -6,13 +6,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { getSetting } from "@/lib/actions/settings-actions";
+import { Hero3DShirt } from "./hero-3d-shirt";
 
 export function Hero() {
   const [mounted, setMounted] = useState(false);
+  const [settings, setSettings] = useState<{
+    heroImage?: string;
+    heroGlowHex?: string;
+    heroAccentHex?: string;
+    active?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
+
+    async function fetchSettings() {
+      const raw = await getSetting("new_releases_settings", JSON.stringify({
+        heroImage: "/zad_green_shirt_studio.png",
+        heroGlowHex: "#065f46",
+        heroAccentHex: "#10b981",
+        active: false,
+      }));
+      setSettings(JSON.parse(raw));
+    }
+    fetchSettings();
   }, []);
+
+  const heroImage = settings?.heroImage || "/zad_green_shirt_studio.png";
+  const glowColor = settings?.heroGlowHex || "#065f46"; // emerald-800 hex approx
+  const accentColor = settings?.heroAccentHex || "#10b981"; // emerald-500 hex approx
 
   return (
     <div className="relative min-h-[100dvh] w-full flex flex-col overflow-hidden bg-background text-foreground">
@@ -20,15 +43,30 @@ export function Hero() {
       {/* === Animated Background === */}
       {/* Main radial glow */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] rounded-full bg-gradient-radial from-emerald-800/40 via-emerald-950/15 to-transparent blur-3xl animate-hero-pulse" />
+        <div
+          className="absolute top-[30%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[1000px] md:h-[1000px] rounded-full blur-3xl animate-hero-pulse"
+          style={{
+            background: `radial-gradient(circle, ${glowColor}66 0%, ${glowColor}26 50%, transparent 100%)`
+          }}
+        />
       </div>
       {/* Grain overlay */}
       <div className="absolute inset-0 z-[1] opacity-[0.03] pointer-events-none"
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }}
       />
       {/* Accent orbs */}
-      <div className="absolute -top-20 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-gradient-radial from-emerald-500/8 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 -left-20 w-[250px] h-[250px] md:w-[400px] md:h-[400px] bg-gradient-radial from-cyan-500/6 to-transparent rounded-full blur-3xl" />
+      <div
+        className="absolute -top-20 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full blur-3xl"
+        style={{
+          background: `radial-gradient(circle, ${accentColor}14 0%, transparent 100%)`
+        }}
+      />
+      <div
+        className="absolute bottom-0 -left-20 w-[250px] h-[250px] md:w-[400px] md:h-[400px] rounded-full blur-3xl"
+        style={{
+          background: `radial-gradient(circle, ${accentColor}0F 0%, transparent 100%)`
+        }}
+      />
 
       {/* === Navbar === */}
       <div className="relative w-full z-50 px-2 md:px-8 py-3 md:py-4">
@@ -45,22 +83,30 @@ export function Hero() {
           {/* Badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/[0.06] backdrop-blur-sm border border-foreground/[0.08] rounded-full">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: accentColor }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: accentColor }} />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300">New Drop</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: accentColor }}>New Drop</span>
           </div>
 
           {/* Product image - centered, with glow */}
           <div className="relative w-[240px] h-[240px] my-2">
             {/* Glow behind */}
-            <div className="absolute inset-[-20%] bg-gradient-radial from-emerald-500/20 via-transparent to-transparent rounded-full blur-2xl" />
+            <div
+              className="absolute inset-[-20%] rounded-full blur-2xl"
+              style={{
+                background: `radial-gradient(circle, ${accentColor}33 0%, transparent 70%)`
+              }}
+            />
             <div className="relative w-full h-full animate-hero-float">
               <Image
-                src="/zad_green_shirt_studio.png"
+                src={heroImage}
                 alt="ZAD Genesis Collection"
                 fill
-                className="object-contain drop-shadow-[0_15px_50px_rgba(16,185,129,0.35)]"
+                className="object-contain"
+                style={{
+                  filter: `drop-shadow(0 15px 50px ${accentColor}59)`
+                }}
                 priority
               />
             </div>
@@ -90,13 +136,16 @@ export function Hero() {
           {/* CTA */}
           <div className="flex flex-col gap-3 w-full max-w-[320px]">
             <Button
-              className="w-full rounded-none py-7 text-xs font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-emerald-400 transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] border-none"
+              className="w-full rounded-none py-7 text-xs font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:opacity-90 transition-all duration-500 shadow-[0_0_20px_rgba(255,255,255,0.1)] border-none"
               asChild
             >
               <Link href="/shop">Shop Collection</Link>
             </Button>
             <Button
-              className="w-full rounded-none py-7 text-xs font-bold uppercase tracking-[0.15em] bg-transparent text-foreground border border-foreground/10 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all duration-300"
+              className="w-full rounded-none py-7 text-xs font-bold uppercase tracking-[0.15em] bg-transparent text-foreground border border-foreground/10 hover:bg-foreground/5 transition-all duration-300"
+              style={{
+                border: `1px solid ${accentColor}33`,
+              }}
               asChild
             >
               <Link href="/#features">Explore Tech</Link>
@@ -113,7 +162,7 @@ export function Hero() {
             <div className="flex flex-col items-center">
               <div className="flex gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <svg key={i} className="w-3 h-3 text-emerald-400 fill-current" viewBox="0 0 20 20">
+                  <svg key={i} className="w-3 h-3 fill-current" style={{ color: accentColor }} viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
@@ -161,10 +210,10 @@ export function Hero() {
             {/* Badge */}
             <div className="flex items-center gap-2.5 px-4 py-2 bg-foreground/[0.06] backdrop-blur-sm border border-foreground/[0.08] rounded-full">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: accentColor }} />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: accentColor }} />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">New Release</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: accentColor }}>New Release</span>
             </div>
 
             {/* Heading */}
@@ -191,17 +240,20 @@ export function Hero() {
             {/* CTA */}
             <div className="flex gap-6">
               <Button
-                className="group relative overflow-hidden rounded-none px-12 py-8 text-sm font-black uppercase tracking-[0.25em] bg-primary text-primary-foreground hover:text-foreground transition-all duration-500 hover:shadow-[0_0_50px_rgba(52,211,153,0.3)]"
+                className="group relative overflow-hidden rounded-none px-12 py-8 text-sm font-black uppercase tracking-[0.25em] bg-primary text-primary-foreground transition-all duration-500 hover:shadow-[0_0_50px_rgba(52,211,153,0.3)]"
                 asChild
               >
                 <Link href="/shop">
                   <span className="relative z-10 transition-colors duration-500 group-hover:text-foreground">Shop Collection</span>
                   <span className="absolute inset-0 bg-background translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                  <span className="absolute bottom-0 left-0 w-full h-1 bg-emerald-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" />
+                  <span className="absolute bottom-0 left-0 w-full h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-100" style={{ backgroundColor: accentColor }} />
                 </Link>
               </Button>
               <Button
-                className="group rounded-none px-12 py-8 text-sm font-bold uppercase tracking-[0.2em] bg-transparent text-foreground border border-foreground/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all duration-500"
+                className="group rounded-none px-12 py-8 text-sm font-bold uppercase tracking-[0.2em] bg-transparent text-foreground border border-foreground/10 hover:bg-foreground/5 transition-all duration-500"
+                style={{
+                  borderColor: `${accentColor}4D` // ~30% opacity
+                }}
                 asChild
               >
                 <Link href="/#features">
@@ -225,7 +277,7 @@ export function Hero() {
               <div className="flex flex-col">
                 <div className="flex gap-0.5">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <svg key={i} className="w-3.5 h-3.5 text-emerald-400 fill-current" viewBox="0 0 20 20">
+                    <svg key={i} className="w-3.5 h-3.5 fill-current" style={{ color: accentColor }} viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
@@ -242,29 +294,21 @@ export function Hero() {
           >
             {/* Glow rings */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[80%] h-[80%] rounded-full border border-emerald-500/10 animate-hero-ring" />
+              <div className="w-[80%] h-[80%] rounded-full border animate-hero-ring" style={{ borderColor: `${accentColor}1A` }} />
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-[60%] h-[60%] rounded-full border border-cyan-500/5 animate-hero-ring-reverse" />
+              <div className="w-[60%] h-[60%] rounded-full border animate-hero-ring-reverse" style={{ borderColor: `${accentColor}0D` }} />
             </div>
 
-            {/* Product Image */}
-            <div className="relative w-[110%] h-[110%] flex items-center justify-center z-10 animate-hero-float">
-              <Image
-                src="/zad_green_shirt_studio.png"
-                alt="ZAD Genesis Collection"
-                fill
-                className="object-contain object-center drop-shadow-[0_20px_80px_rgba(16,185,129,0.25)] hover:drop-shadow-[0_20px_100px_rgba(16,185,129,0.4)] transition-all duration-700 ease-out hover:scale-105"
-                priority
-              />
-            </div>
+            {/* Product Image Component */}
+            <Hero3DShirt image={heroImage} glowColor={accentColor} />
 
             {/* Price sticker */}
             <div className={`absolute bottom-12 right-0 z-20 transition-all duration-700 delay-700 ${mounted ? "opacity-100 translate-x-0 rotate-[-3deg]" : "opacity-0 translate-x-4 rotate-0"
               }`}>
               <div className="relative bg-primary px-5 py-3 shadow-xl">
                 {/* Emerald accent bar */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400" />
+                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: accentColor }} />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/60 block">Starting at</span>
                 <span className="text-2xl font-black text-primary-foreground">L.E 599</span>
                 {/* Folded corner */}
@@ -274,6 +318,7 @@ export function Hero() {
           </div>
         </div>
       </div>
+
 
       {/* === Bottom Ticker === */}
       <div className="relative w-full z-10 py-3 md:py-4 border-t border-foreground/[0.06] bg-foreground/[0.02] backdrop-blur-sm overflow-hidden shrink-0">

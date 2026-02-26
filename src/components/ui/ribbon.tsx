@@ -5,25 +5,42 @@ import { cn } from "@/lib/utils";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function Ribbon() {
-    const [settings, setSettings] = useState<{ text: string, bgHex: string, textHex: string, active: boolean, timerActive?: boolean, timerEndDate?: string } | null>(null);
+    const pathname = usePathname();
+    const [settings, setSettings] = useState<{
+        text: string,
+        bgHex: string,
+        textHex: string,
+        shimmerHex?: string,
+        active: boolean,
+        timerActive?: boolean,
+        timerEndDate?: string
+    } | null>(null);
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
         async function fetchRibbon() {
-            const ribbonSettingsRaw = await getSetting("ribbon_settings", JSON.stringify({
+            // Determine which setting to use based on the path
+            const isAboutOrShop = pathname === "/about" || pathname === "/shop";
+            const settingKey = isAboutOrShop ? "new_releases_settings" : "ribbon_settings";
+
+            const defaultValue = JSON.stringify({
                 text: "",
-                bgHex: "#ef4444",
+                bgHex: isAboutOrShop ? "#000000" : "#ef4444",
                 textHex: "#ffffff",
+                shimmerHex: "#ffffff",
                 active: false,
                 timerActive: false,
                 timerEndDate: "",
-            }));
+            });
+
+            const ribbonSettingsRaw = await getSetting(settingKey, defaultValue);
             setSettings(JSON.parse(ribbonSettingsRaw));
         }
         fetchRibbon();
-    }, []);
+    }, [pathname]);
 
     if (!settings || !settings.active || !settings.text || !isVisible) {
         return null;
@@ -48,8 +65,11 @@ export function Ribbon() {
                         color: settings.textHex
                     }}
                 >
-                    {/* Glass glare effect for premium feel */}
-                    <div className="absolute inset-0 bg-white/10 blur-[2px] opacity-30 mix-blend-overlay pointer-events-none" />
+                    {/* Glass glare effect for premium feel (Shaded Color) */}
+                    <div
+                        className="absolute inset-0 blur-[2px] opacity-30 mix-blend-overlay pointer-events-none"
+                        style={{ backgroundColor: settings.shimmerHex || "rgba(255,255,255,0.1)" }}
+                    />
 
                     {/* Marquee Wrapper */}
                     <div className="relative flex w-full overflow-hidden py-2 md:py-2.5">
@@ -98,7 +118,7 @@ export function Ribbon() {
     );
 }
 
-function CountdownTimer({ endDate }: { endDate: string, textHex: string }) {
+function CountdownTimer({ endDate, textHex }: { endDate: string, textHex: string }) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [isMounted, setIsMounted] = useState(false);
 
