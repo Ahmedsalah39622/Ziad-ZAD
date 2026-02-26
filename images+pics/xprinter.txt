@@ -1,0 +1,53 @@
+I have an e-commerce website built with Next.js (App Router) and deployed on Vercel.
+
+I want to implement an automatic receipt printing system for new paid orders using a Local Print Server inside my physical store.
+
+IMPORTANT ARCHITECTURE REQUIREMENTS:
+
+- My website backend is hosted on Vercel (cloud).
+- I do NOT want to use port forwarding.
+- I do NOT want direct inbound connections to the local machine.
+- The solution must use reverse polling (the local machine checks the cloud server periodically).
+
+SYSTEM DESIGN:
+
+1) When a new order is paid:
+   - Save it in the database with status = "pending_print"
+
+2) Create a Next.js API route:
+   - GET /api/orders-to-print
+   - Returns one order with status "pending_print"
+
+3) Create another API route:
+   - POST /api/mark-printed
+   - Updates order status to "printed"
+
+4) Create a Local Print Server using Node.js that:
+   - Runs on a Windows machine inside the store
+   - Uses escpos and escpos-usb
+   - Polls https://mydomain.vercel.app/api/orders-to-print every 3 seconds
+   - If an order exists:
+        - Prints a properly formatted 80mm receipt
+        - Cuts the paper
+        - Calls /api/mark-printed
+
+TECH REQUIREMENTS:
+
+- Use Node.js
+- Use escpos
+- Use escpos-usb
+- Show full working code
+- Show folder structure
+- Show how to run with PM2
+- Show how to auto-start on Windows
+- Format receipt professionally (store name centered, bold title, items list, total, thank you message)
+- Make sure printing is stable and does not duplicate orders
+
+Also include:
+- Error handling
+- Logging
+- Retry logic
+- Environment variables usage
+- Production best practices
+
+The solution must be production-ready.

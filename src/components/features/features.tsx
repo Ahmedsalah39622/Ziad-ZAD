@@ -12,6 +12,7 @@ export interface Feature {
   icon: React.ReactNode;
   title: string;
   description: string;
+  image?: string;
   gridArea?: string;
   bgClass?: string;
   background?: string;
