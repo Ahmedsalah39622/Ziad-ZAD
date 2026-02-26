@@ -44,6 +44,7 @@ export default async function OrderDetailPage({
 
     // Calculate subtotal from items to ensure accuracy
     const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const shippingFee = (order as any).shippingFee || 0;
     const discountAmount = order.discountPct > 0 ? (subtotal * order.discountPct) / 100 : 0;
     const finalTotal = order.total; // The order.total already has the discount AND shipping applied from the database

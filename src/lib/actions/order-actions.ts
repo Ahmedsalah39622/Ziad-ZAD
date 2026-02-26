@@ -275,8 +275,8 @@ export async function createOrder(data: {
         }
 
         const finalTotal = (data.total * (1 - discountPct / 100)) + (data.shippingFee || 0);
-
         const order = await tx.order.create({
+            /* eslint-disable @typescript-eslint/no-explicit-any */
             data: {
                 user: session.user?.id ? { connect: { id: session.user.id } } : undefined,
                 customerName: data.customerName,
@@ -300,6 +300,7 @@ export async function createOrder(data: {
                     })),
                 },
             } as any,
+            /* eslint-enable @typescript-eslint/no-explicit-any */
         });
 
         // Optional: Update stock

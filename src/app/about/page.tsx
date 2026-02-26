@@ -25,8 +25,8 @@ export default function AboutPage() {
                             </h1>
                             <div className="grid md:grid-cols-2 gap-12 items-end">
                                 <p className="text-xl md:text-2xl font-medium leading-tight">
-                                    ZAD isn't just a brand. It's a statement. Born in the heart of Egypt,
-                                    we're redefining the intersection of traditional heritage and modern street culture.
+                                    ZAD isn&apos;t just a brand. It&apos;s a statement. Born in the heart of Egypt,
+                                    we&apos;re redefining the intersection of traditional heritage and modern street culture.
                                 </p>
                                 <div className="flex gap-4">
                                     <div className="h-[2px] w-24 bg-black mt-4" />
@@ -56,7 +56,7 @@ export default function AboutPage() {
                                 <p className="text-neutral-400 text-lg leading-relaxed">
                                     Every piece is engineered for the streets. We source the finest heavy-weight
                                     Egyptian cotton and combine it with cutting-edge silhouettes.
-                                    Quality isn't an option — it's our foundation.
+                                    Quality isn&apos;t an option — it&apos;s our foundation.
                                 </p>
                             </div>
                         </div>

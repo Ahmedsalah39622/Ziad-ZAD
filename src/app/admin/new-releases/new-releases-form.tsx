@@ -144,6 +144,18 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
                                 </div>
                             </div>
                             <div className="space-y-2">
+                                <Label>Ribbon Text Color</Label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={textHex}
+                                        onChange={(e) => setTextHex(e.target.value)}
+                                        className="w-10 h-10 rounded cursor-pointer shrink-0 border-0 p-0"
+                                    />
+                                    <span className="text-muted-foreground font-mono uppercase">{textHex}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
                                 <Label>Shimmer Color</Label>
                                 <div className="flex items-center gap-2">
                                     <input

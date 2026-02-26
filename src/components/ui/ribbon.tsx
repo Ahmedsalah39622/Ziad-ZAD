@@ -157,6 +157,7 @@ function CountdownTimer({ endDate, textHex }: { endDate: string, textHex: string
     return (
         <span
             className="inline-flex items-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-xs font-bold leading-none px-2 py-1 rounded bg-black/10 tabular-nums shrink-0 ml-4 lg:ml-6 tracking-normal"
+            style={{ color: textHex }}
         >
             {timeLeft.days > 0 && <span>{timeLeft.days}d</span>}
             <span>{timeLeft.hours.toString().padStart(2, '0')}:{timeLeft.minutes.toString().padStart(2, '0')}:{timeLeft.seconds.toString().padStart(2, '0')}</span>

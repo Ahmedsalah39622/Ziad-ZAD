@@ -33,7 +33,6 @@ export function FooterSocials() {
                 const socialConfig = JSON.parse(socialLinksStr);
 
                 const activeSocialLinks = Object.entries(socialConfig)
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     .filter(([key, url]) => url && (url as string).trim() !== "" && iconMap[key])
                     .map(([key, url]) => ({
                         id: key,

@@ -22,7 +22,7 @@ export default async function NewReleasesAdminPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">New Releases Ribbon</h1>
                 <p className="text-muted-foreground mt-2">
-                    Manage the "New Releases" announcement ribbon. This ribbon features a custom shimmer effect.
+                    Manage the &quot;New Releases&quot; announcement ribbon. This ribbon features a custom shimmer effect.
                 </p>
             </div>
 
@@ -35,7 +35,7 @@ export default async function NewReleasesAdminPage() {
                     <div className="rounded-xl border border-border bg-card p-6">
                         <h3 className="font-semibold mb-2">Instructions</h3>
                         <p className="text-sm text-muted-foreground mb-4">
-                            Unlike the standard ribbon, the "New Releases" ribbon allows you to customize the <strong>Shimmer Color</strong>.
+                            Unlike the standard ribbon, the &quot;New Releases&quot; ribbon allows you to customize the <strong>Shimmer Color</strong>.
                             This color determines the tint of the moving light reflection.
                         </p>
                         <div className="relative border border-dashed border-border rounded-md overflow-hidden bg-background h-32 flex flex-col pt-4">
