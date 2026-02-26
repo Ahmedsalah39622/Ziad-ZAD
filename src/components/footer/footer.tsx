@@ -1,5 +1,5 @@
-import { XIcon, LinkedInIcon, GithubIcon } from "@/components/footer/icons";
 import Link from "next/link";
+import { FooterSocials } from "@/components/footer/footer-socials";
 
 const navLinks = [
   { label: "Features", href: "/#features" },
@@ -11,12 +11,6 @@ const legalLinks = [
   { label: "Terms & Conditions", href: "/terms-and-conditions" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Refund Policy", href: "/refund-policy" },
-];
-
-const socialLinks = [
-  { icon: XIcon, href: "https://x.com/", label: "Twitter" },
-  { icon: LinkedInIcon, href: "https://www.linkedin.com/", label: "LinkedIn" },
-  { icon: GithubIcon, href: "https://github.com/", label: "Github" },
 ];
 
 export function Footer() {
@@ -38,19 +32,7 @@ export function Footer() {
               streetwear built for those who refuse to blend in.
             </p>
             {/* Social icons */}
-            <div className="flex gap-4 mt-2">
-              {socialLinks.map((social) => (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  title={social.label}
-                  className="w-10 h-10 rounded-full border border-foreground/10 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all duration-300 hover:bg-foreground/5"
-                >
-                  <social.icon className="h-4 w-4 fill-current" />
-                </Link>
-              ))}
-            </div>
+            <FooterSocials />
           </div>
 
           {/* Nav Links */}
