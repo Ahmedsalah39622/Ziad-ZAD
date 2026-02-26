@@ -12,7 +12,7 @@ export function PageLoader() {
 
     if (!mounted) return null;
 
-    const letters = "AZAD".split("");
+    const letters = "ZAD".split("");
 
     const containerVariants: Variants = {
         hidden: { opacity: 0 },
