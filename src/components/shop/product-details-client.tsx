@@ -26,6 +26,14 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     // Main image state
     const [mainImageIndex, setMainImageIndex] = useState(0);
 
+    const selectedSizeData = useMemo(() => {
+        if (!selectedSize) return null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (product.sizes || []).find((s: any) =>
+            (typeof s === 'object' ? s.name : s) === selectedSize
+        );
+    }, [selectedSize, product.sizes]);
+
     // Filter images by color or show all
     const images = useMemo(() => product.images || [], [product.images]);
     const colors = useMemo(() => product.colors || [], [product.colors]);
@@ -175,22 +183,50 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
 
                         {/* Size Selection */}
                         <div>
-                            <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground mb-4">
-                                Select Size {selectedSize && <span className="text-foreground">— {selectedSize}</span>}
-                            </p>
+                            <div className="flex items-center justify-between mb-4">
+                                <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground">
+                                    Select Size {selectedSize && <span className="text-foreground">— {selectedSize}</span>}
+                                </p>
+                                {selectedSize && (
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock > 0
+                                        ? "text-emerald-500"
+                                        : "text-red-500"
+                                        }`}>
+                                        {selectedSizeData && typeof selectedSizeData === 'object'
+                                            ? (selectedSizeData.stock > 0 ? `${selectedSizeData.stock} units remaining` : "Out of Stock")
+                                            : (product.stock > 0 ? `${product.stock} units remaining` : "Out of Stock")
+                                        }
+                                    </span>
+                                )}
+                            </div>
                             <div className="flex flex-wrap gap-3">
-                                {product.sizes.map((size: string) => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`min-w-[64px] h-14 px-6 border rounded-xl text-sm font-black tracking-widest uppercase transition-all duration-300 ${selectedSize === size
-                                            ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_rgba(0,0,0,0.1)]"
-                                            : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground bg-secondary/30"
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {product.sizes.map((size: any) => {
+                                    const sizeName = typeof size === 'object' ? size.name : size;
+                                    const sizeStock = typeof size === 'object' ? size.stock : product.stock;
+                                    const isOutOfStock = sizeStock <= 0;
+
+                                    return (
+                                        <button
+                                            key={sizeName}
+                                            disabled={isOutOfStock}
+                                            onClick={() => setSelectedSize(sizeName)}
+                                            className={`min-w-[64px] h-14 px-6 border rounded-xl text-sm font-black tracking-widest uppercase transition-all duration-300 relative overflow-hidden ${selectedSize === sizeName
+                                                ? "bg-primary text-primary-foreground border-primary shadow-[0_0_20px_rgba(0,0,0,0.1)]"
+                                                : isOutOfStock
+                                                    ? "border-border text-muted-foreground/30 bg-secondary/10 cursor-not-allowed"
+                                                    : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground bg-secondary/30"
+                                                }`}
+                                        >
+                                            {sizeName}
+                                            {isOutOfStock && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="w-full h-[px] bg-red-500/30 rotate-45" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -223,9 +259,10 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     <div className="pt-6">
                         <button
                             onClick={handleAddToCart}
+                            disabled={!selectedSize || (selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock <= 0)}
                             className={`w-full h-16 rounded-2xl font-black tracking-[0.3em] uppercase text-xs flex items-center justify-center gap-4 transition-all duration-500 ${added
                                 ? "bg-foreground text-background shadow-[0_0_30px_rgba(0,0,0,0.1)]"
-                                : selectedSize
+                                : (selectedSize && (typeof selectedSizeData === 'object' ? selectedSizeData.stock > 0 : product.stock > 0))
                                     ? "bg-primary text-primary-foreground hover:opacity-90 shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:-translate-y-1"
                                     : "bg-secondary text-muted-foreground cursor-pointer grayscale border border-border"
                                 }`}
@@ -238,7 +275,12 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                             ) : (
                                 <>
                                     <ShoppingBag className="w-5 h-5" />
-                                    {selectedSize ? "Secure Order" : "Select Size First"}
+                                    {selectedSize
+                                        ? (selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock <= 0
+                                            ? "Sold Out"
+                                            : "Secure Order")
+                                        : "Select Size First"
+                                    }
                                 </>
                             )}
                         </button>

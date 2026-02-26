@@ -303,16 +303,35 @@ export async function createOrder(data: {
             /* eslint-enable @typescript-eslint/no-explicit-any */
         });
 
-        // Optional: Update stock
+        // Update stock
         for (const item of data.items) {
-            await tx.product.update({
+            const product = await tx.product.findUnique({
                 where: { id: item.productId },
-                data: {
-                    stock: {
-                        decrement: item.quantity,
-                    },
-                },
+                select: { sizes: true }
             });
+
+            if (product) {
+                let sizes = JSON.parse(product.sizes || "[]");
+                if (Array.isArray(sizes) && sizes.length > 0 && typeof sizes[0] === 'object') {
+                    // Modern format: [{name, stock}]
+                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                    sizes = sizes.map((s: any) =>
+                        s.name === item.size
+                            ? { ...s, stock: Math.max(0, (s.stock || 0) - item.quantity) }
+                            : s
+                    );
+                }
+
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: {
+                        stock: {
+                            decrement: item.quantity,
+                        },
+                        sizes: JSON.stringify(sizes)
+                    },
+                });
+            }
         }
 
         return order;

@@ -48,7 +48,7 @@ export async function createProduct({ payload }: { payload: string }) {
         description: string;
         details: string[];
         images: { url: string; color?: string }[];
-        sizes: string[];
+        sizes: { name: string; stock: number }[];
         colors: { name: string; hex: string }[];
         categoryId?: string;
         stock: number;
@@ -85,7 +85,7 @@ export async function updateProduct(
         description?: string;
         details?: string[];
         images?: { url: string; color?: string }[];
-        sizes?: string[];
+        sizes?: { name: string; stock: number }[];
         colors?: { name: string; hex: string }[];
         categoryId?: string;
         stock?: number;

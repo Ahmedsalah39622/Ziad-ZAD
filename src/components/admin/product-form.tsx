@@ -23,9 +23,10 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(initialData?.description || "");
     const [price, setPrice] = useState(initialData?.price?.toString() || "");
-    const [stock, setStock] = useState(initialData?.stock?.toString() || "");
     const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
     const [tag, setTag] = useState(initialData?.tag || "");
+
+    const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"];
 
     // Dynamic Arrays - Handle JSON parsing if needed
     const [colors, setColors] = useState<{ name: string; hex: string }[]>(
@@ -38,7 +39,33 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         initialData?.details ? (typeof initialData.details === 'string' ? JSON.parse(initialData.details) : initialData.details) : [""]
     );
 
+    // Sizes with stock: [{ name: "S", stock: 10 }, ...]
+    const [sizes, setSizes] = useState<{ name: string; stock: number }[]>(() => {
+        if (!initialData?.sizes) return [];
+        const parsed = typeof initialData.sizes === 'string' ? JSON.parse(initialData.sizes) : initialData.sizes;
+        // Migration: If it's just a string array, convert to objects with current total stock
+        if (Array.isArray(parsed) && typeof parsed[0] === 'string') {
+            return (parsed as string[]).map(s => ({ name: s, stock: initialData.stock || 0 }));
+        }
+        return parsed || [];
+    });
+
     // Helpers
+    const toggleSize = (sizeName: string) => {
+        if (sizes.find(s => s.name === sizeName)) {
+            setSizes(sizes.filter(s => s.name !== sizeName));
+        } else {
+            setSizes([...sizes, { name: sizeName, stock: 0 }]);
+        }
+    };
+
+    const updateSizeStock = (sizeName: string, stockValue: number) => {
+        setSizes(sizes.map(s => s.name === sizeName ? { ...s, stock: stockValue } : s));
+    };
+
+    // Auto-calculate total stock based on sizes
+    const totalStock = sizes.reduce((sum, s) => sum + s.stock, 0);
+
     const addColor = () => setColors([...colors, { name: "", hex: "#000000" }]);
     const removeColor = (index: number) => setColors(colors.filter((_, i) => i !== index));
     const updateColor = (index: number, field: "name" | "hex", value: string) => {
@@ -72,11 +99,11 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             price: parseFloat(price),
             description,
             details: details.filter(d => d.trim() !== ""),
-            images, // already objects
-            sizes: ["S", "M", "L", "XL", "XXL"], // Default sizes
+            images,
+            sizes, // Now objects [{name, stock}]
             colors: colors.filter(c => c.name.trim() !== ""),
             categoryId,
-            stock: parseInt(stock),
+            stock: totalStock, // Use calculated total
             tag,
         };
 
@@ -84,7 +111,6 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             if (initialData?.id) {
                 await updateProduct(initialData.id, data);
             } else {
-                // send as a single JSON string to avoid nested arrays
                 await createProduct({ payload: JSON.stringify(data) });
             }
             router.push("/admin/products");
@@ -126,6 +152,58 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 required
                                 className="border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground focus:ring-foreground/10"
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Size Selection & Stock */}
+                <div className="rounded-xl border border-border bg-card p-8 space-y-6 shadow-2xl">
+                    <h3 className="text-sm font-black text-muted-foreground/60 uppercase tracking-[0.2em] mb-4">Size & Inventory</h3>
+                    <div className="grid gap-6">
+                        <div className="flex flex-wrap gap-3">
+                            {AVAILABLE_SIZES.map((size) => {
+                                const isSelected = !!sizes.find((s) => s.name === size);
+                                return (
+                                    <button
+                                        key={size}
+                                        type="button"
+                                        onClick={() => toggleSize(size)}
+                                        className={`px-6 py-3 rounded-xl border text-xs font-black tracking-widest uppercase transition-all duration-300 ${isSelected
+                                            ? "bg-primary text-primary-foreground border-primary shadow-lg scale-105"
+                                            : "bg-secondary/50 border-border text-muted-foreground hover:border-foreground/30"
+                                            }`}
+                                    >
+                                        {size}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="space-y-4 pt-4 border-t border-border">
+                            <Label className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Stock Levels per Size</Label>
+                            {sizes.length === 0 ? (
+                                <p className="text-xs text-muted-foreground italic">Select sizes above to set stock levels.</p>
+                            ) : (
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    {sizes.map((s) => (
+                                        <div key={s.name} className="bg-secondary/30 border border-border rounded-xl p-4 flex flex-col gap-2">
+                                            <span className="text-xs font-black uppercase tracking-widest text-foreground">{s.name}</span>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                value={s.stock}
+                                                onChange={(e) => updateSizeStock(s.name, parseInt(e.target.value) || 0)}
+                                                className="h-10 bg-background/50 border-border focus:ring-foreground/10"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-4 p-4 bg-foreground/5 rounded-xl border border-border flex items-center justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Calculated Total Stock</span>
+                            <span className="text-xl font-black text-foreground">{totalStock}</span>
                         </div>
                     </div>
                 </div>
@@ -224,7 +302,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                     reader.readAsDataURL(file);
                                 });
                             }}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            className="absolute inset-0 w-full h-full opacity-0 Brewster-pointer-events-none cursor-pointer"
                         />
                     </div>
 
@@ -342,18 +420,6 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 placeholder="599.00"
-                                required
-                                className="border-border bg-secondary/50 text-foreground h-12"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="stock" className="text-muted-foreground uppercase text-[10px] font-bold tracking-widest">Stock Level</Label>
-                            <Input
-                                id="stock"
-                                type="number"
-                                value={stock}
-                                onChange={(e) => setStock(e.target.value)}
-                                placeholder="100"
                                 required
                                 className="border-border bg-secondary/50 text-foreground h-12"
                             />

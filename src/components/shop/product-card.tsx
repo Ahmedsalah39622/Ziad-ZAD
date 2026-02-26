@@ -77,6 +77,11 @@ export function ProductCard({ product }: { product: any }) {
                         {product.name}
                     </h3>
                     <p className="text-sm text-muted-foreground font-medium mt-2 tracking-widest uppercase">{product.category}</p>
+                    {!isOutOfStock && product.stock !== undefined && (
+                        <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em]">
+                            Stock: {product.stock}
+                        </p>
+                    )}
                 </div>
                 <p className="text-xl md:text-2xl font-black text-foreground tabular-nums">{product.priceDisplay}</p>
             </div>
