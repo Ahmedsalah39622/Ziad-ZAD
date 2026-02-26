@@ -98,7 +98,7 @@ export function Ribbon() {
     );
 }
 
-function CountdownTimer({ endDate, textHex }: { endDate: string, textHex: string }) {
+function CountdownTimer({ endDate }: { endDate: string, textHex: string }) {
     const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const [isMounted, setIsMounted] = useState(false);
 
