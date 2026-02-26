@@ -86,3 +86,11 @@ model DiscountCode {
   expiresAt   DateTime?
   createdAt   DateTime @default(now())
 }
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
