@@ -19,6 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth-actions";
 
+import { MobileHeader } from "@/components/admin/mobile-header";
+
 export default async function AdminLayout({
     children,
 }: {
@@ -83,12 +85,7 @@ export default async function AdminLayout({
             {/* Main Content */}
             <div className="flex-1 lg:pl-64">
                 {/* Mobile Header */}
-                <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-md lg:hidden">
-                    <Link href="/admin" className="text-lg font-bold">ZAD ADMIN</Link>
-                    <Button variant="ghost" size="icon">
-                        <Menu className="h-5 w-5" />
-                    </Button>
-                </header>
+                <MobileHeader navItems={navItems} />
 
                 <main className="p-6 lg:p-10">
                     {children}
