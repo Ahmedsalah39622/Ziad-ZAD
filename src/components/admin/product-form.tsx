@@ -23,6 +23,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     const [name, setName] = useState(initialData?.name || "");
     const [description, setDescription] = useState(initialData?.description || "");
     const [price, setPrice] = useState(initialData?.price?.toString() || "");
+    const [compareAtPrice, setCompareAtPrice] = useState(initialData?.compareAtPrice?.toString() || "");
     const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
     const [tag, setTag] = useState(initialData?.tag || "");
 
@@ -97,6 +98,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         const data = {
             name,
             price: parseFloat(price),
+            compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
             description,
             details: details.filter(d => d.trim() !== ""),
             images,
@@ -232,12 +234,11 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 <div className="space-y-2">
                                     <Label className="text-[9px] text-muted-foreground uppercase font-black">Hex Code</Label>
                                     <div className="flex gap-2">
-                                        <div className="w-10 h-10 rounded-lg border border-border shrink-0" style={{ backgroundColor: color.hex }} />
                                         <Input
+                                            type="color"
                                             value={color.hex}
                                             onChange={(e) => updateColor(index, "hex", e.target.value)}
-                                            placeholder="#1a472a"
-                                            className="h-10 w-28 bg-background/50 border-border font-mono text-xs"
+                                            className="h-10 w-16 p-1 cursor-pointer bg-background/50 border-border"
                                         />
                                     </div>
                                 </div>
@@ -423,6 +424,23 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                 required
                                 className="border-border bg-secondary/50 text-foreground h-12"
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="compareAtPrice" className="flex items-center gap-2 text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
+                                Compare at Price
+                                <span className="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-sm lowercase tracking-normal">Discount</span>
+                            </Label>
+                            <Input
+                                id="compareAtPrice"
+                                type="number"
+                                value={compareAtPrice}
+                                onChange={(e) => setCompareAtPrice(e.target.value)}
+                                placeholder="899.00 (Optional)"
+                                className="border-border bg-secondary/50 text-foreground h-12"
+                            />
+                            <p className="text-[10px] text-muted-foreground mt-1">
+                                Sets the original price before discount to trigger the sale ribbon.
+                            </p>
                         </div>
                     </div>
 

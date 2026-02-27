@@ -132,7 +132,7 @@ export default async function ProductDiscountsPage() {
                                                     className="w-24 border border-border bg-background rounded-md px-2 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none font-bold text-emerald-500"
                                                 />
                                             </div>
-
+{/*
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="text"
@@ -149,7 +149,7 @@ export default async function ProductDiscountsPage() {
                                                     title="Ribbon Color"
                                                 />
                                             </div>
-
+*/}
                                             <button
                                                 type="submit"
                                                 className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-primary-foreground px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-widest"

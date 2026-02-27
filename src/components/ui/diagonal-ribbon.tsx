@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 
 interface DiagonalRibbonProps {
     text: string;
@@ -6,28 +7,28 @@ interface DiagonalRibbonProps {
     position?: 'top-left' | 'top-right';
 }
 
-export function DiagonalRibbon({ text, color = '#ef4444', position = 'top-left' }: DiagonalRibbonProps) {
+export function DiagonalRibbon({ text, color = '#dc2626', position = 'top-left' }: DiagonalRibbonProps) {
     const isTopLeft = position === 'top-left';
 
+    // Using the user-provided image for the ribbon
     return (
-        <div className={`absolute top-0 ${isTopLeft ? 'left-0' : 'right-0'} z-30 pointer-events-none w-28 h-28 overflow-hidden select-none`}>
-            <div
-                className={`absolute w-[150%] h-7 flex items-center justify-center shadow-xl transform transition-transform duration-500
-          ${isTopLeft
-                        ? 'top-[22px] left-[-45px] -rotate-45'
-                        : 'top-[22px] right-[-45px] rotate-45'
-                    }`}
-                style={{
-                    backgroundColor: color,
-                    backgroundImage: 'linear-gradient(rgba(255,255,255,0.15), rgba(0,0,0,0.1))'
-                }}
-            >
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white py-1 filter drop-shadow-md">
-                    {text}
-                </span>
-
-                {/* Subtle shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer" />
+        <div
+            className={`absolute z-30 pointer-events-none select-none`}
+            style={{
+                top: '-5px', // Sit tight to the corner
+                [isTopLeft ? 'left' : 'right']: '-5px',
+                width: '100px', // Scaling down to be small and unintrusive
+                height: '100px',
+                transform: isTopLeft ? 'none' : 'scaleX(-1)'
+            }}
+        >
+            <div className="relative w-full h-full">
+                <Image
+                    src="/discount-ribbon.png"
+                    alt="Discount Ribbon"
+                    fill
+                    className="object-contain drop-shadow-2xl"
+                />
             </div>
         </div>
     );

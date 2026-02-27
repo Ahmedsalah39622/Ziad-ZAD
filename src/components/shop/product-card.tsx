@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: any }) {
             className={`group relative flex flex-col cursor-pointer ${isOutOfStock ? "pointer-events-none" : ""}`}
         >
             {/* Image Container */}
-            <div className="aspect-[3/4] w-full overflow-hidden bg-secondary relative">
+            <div className="aspect-[3/4] w-full bg-secondary relative">
 
                 {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
                     <DiagonalRibbon
@@ -39,7 +39,7 @@ export function ProductCard({ product }: { product: any }) {
                 )}
 
                 {/* Product Image */}
-                <div className="absolute inset-0">
+                <div className="absolute inset-0 overflow-hidden">
                     {product.image && product.image !== "" ? (
                         <div className="relative w-full h-full group-hover:scale-110 transition-transform duration-[800ms] ease-out">
                             <Image
@@ -71,19 +71,21 @@ export function ProductCard({ product }: { product: any }) {
             </div>
 
             {/* Product Info */}
-            <div className="flex justify-between items-start pt-6 pb-2">
-                <div>
-                    <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tight uppercase">
+            <div className="flex flex-col items-start pt-6 pb-2">
+                <div className="w-full flex flex-col items-start gap-1 mb-2">
+                    <h3 className="text-xl md:text-2xl font-black text-foreground tracking-tight uppercase line-clamp-2">
                         {product.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground font-medium mt-2 tracking-widest uppercase">{product.category}</p>
-                    {!isOutOfStock && product.stock !== undefined && (
-                        <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em]">
-                            Stock: {product.stock}
-                        </p>
-                    )}
+                    <p className="text-xl md:text-2xl font-black text-foreground tabular-nums">{product.priceDisplay}</p>
                 </div>
-                <p className="text-xl md:text-2xl font-black text-foreground tabular-nums">{product.priceDisplay}</p>
+
+                <p className="text-sm text-muted-foreground font-medium tracking-widest uppercase">{product.category}</p>
+
+                {!isOutOfStock && product.stock !== undefined && (
+                    <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em]">
+                        Stock: {product.stock}
+                    </p>
+                )}
             </div>
 
             {/* Color Swatches */}
