@@ -7,7 +7,7 @@ interface DiagonalRibbonProps {
     position?: 'top-left' | 'top-right';
 }
 
-export function DiagonalRibbon({ text, color = '#dc2626', position = 'top-left' }: DiagonalRibbonProps) {
+export function DiagonalRibbon({ position = 'top-left' }: DiagonalRibbonProps) {
     const isTopLeft = position === 'top-left';
 
     // Using the user-provided image for the ribbon

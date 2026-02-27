@@ -18,8 +18,6 @@ export default async function ProductDiscountsPage() {
     }
 
     const products = await getProducts();
-    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
 
     async function handleUpdate(formData: FormData) {
         "use server";
@@ -132,7 +130,7 @@ export default async function ProductDiscountsPage() {
                                                     className="w-24 border border-border bg-background rounded-md px-2 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none font-bold text-emerald-500"
                                                 />
                                             </div>
-{/*
+                                            {/*
                                             <div className="flex items-center gap-2">
                                                 <input
                                                     type="text"

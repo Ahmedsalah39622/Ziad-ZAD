@@ -36,7 +36,7 @@ export function FeaturedCategory({ title, products, viewAllLink = "/shop" }: Fea
                     coverImage = parsed[0].url || parsed[0] || "";
                 }
             }
-        } catch (e) {
+        } catch {
             // Ignore parse errors
         }
         return {
@@ -109,7 +109,7 @@ export function FeaturedCategory({ title, products, viewAllLink = "/shop" }: Fea
               Tailwind utility for hiding scrollbar if not in global: 
               [&::-webkit-scrollbar]:hidden 
             */}
-                        {parsedProducts.map((product, index) => {
+                        {parsedProducts.map((product) => {
                             const isOnSale = product.compareAtPrice && product.compareAtPrice > product.price;
 
                             return (
