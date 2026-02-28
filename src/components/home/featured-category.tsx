@@ -115,7 +115,7 @@ export function FeaturedCategory({ title, products, viewAllLink = "/shop" }: Fea
                             return (
                                 <div
                                     key={product.id}
-                                    className="w-[50vw] sm:w-[35vw] md:w-[25vw] lg:w-[20vw] xl:w-[15vw] snap-start flex-shrink-0 flex flex-col group cursor-pointer"
+                                    className="w-[260px] xs:w-[280px] sm:w-[35vw] md:w-[25vw] lg:w-[20vw] xl:w-[15vw] snap-start flex-shrink-0 flex flex-col group cursor-pointer"
                                 >
                                     <Link href={`/shop/${product.id}`} className="block relative w-full aspect-[4/5] bg-gray-100 mb-4 overflow-hidden">
                                         {product.coverImage ? (
@@ -138,10 +138,10 @@ export function FeaturedCategory({ title, products, viewAllLink = "/shop" }: Fea
                                         )}
                                     </Link>
 
-                                    <div className="flex flex-col flex-grow text-center items-center">
-                                        <div className="flex flex-col items-center justify-center gap-1 mb-4 w-full px-2">
+                                    <div className="flex flex-col flex-grow text-center items-center justify-between">
+                                        <div className="flex flex-col items-center justify-center gap-1 mb-6 w-full px-2 min-h-[90px] md:min-h-[110px]">
                                             <Link href={`/shop/${product.id}`} className="w-full">
-                                                <h3 className="text-base md:text-lg lg:text-xl font-black text-foreground uppercase tracking-tight line-clamp-2">
+                                                <h3 className="text-base md:text-lg lg:text-xl font-black text-foreground uppercase tracking-tight line-clamp-2 leading-tight">
                                                     {product.name}
                                                 </h3>
                                             </Link>
@@ -164,7 +164,7 @@ export function FeaturedCategory({ title, products, viewAllLink = "/shop" }: Fea
 
                                         <Link
                                             href={`/shop/${product.id}`}
-                                            className="w-full text-center border border-gray-900 text-gray-900 py-3 text-xs md:text-sm font-semibold uppercase hover:bg-gray-900 hover:text-white transition-colors duration-300"
+                                            className="w-full text-center border border-gray-900 text-gray-900 py-3 text-xs md:text-sm font-bold uppercase hover:bg-gray-900 hover:text-white transition-all duration-300"
                                         >
                                             Choose options
                                         </Link>
