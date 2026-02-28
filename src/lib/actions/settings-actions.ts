@@ -2,8 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import fs from "fs";
-import path from "path";
 
 /**
  * Get a single site setting by key.
@@ -46,7 +44,7 @@ export async function setSetting(key: string, value: string) {
  * In a serverless environment like Vercel, we can't save to the filesystem,
  * so we store the base64 string directly in the database.
  */
-export async function uploadHeroImage(base64Data: string, fileName: string) {
+export async function uploadHeroImage(base64Data: string) {
     try {
         // Just return the base64 data to be stored in the database
         return { success: true, path: base64Data };
@@ -59,7 +57,7 @@ export async function uploadHeroImage(base64Data: string, fileName: string) {
 /**
  * Upload a feature background image from base64 and return the base64 data.
  */
-export async function uploadFeatureImage(base64Data: string, fileName: string) {
+export async function uploadFeatureImage(base64Data: string) {
     try {
         // Just return the base64 data to be stored in the database
         return { success: true, path: base64Data };

@@ -73,10 +73,7 @@ export function FeaturesForm({ initialSettings }: { initialSettings: FeaturesSet
             const preview = previews[key];
 
             if (file && preview) {
-                const extension = file.name.split('.').pop();
-                const cleanName = `${key}_${Date.now()}.${extension}`;
-
-                const uploadRes = await uploadFeatureImage(preview, cleanName);
+                const uploadRes = await uploadFeatureImage(preview);
                 if (uploadRes.success && uploadRes.path) {
                     finalSettings[key] = {
                         ...(finalSettings[key] || { title: "", description: "", image: "" }),

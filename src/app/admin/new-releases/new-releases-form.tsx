@@ -63,12 +63,7 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
         let finalHeroImagePath = heroImage;
 
         if (selectedFile && heroImagePreview) {
-            const extension = selectedFile.name.split('.').pop();
-            const baseName = selectedFile.name.split('.').slice(0, -1).join('.')
-                .replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const cleanName = `${baseName}_${Date.now()}.${extension}`;
-
-            const uploadRes = await uploadHeroImage(heroImagePreview, cleanName);
+            const uploadRes = await uploadHeroImage(heroImagePreview);
             if (uploadRes.success && uploadRes.path) {
                 finalHeroImagePath = uploadRes.path;
                 setHeroImage(uploadRes.path);
