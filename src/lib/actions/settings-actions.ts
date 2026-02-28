@@ -42,22 +42,14 @@ export async function setSetting(key: string, value: string) {
 }
 
 /**
- * Upload a hero image from base64 and return the public path.
+ * Upload a hero image from base64 and return the base64 data.
+ * In a serverless environment like Vercel, we can't save to the filesystem,
+ * so we store the base64 string directly in the database.
  */
 export async function uploadHeroImage(base64Data: string, fileName: string) {
     try {
-        const base64Content = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
-        const buffer = Buffer.from(base64Content, "base64");
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        const filePath = path.join(uploadDir, fileName);
-        fs.writeFileSync(filePath, buffer);
-
-        return { success: true, path: `/uploads/${fileName}` };
+        // Just return the base64 data to be stored in the database
+        return { success: true, path: base64Data };
     } catch (error) {
         console.error("Upload failed:", error);
         return { success: false, error: "Upload failed." };
@@ -65,22 +57,12 @@ export async function uploadHeroImage(base64Data: string, fileName: string) {
 }
 
 /**
- * Upload a feature background image from base64 and return the public path.
+ * Upload a feature background image from base64 and return the base64 data.
  */
 export async function uploadFeatureImage(base64Data: string, fileName: string) {
     try {
-        const base64Content = base64Data.includes(",") ? base64Data.split(",")[1] : base64Data;
-        const buffer = Buffer.from(base64Content, "base64");
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "features");
-
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-
-        const filePath = path.join(uploadDir, fileName);
-        fs.writeFileSync(filePath, buffer);
-
-        return { success: true, path: `/uploads/features/${fileName}` };
+        // Just return the base64 data to be stored in the database
+        return { success: true, path: base64Data };
     } catch (error) {
         console.error("Feature upload failed:", error);
         return { success: false, error: "Upload failed." };
