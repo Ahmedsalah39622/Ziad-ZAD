@@ -29,10 +29,6 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.paddle.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; connect-src 'self' https://sandbox-checkout.paddle.com https://checkout.paddle.com https://cdn.paddle.com; frame-src 'self' https://sandbox-checkout.paddle.com https://checkout.paddle.com; frame-ancestors 'self';",
-          },
-          {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
           },
