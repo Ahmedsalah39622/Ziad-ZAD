@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CreditCard, Truck, Package } from "lucide-react";
+import { Loader2, CreditCard, Truck, Package, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: string | null; email?: string | null } | null, shippingFee?: number }) {
@@ -31,8 +31,11 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
     const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; pct: number } | null>(null);
     const [isValidating, setIsValidating] = useState(false);
 
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [orderId, setOrderId] = useState<string | null>(null);
+
     // show empty cart only if there really are no items and we're not currently submitting
-    if (items.length === 0 && !isLoading) {
+    if (items.length === 0 && !isLoading && !isSuccess) {
         return (
             <div className="text-center py-20">
                 <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -41,6 +44,54 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
                 <Button onClick={() => router.push("/shop")} className="bg-primary text-primary-foreground">
                     Go Shopping
                 </Button>
+            </div>
+        );
+    }
+
+    if (isSuccess && orderId) {
+        return (
+            <div className="flex flex-col items-center justify-center py-12 md:py-24 text-center space-y-8 animate-in fade-in duration-500">
+                <div className="flex justify-center mb-4">
+                    <div className="h-24 w-24 rounded-full bg-foreground/10 flex items-center justify-center relative">
+                        <CheckCircle2 className="h-16 w-16 text-foreground" />
+                        <div className="absolute inset-0 rounded-full border border-foreground/20 animate-ping opacity-20" />
+                    </div>
+                </div>
+
+                <div className="space-y-4 max-w-2xl mx-auto">
+                    <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic">
+                        Order Confirmed
+                    </h1>
+                    <p className="text-muted-foreground text-lg">
+                        Thank you for your order! We&apos;ve received your request and will contact you shortly to confirm the shipping.
+                    </p>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-card/50 p-6 md:p-8 text-left space-y-4 backdrop-blur-xl w-full max-w-md mx-auto">
+                    <div className="flex justify-between items-center border-b border-border pb-4">
+                        <span className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Order ID</span>
+                        <span className="text-foreground font-mono text-sm">{orderId}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-border pb-4">
+                        <span className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Status</span>
+                        <span className="px-3 py-1 bg-secondary text-foreground border border-border rounded-full text-xs font-bold">
+                            PENDING
+                        </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Payment Method</span>
+                        <span className="text-foreground font-bold">Cash on Delivery</span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md mx-auto pt-4">
+                    <Button onClick={() => router.push('/shop')} className="h-14 bg-primary text-primary-foreground hover:opacity-90 rounded-xl font-black uppercase tracking-tighter text-lg">
+                        Continue Shopping
+                    </Button>
+                    <Button onClick={() => router.push('/')} variant="outline" className="h-14 border-border bg-transparent text-foreground hover:bg-foreground/5 hover:text-foreground rounded-xl font-bold uppercase tracking-wider">
+                        Home Page
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -89,12 +140,13 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
             });
 
             toast.success("Order placed successfully!");
-            // navigate first, then clear the cart so the checkout page doesn't briefly show empty state
-            await router.push(`/checkout/success?id=${result.id}`);
+            setOrderId(result.id);
+            setIsSuccess(true);
             clearCart();
+            // Pre-fetch shop for fast navigation back
+            router.prefetch('/shop');
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to place order. Please try again.");
-        } finally {
             setIsLoading(false);
         }
     };

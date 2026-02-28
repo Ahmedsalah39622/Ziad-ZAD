@@ -34,8 +34,7 @@ export default function CheckoutPaymentPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
-        // Simulate processing
-        await new Promise((r) => setTimeout(r, 2000));
+        // Instant processing for immediate success feedback
         setIsProcessing(false);
         setOrderComplete(true);
         clearCart();
