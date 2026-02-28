@@ -9,14 +9,19 @@ import { cn } from "@/lib/utils";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { Hero3DShirt } from "./hero-3d-shirt";
 
-export function Hero() {
+interface HeroSettings {
+  heroImage?: string;
+  heroGlowHex?: string;
+  heroAccentHex?: string;
+  startingPrice?: string;
+  badgeDotColor?: string;
+  badgeTextColor?: string;
+  active?: boolean;
+}
+
+export function Hero({ initialSettings }: { initialSettings?: HeroSettings | null }) {
   const [mounted, setMounted] = useState(false);
-  const [settings, setSettings] = useState<{
-    heroImage?: string;
-    heroGlowHex?: string;
-    heroAccentHex?: string;
-    active?: boolean;
-  } | null>(null);
+  const [settings, setSettings] = useState<HeroSettings | null>(initialSettings || null);
 
   useEffect(() => {
     setMounted(true);
@@ -26,16 +31,24 @@ export function Hero() {
         heroImage: "/zad_green_shirt_studio.png",
         heroGlowHex: "#065f46",
         heroAccentHex: "#10b981",
+        startingPrice: "L.E 599",
+        badgeDotColor: "#10b981",
+        badgeTextColor: "#10b981",
         active: false,
       }));
       setSettings(JSON.parse(raw));
     }
-    fetchSettings();
-  }, []);
+    if (!initialSettings) {
+      fetchSettings();
+    }
+  }, [initialSettings]);
 
   const heroImage = settings?.heroImage || "/zad_green_shirt_studio.png";
-  const glowColor = settings?.heroGlowHex || "#065f46"; // emerald-800 hex approx
-  const accentColor = settings?.heroAccentHex || "#10b981"; // emerald-500 hex approx
+  const glowColor = settings?.heroGlowHex || "#065f46";
+  const accentColor = settings?.heroAccentHex || "#10b981";
+  const startingPrice = settings?.startingPrice || "L.E 599";
+  const badgeDotColor = settings?.badgeDotColor || accentColor;
+  const badgeTextColor = settings?.badgeTextColor || accentColor;
 
   return (
     <div className="relative min-h-[100dvh] w-full flex flex-col overflow-hidden bg-background text-foreground">
@@ -83,10 +96,10 @@ export function Hero() {
           {/* Badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-foreground/[0.06] backdrop-blur-sm border border-foreground/[0.08] rounded-full">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: accentColor }} />
-              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: accentColor }} />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: badgeDotColor }} />
+              <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: badgeDotColor }} />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: accentColor }}>New Drop</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: badgeTextColor }}>New Drop</span>
           </div>
 
           {/* Product image - centered, with glow */}
@@ -210,10 +223,10 @@ export function Hero() {
             {/* Badge */}
             <div className="flex items-center gap-2.5 px-4 py-2 bg-foreground/[0.06] backdrop-blur-sm border border-foreground/[0.08] rounded-full">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: accentColor }} />
-                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: accentColor }} />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: badgeDotColor }} />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: badgeDotColor }} />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: accentColor }}>New Release</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: badgeTextColor }}>New Release</span>
             </div>
 
             {/* Heading */}
@@ -310,7 +323,7 @@ export function Hero() {
                 {/* Emerald accent bar */}
                 <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: accentColor }} />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/60 block">Starting at</span>
-                <span className="text-2xl font-black text-primary-foreground">L.E 599</span>
+                <span className="text-2xl font-black text-primary-foreground">{startingPrice}</span>
                 {/* Folded corner */}
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[12px] border-t-background/20 border-l-[12px] border-l-primary" />
               </div>

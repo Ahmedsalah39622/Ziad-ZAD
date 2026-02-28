@@ -16,6 +16,9 @@ interface NewReleasesSettings {
     heroImage?: string;
     heroGlowHex?: string;
     heroAccentHex?: string;
+    startingPrice?: string;
+    badgeDotColor?: string;
+    badgeTextColor?: string;
     active: boolean;
 }
 
@@ -30,6 +33,9 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [heroGlowHex, setHeroGlowHex] = useState(initialSettings.heroGlowHex || "#065f46");
     const [heroAccentHex, setHeroAccentHex] = useState(initialSettings.heroAccentHex || "#10b981");
+    const [startingPrice, setStartingPrice] = useState(initialSettings.startingPrice || "L.E 599");
+    const [badgeDotColor, setBadgeDotColor] = useState(initialSettings.badgeDotColor || initialSettings.heroAccentHex || "#10b981");
+    const [badgeTextColor, setBadgeTextColor] = useState(initialSettings.badgeTextColor || initialSettings.heroAccentHex || "#10b981");
     const [active, setActive] = useState(initialSettings.active ?? false);
     const [loading, setLoading] = useState(false);
     const [previewContainer, setPreviewContainer] = useState<HTMLElement | null>(null);
@@ -83,6 +89,9 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
             heroImage: finalHeroImagePath,
             heroGlowHex,
             heroAccentHex,
+            startingPrice,
+            badgeDotColor,
+            badgeTextColor,
             active,
         });
 
@@ -259,6 +268,44 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
                                     <span className="text-muted-foreground font-mono uppercase">{heroAccentHex}</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Badge Dot Color (Alert)</Label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={badgeDotColor}
+                                        onChange={(e) => setBadgeDotColor(e.target.value)}
+                                        className="w-10 h-10 rounded cursor-pointer shrink-0 border-0 p-0"
+                                    />
+                                    <span className="text-muted-foreground font-mono uppercase">{badgeDotColor}</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Badge Text Color</Label>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={badgeTextColor}
+                                        onChange={(e) => setBadgeTextColor(e.target.value)}
+                                        className="w-10 h-10 rounded cursor-pointer shrink-0 border-0 p-0"
+                                    />
+                                    <span className="text-muted-foreground font-mono uppercase">{badgeTextColor}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="starting-price">Starting Price Text</Label>
+                            <Input
+                                id="starting-price"
+                                value={startingPrice}
+                                onChange={(e) => setStartingPrice(e.target.value)}
+                                placeholder="e.g. L.E 599 or $89"
+                            />
+                            <p className="text-[10px] text-muted-foreground italic">This appears on the price sticker in the hero section.</p>
                         </div>
                     </div>
                 </div>

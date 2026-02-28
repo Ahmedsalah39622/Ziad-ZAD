@@ -15,12 +15,23 @@ export default async function Home() {
   const settingsRaw = await getSetting("feature_settings", "{}");
   const settings = JSON.parse(settingsRaw);
 
+  const newReleasesRaw = await getSetting("new_releases_settings", JSON.stringify({
+    heroImage: "/zad_green_shirt_studio.png",
+    heroGlowHex: "#065f46",
+    heroAccentHex: "#10b981",
+    startingPrice: "L.E 599",
+    badgeDotColor: "#10b981",
+    badgeTextColor: "#10b981",
+    active: false,
+  }));
+  const newReleasesSettings = JSON.parse(newReleasesRaw);
+
   const allProducts = await getProducts();
   const flexiStyleProducts = allProducts.filter(p => p.active !== false).slice(0, 10);
 
   return (
     <SmoothScroll>
-      <Hero />
+      <Hero initialSettings={newReleasesSettings} />
       <ScrollReveal>
         <FeaturedCategory title="ZAD Editions" products={flexiStyleProducts} />
       </ScrollReveal>

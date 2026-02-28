@@ -12,6 +12,9 @@ export default async function NewReleasesAdminPage() {
         heroImage: "/zad_green_shirt_studio.png",
         heroGlowHex: "#065f46",
         heroAccentHex: "#10b981",
+        startingPrice: "L.E 599",
+        badgeDotColor: "#10b981",
+        badgeTextColor: "#10b981",
         active: false,
     }));
 
