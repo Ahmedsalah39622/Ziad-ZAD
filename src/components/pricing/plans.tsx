@@ -46,7 +46,7 @@ export function Plans() {
           ZAD Elite Memberships
         </h1>
         <p className="mt-4 text-muted-foreground md:text-lg">
-          We don't just design clothes. We engineer movement. Join the absolute pinnacle of streetwear culture.
+          We don&apos;t just design clothes. We engineer movement. Join the absolute pinnacle of streetwear culture.
         </p>
       </div>
 
