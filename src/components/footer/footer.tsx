@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FooterSocials } from "@/components/footer/footer-socials";
 
 const navLinks = [
@@ -33,6 +34,24 @@ export function Footer() {
             </p>
             {/* Social icons */}
             <FooterSocials />
+
+            {/* Payment Methods */}
+            <div className="flex flex-wrap items-center gap-6 mt-4">
+              <Image
+                src="/payment-methods.png"
+                alt="Payment Methods"
+                width={160}
+                height={32}
+                className="h-8 w-auto object-contain pointer-events-none"
+              />
+              <Image
+                src="/cash-on-delivery.png"
+                alt="Cash on Delivery"
+                width={80}
+                height={32}
+                className="h-8 w-auto object-contain pointer-events-none"
+              />
+            </div>
           </div>
 
           {/* Nav Links */}
@@ -75,10 +94,11 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-8">
           <span className="text-muted-foreground text-xs tracking-wider">
             &copy; {new Date().getFullYear()} ZAD. All rights reserved.
           </span>
+
           <span className="text-muted-foreground/60 text-xs tracking-wider uppercase">
             EST. 2026 // Genesis Edition
           </span>

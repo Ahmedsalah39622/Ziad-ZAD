@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
     const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
     const cspHeader = `
         default-src 'self';
-        script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.paddle.com;
+        script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.paddle.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""};
         style-src 'self' 'unsafe-inline';
         img-src 'self' blob: data: https:;
         font-src 'self' data:;

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { SocialLinksSettings, SocialLinksConfig } from "./social-links-settings";
+import { WhatsAppSettings } from "./whatsapp-settings";
 
 export default async function SettingsPage() {
     const session = await auth();
@@ -37,6 +38,9 @@ export default async function SettingsPage() {
     } catch (e) {
         console.error("Failed to parse social config", e);
     }
+
+    // Fetch WhatsApp number
+    const whatsappNumber = await getSetting("whatsapp_number", "");
 
     return (
         <div className="max-w-4xl space-y-8">
@@ -117,6 +121,9 @@ export default async function SettingsPage() {
 
                 {/* Social Links Form */}
                 <SocialLinksSettings initialConfig={socialConfig} />
+
+                {/* WhatsApp Config Form */}
+                <WhatsAppSettings initialNumber={whatsappNumber} />
             </div>
         </div>
     );

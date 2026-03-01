@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { getSetting } from "@/lib/actions/settings-actions";
+import { WhatsAppWidget } from "@/components/ui/whatsapp-widget";
 import "./globals.css";
 
 // const inter = Inter({
@@ -15,17 +17,20 @@ export const metadata: Metadata = {
   description: "Premium streetwear engineered for those who refuse to blend in. Every piece is built for movement, designed for impact.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const whatsappNumber = await getSetting("whatsapp_number", "");
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
         <AuthProvider>
           <CartProvider>
             {children}
+            <WhatsAppWidget phoneNumber={whatsappNumber} />
           </CartProvider>
         </AuthProvider>
         <Toaster />
