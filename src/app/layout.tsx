@@ -14,8 +14,23 @@ import "./globals.css";
 // });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://zadfitt.com"),
   title: "ZAD Premium Streetwear",
   description: "Premium streetwear engineered for those who refuse to blend in. Every piece is built for movement, designed for impact.",
+  keywords: ["ZAD", "ZAD fitt", "streetwear", "fitness", "apparel", "clothing", "premium hoodie", "t-shirts", "Egypt streetwear"],
+  openGraph: {
+    title: "ZAD Premium Streetwear",
+    description: "Premium streetwear engineered for those who refuse to blend in. Every piece is built for movement, designed for impact.",
+    url: "https://zadfitt.com",
+    siteName: "ZAD",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ZAD Premium Streetwear",
+    description: "Premium streetwear engineered for those who refuse to blend in. Every piece is built for movement, designed for impact.",
+  },
 };
 
 export default async function RootLayout({
