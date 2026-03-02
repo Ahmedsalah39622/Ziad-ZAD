@@ -31,7 +31,7 @@ export function DesktopNav({ items, className }: Props) {
   return (
     <nav className={cn("mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-4", className)}>
       <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", "text-foreground")}>
-        ZAD
+        Z A D
       </Link>
       <NavigationMenu className="mx-auto">
         <NavigationMenuList className={cn("gap-10")}>

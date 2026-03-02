@@ -26,7 +26,7 @@ export function Footer() {
           {/* Brand */}
           <div className="md:col-span-5 flex flex-col gap-5">
             <h2 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
-              ZAD
+              Z A D
             </h2>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               We don&apos;t just design clothes. We engineer movement. Premium

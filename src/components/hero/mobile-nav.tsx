@@ -27,7 +27,7 @@ export function MobileNav({ items, className }: Props) {
   return (
     <nav className={cn("flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3", className)}>
       <Link href="/" className={cn("font-bold text-2xl tracking-tighter transition-colors", "text-foreground")}>
-        ZAD
+        Z A D
       </Link>
       <div className="flex items-center gap-3">
         {isAdmin && (

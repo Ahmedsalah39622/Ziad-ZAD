@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://zadwearstore.vercel.app",
+            value: "https://zadfitt.com",
           },
         ],
       },
