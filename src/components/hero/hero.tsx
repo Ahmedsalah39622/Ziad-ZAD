@@ -126,9 +126,9 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
           </div>
 
           {/* Huge headline */}
-          <h2 className="text-[13vw] font-black tracking-[-0.04em] leading-[0.85]">
-            <span className="block text-foreground">WEAR</span>
-            <span className="block text-foreground">THE</span>
+          <h1 className="text-[13vw] font-black tracking-[-0.04em] leading-[0.85]">
+            <span className="block text-foreground">Break</span>
+            <span className="block text-foreground">Your</span>
             <span
               className="block"
               style={{
@@ -137,13 +137,13 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
                 WebkitTextFillColor: "transparent",
               }}
             >
-              IMPOSSIBLE
+              Limits
             </span>
-          </h2>
+          </h1>
 
           {/* Short punchy description */}
           <p className="text-sm text-foreground max-w-[280px] leading-relaxed font-bold">
-            Premium streetwear built for those who refuse to blend in. <span className="text-foreground">ZAD</span> — engineered for movement, designed for impact.
+            Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure and unapologetic style.
           </p>
 
           {/* CTA */}
@@ -195,8 +195,8 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
       <div className="hidden md:flex flex-1 flex-col items-center justify-center w-full max-w-[1440px] mx-auto px-12 relative z-10">
 
         {/* Massive Background Typography */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-          <h1
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden" aria-hidden="true">
+          <div
             style={{
               background: "linear-gradient(180deg, currentColor 0%, transparent 100%)",
               WebkitBackgroundClip: "text",
@@ -209,7 +209,7 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
             )}
           >
             JUST DROP
-          </h1>
+          </div>
         </div>
 
         {/* Desktop Content Grid */}
@@ -230,9 +230,9 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
             </div>
 
             {/* Heading */}
-            <h2 className="text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[0.85]">
-              <span className="block text-foreground">WEAR</span>
-              <span className="block text-foreground">THE</span>
+            <h1 className="text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[0.85]">
+              <span className="block text-foreground">Break</span>
+              <span className="block text-foreground">Your</span>
               <span
                 className="block mt-1"
                 style={{
@@ -241,13 +241,13 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                IMPOSSIBLE
+                Limits
               </span>
-            </h2>
+            </h1>
 
             {/* Description */}
             <p className="text-lg font-bold text-foreground max-w-md leading-relaxed tracking-wide">
-              Premium streetwear built for those who refuse to blend in. <span className="text-foreground">ZAD</span> — engineered for movement, designed for impact.
+              Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and unapologetic style.
             </p>
 
             {/* CTA */}
