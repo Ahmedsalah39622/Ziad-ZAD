@@ -16,11 +16,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://zadfitt.com"),
   title: "ZAD Premium Box Fit - Break Your Limits",
-  description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and unapologetic style. Every piece is built for movement, designed for impact.",
+  description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
   keywords: ["ZAD", "ZAD fitt", "box fit", "oversized fit", "premium streetwear", "fitness", "apparel", "clothing", "heavyweight tee", "Egypt streetwear"],
   openGraph: {
     title: "ZAD Premium Box Fit - Break Your Limits",
-    description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and unapologetic style. Every piece is built for movement, designed for impact.",
+    description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
     url: "https://zadfitt.com",
     siteName: "ZAD",
     locale: "en_US",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ZAD Premium Box Fit - Wear The Impossible",
-    description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and unapologetic style.",
+    description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
   },
 };
 

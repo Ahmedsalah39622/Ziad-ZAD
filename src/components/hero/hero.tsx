@@ -229,8 +229,8 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
               <span className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: badgeTextColor }}>New Release</span>
             </div>
 
-            {/* Heading */}
-            <h1 className="text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[0.85]">
+            {/* Heading (Desktop) - Changed to div to avoid duplicate H1s for SEO, styled exactly the same */}
+            <div className="text-7xl lg:text-8xl font-black tracking-[-0.04em] leading-[0.85]" aria-hidden="true">
               <span className="block text-foreground">Break</span>
               <span className="block text-foreground">Your</span>
               <span
@@ -243,7 +243,7 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
               >
                 Limits
               </span>
-            </h1>
+            </div>
 
             {/* Description */}
             <p className="text-lg font-bold text-foreground max-w-md leading-relaxed tracking-wide">
