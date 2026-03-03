@@ -83,7 +83,7 @@ export function Features({ settings = {} }: { settings?: { [key: string]: Featur
                 <div className="absolute inset-0 z-0">
                   <img
                     src={feature.background}
-                    alt=""
+                    alt={`${feature.title} background image`}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />

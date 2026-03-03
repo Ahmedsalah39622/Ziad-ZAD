@@ -205,7 +205,7 @@ export function NewReleasesForm({ initialSettings }: { initialSettings: NewRelea
                                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border bg-background">
                                         <img
                                             src={heroImagePreview || heroImage}
-                                            alt="Preview"
+                                            alt="Hero image preview"
                                             className="w-full h-full object-contain p-2"
                                         />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

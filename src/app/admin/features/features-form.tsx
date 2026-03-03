@@ -177,7 +177,7 @@ export function FeaturesForm({ initialSettings }: { initialSettings: FeaturesSet
                                             <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border bg-background">
                                                 <img
                                                     src={previews[key] || feature.image}
-                                                    alt={feature.title}
+                                                    alt={`Preview image for ${feature.title}`}
                                                     className="w-full h-full object-cover"
                                                 />
                                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

@@ -15,8 +15,14 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://zadfitt.com"),
-  title: "ZAD Premium Box Fit - Break Your Limits",
+  title: {
+    default: "ZAD Premium Box Fit - Break Your Limits",
+    template: "%s | ZAD"
+  },
   description: "Redefining the modern silhouette. Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
+  alternates: {
+    canonical: "https://zadfitt.com",
+  },
   keywords: ["ZAD", "ZAD fitt", "box fit", "oversized fit", "premium streetwear", "fitness", "apparel", "clothing", "heavyweight tee", "Egypt streetwear"],
   openGraph: {
     title: "ZAD Premium Box Fit - Break Your Limits",
@@ -40,8 +46,30 @@ export default async function RootLayout({
 }>) {
   const whatsappNumber = await getSetting("whatsapp_number", "");
 
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "ZAD",
+    "url": "https://zadfitt.com",
+    "logo": "https://zadfitt.com/icon.svg",
+    "image": "https://zadfitt.com/zad_green_shirt_studio2255.png",
+    "description": "Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "EG"
+    },
+    // Adding price range as it's a clothing store usually expected by Google
+    "priceRange": "$$"
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+        />
+      </head>
       <body className={`antialiased`}>
         <AuthProvider>
           <CartProvider>

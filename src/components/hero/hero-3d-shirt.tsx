@@ -79,7 +79,7 @@ export function Hero3DShirt({ image, glowColor }: { image: string, glowColor: st
                 <div className="relative w-[130%] h-[130%] flex items-center justify-center transition-transform duration-500">
                     <img
                         src={image}
-                        alt="ZAD Genesis Shirt"
+                        alt="ZAD Genesis Shirt 3D View"
                         className="w-full h-full object-contain filter contrast-110 saturate-110"
                         style={{
                             filter: `drop-shadow(0 35px 60px ${glowColor}66)`
