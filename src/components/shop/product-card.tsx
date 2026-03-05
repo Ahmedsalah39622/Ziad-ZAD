@@ -81,11 +81,7 @@ export function ProductCard({ product }: { product: any }) {
 
                 <p className="text-sm text-muted-foreground font-medium tracking-widest uppercase">{product.category}</p>
 
-                {!isOutOfStock && product.stock !== undefined && (
-                    <p className="text-[10px] font-black text-emerald-600 mt-2 uppercase tracking-[0.2em]">
-                        Stock: {product.stock}
-                    </p>
-                )}
+
             </div>
 
             {/* Color Swatches */}

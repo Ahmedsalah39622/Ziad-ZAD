@@ -34,6 +34,17 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
         );
     }, [selectedSize, product.sizes]);
 
+    // Compute max stock for the selected size
+    const maxStock = useMemo(() => {
+        if (!selectedSizeData) return product.stock || 0;
+        return typeof selectedSizeData === 'object' ? selectedSizeData.stock : product.stock || 0;
+    }, [selectedSizeData, product.stock]);
+
+    // Reset quantity to 1 when size changes
+    useEffect(() => {
+        setQuantity(1);
+    }, [selectedSize]);
+
     // Filter images by color or show all
     const images = useMemo(() => product.images || [], [product.images]);
     const colors = useMemo(() => product.colors || [], [product.colors]);
@@ -53,6 +64,13 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     const handleAddToCart = () => {
         if (!selectedSize) {
             toast.error("Please select a size before ordering");
+            return;
+        }
+
+        // Validate quantity against stock
+        if (quantity > maxStock) {
+            toast.error(`Only ${maxStock} units remaining for size ${selectedSize}`);
+            setQuantity(maxStock > 0 ? maxStock : 1);
             return;
         }
 
@@ -187,17 +205,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                                 <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground">
                                     Select Size {selectedSize && <span className="text-foreground">— {selectedSize}</span>}
                                 </p>
-                                {selectedSize && (
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock > 0
-                                        ? "text-emerald-500"
-                                        : "text-red-500"
-                                        }`}>
-                                        {selectedSizeData && typeof selectedSizeData === 'object'
-                                            ? (selectedSizeData.stock > 0 ? `${selectedSizeData.stock} units remaining` : "Out of Stock")
-                                            : (product.stock > 0 ? `${product.stock} units remaining` : "Out of Stock")
-                                        }
-                                    </span>
-                                )}
+
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -246,12 +254,18 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                                     {quantity}
                                 </span>
                                 <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="w-14 h-14 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors hover:bg-foreground/5"
+                                    onClick={() => setQuantity(Math.min(quantity + 1, maxStock))}
+                                    disabled={quantity >= maxStock}
+                                    className={`w-14 h-14 flex items-center justify-center transition-colors hover:bg-foreground/5 ${quantity >= maxStock ? 'text-muted-foreground/30 cursor-not-allowed' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
                             </div>
+                            {selectedSize && quantity >= maxStock && (
+                                <p className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-2">
+                                    No more remaining stock
+                                </p>
+                            )}
                         </div>
                     </div>
 
