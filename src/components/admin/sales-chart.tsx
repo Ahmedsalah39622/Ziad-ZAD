@@ -128,7 +128,8 @@ export function SalesChart({ dailyStats, ordersByStatus, topProducts }: SalesCha
                                             contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                                             itemStyle={{ color: 'hsl(var(--foreground))' }}
                                             labelStyle={{ fontWeight: 'bold' }}
-                                            formatter={(value: number) => [formatCurrency(value), "Revenue"]}
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                            formatter={(value: any) => [formatCurrency(Number(value) || 0), "Revenue"]}
                                         />
                                         <Area
                                             type="monotone"
