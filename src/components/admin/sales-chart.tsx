@@ -68,7 +68,7 @@ export function SalesChart({ dailyStats, ordersByStatus, topProducts }: SalesCha
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
+                                onClick={() => setActiveTab(tab.id as "revenue" | "status" | "products")}
                                 className={`relative flex-1 sm:flex-none px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === tab.id
                                     ? "text-foreground"
                                     : "text-muted-foreground hover:text-foreground/80"
@@ -156,6 +156,7 @@ export function SalesChart({ dailyStats, ordersByStatus, topProducts }: SalesCha
                                         <Tooltip
                                             contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                                             itemStyle={{ color: 'hsl(var(--foreground))' }}
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             formatter={(value: any) => [value, "Orders"]}
                                         />
                                         <Pie
@@ -194,6 +195,7 @@ export function SalesChart({ dailyStats, ordersByStatus, topProducts }: SalesCha
                                         <Tooltip
                                             contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                                             cursor={{ fill: 'hsl(var(--muted))' }}
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             formatter={(value: any) => [value, "Quantity Sold"]}
                                         />
                                         <Bar

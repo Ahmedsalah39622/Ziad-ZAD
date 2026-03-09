@@ -117,7 +117,7 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
 
     try {
         // Fetch only the essentials: Product count and the main Order data
-        const [totalProducts, allOrders] = await Promise.all([
+        const [totalProducts, allOrders, lowStockProducts] = await Promise.all([
             prisma.product.count({ where: { active: true } }),
             prisma.order.findMany({
                 where,
@@ -144,6 +144,18 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
                         }
                     }
                 }
+            }),
+            prisma.product.findMany({
+                where: {
+                    active: true,
+                    stock: { lt: 5 }
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    stock: true
+                },
+                orderBy: { stock: "asc" }
             })
         ]);
 
@@ -231,6 +243,7 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
             topProducts,
             clientStats,
             dailyStats,
+            lowStockProducts,
             allOrders // Exposed to avoid redundant fetch on the page
         };
     } catch (error) {
