@@ -171,7 +171,8 @@ export function SalesChart({ dailyStats, ordersByStatus, topProducts }: SalesCha
                                             nameKey="status"
                                             animationDuration={1500}
                                             animationEasing="ease-out"
-                                            label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                            label={({ name, percent }: any) => `${name || 'Other'} ${(percent * 100).toFixed(0)}%`}
                                         >
                                             {ordersByStatus.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
