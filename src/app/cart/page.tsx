@@ -112,7 +112,7 @@ export default function CartPage() {
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
                                                 <p className="text-foreground font-bold tabular-nums">
-                                                    L.E {(item.product.price * item.quantity).toLocaleString()}
+                                                    L.E {(item.product.price * item.quantity).toLocaleString('en-US')}
                                                 </p>
                                             </div>
                                         </div>
@@ -126,7 +126,7 @@ export default function CartPage() {
                             <div className="flex flex-col gap-4 max-w-sm ml-auto">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Subtotal</span>
-                                    <span className="font-bold">L.E {totalPrice.toLocaleString()}</span>
+                                    <span className="font-bold">L.E {totalPrice.toLocaleString('en-US')}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Shipping</span>
@@ -135,7 +135,7 @@ export default function CartPage() {
                                 <div className="h-px bg-border my-2" />
                                 <div className="flex justify-between">
                                     <span className="font-bold uppercase tracking-wider text-sm">Total</span>
-                                    <span className="text-xl font-black">L.E {totalPrice.toLocaleString()}</span>
+                                    <span className="text-xl font-black">L.E {totalPrice.toLocaleString('en-US')}</span>
                                 </div>
 
                                 <Link

@@ -297,7 +297,7 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-foreground font-bold">L.E {(item.product.price * item.quantity).toLocaleString()}</p>
+                                    <p className="text-foreground font-bold">L.E {(item.product.price * item.quantity).toLocaleString('en-US')}</p>
                                 </div>
                             </div>
                         ))}
@@ -306,23 +306,23 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
                     <div className="mt-8 space-y-4 pt-8 border-t border-border">
                         <div className="flex justify-between items-center text-muted-foreground">
                             <span>Subtotal ({totalItems} items)</span>
-                            <span>L.E {totalPrice.toLocaleString()}</span>
+                            <span>L.E {totalPrice.toLocaleString('en-US')}</span>
                         </div>
                         {appliedDiscount && (
                             <div className="flex justify-between items-center text-primary font-bold">
                                 <span>Discount ({appliedDiscount.pct}%)</span>
-                                <span>- L.E {discountAmount.toLocaleString()}</span>
+                                <span>- L.E {discountAmount.toLocaleString('en-US')}</span>
                             </div>
                         )}
                         <div className="flex justify-between items-center text-muted-foreground">
                             <span>Shipping</span>
                             <span className="text-foreground font-medium">
-                                {shippingFee === 0 ? "FREE" : `L.E ${shippingFee.toLocaleString()}`}
+                                {shippingFee === 0 ? "FREE" : `L.E ${shippingFee.toLocaleString('en-US')}`}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-2xl font-bold text-foreground pt-2">
                             <span>Total</span>
-                            <span>L.E {finalTotal.toLocaleString()}</span>
+                            <span>L.E {finalTotal.toLocaleString('en-US')}</span>
                         </div>
 
                         <Button

@@ -15,6 +15,7 @@ import {
     CardDescription
 } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format-currency";
+import { SalesChart } from "@/components/admin/sales-chart";
 
 export default async function AdminDashboardPage() {
     const stats = await getDashboardStats().catch(() => ({
@@ -23,7 +24,10 @@ export default async function AdminDashboardPage() {
         totalRevenue: 0,
         totalCustomers: 0,
         recentOrders: [],
-        ordersByStatus: []
+        ordersByStatus: [],
+        dailyStats: [],
+        topProducts: [],
+        clientStats: []
     }));
 
     const statCards = [
@@ -117,16 +121,47 @@ export default async function AdminDashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Status Distribution placeholder */}
+                {/* Top Customers */}
                 <Card className="border-border bg-card text-foreground">
                     <CardHeader>
-                        <CardTitle>Sales Analysis</CardTitle>
-                        <CardDescription className="text-muted-foreground">Performance insights by category.</CardDescription>
+                        <CardTitle>Top Customers</CardTitle>
+                        <CardDescription className="text-muted-foreground">Your most valuable clients by total spend.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex h-64 items-center justify-center border-t border-border italic text-muted-foreground/20">
-                        [ Sales visualization coming soon ]
+                    <CardContent>
+                        <div className="space-y-4">
+                            {!stats.clientStats || stats.clientStats.length === 0 ? (
+                                <p className="text-sm text-muted-foreground italic text-center py-4">No customer data available</p>
+                            ) : (
+                                stats.clientStats.slice(0, 5).map((client: any, index: number) => (
+                                    <div key={client.email || index} className="flex items-center justify-between rounded-lg border border-border bg-foreground/5 p-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs">
+                                                {index + 1}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium line-clamp-1">{client.name || "Unknown"}</p>
+                                                <p className="text-xs text-muted-foreground line-clamp-1">{client.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right whitespace-nowrap ml-2">
+                                            <p className="text-sm font-bold">{formatCurrency(client.totalSpent)}</p>
+                                            <p className="text-[10px] text-muted-foreground uppercase">{client.orderCount} orders</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
+
+                {/* Sales Chart */}
+                <div className="lg:col-span-2">
+                    <SalesChart
+                        dailyStats={stats.dailyStats || []}
+                        ordersByStatus={stats.ordersByStatus || []}
+                        topProducts={stats.topProducts || []}
+                    />
+                </div>
             </div>
         </div>
     );

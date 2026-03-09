@@ -159,7 +159,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                             {product.name}
                         </h1>
                         <p className="text-3xl font-bold text-foreground/90">
-                            {typeof product.price === 'number' ? `L.E ${product.price.toLocaleString()}` : product.price}
+                            {typeof product.price === 'number' ? `L.E ${product.price.toLocaleString('en-US')}` : product.price}
                         </p>
                     </div>
 

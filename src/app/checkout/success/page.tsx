@@ -44,7 +44,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
                     </div>
                     <div className="flex justify-between items-center border-b border-border pb-4">
                         <span className="text-muted-foreground uppercase text-xs font-bold tracking-widest">Total Amount</span>
-                        <span className="text-foreground font-black text-xl">L.E {order.total.toLocaleString()}</span>
+                        <span className="text-foreground font-black text-xl">L.E {order.total.toLocaleString('en-US')}</span>
                     </div>
                     {order.discountCode && (
                         <div className="flex justify-between items-center border-b border-border pb-4">
@@ -70,7 +70,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-foreground font-bold">L.E {(item.price * item.quantity).toLocaleString()}</p>
+                                    <p className="text-foreground font-bold">L.E {(item.price * item.quantity).toLocaleString('en-US')}</p>
                                 </div>
                             </div>
                         ))}

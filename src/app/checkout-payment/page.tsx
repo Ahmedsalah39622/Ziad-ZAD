@@ -70,7 +70,7 @@ export default function CheckoutPaymentPage() {
                     <p className="text-muted-foreground text-center max-w-md">
                         Thank you for your purchase! You&apos;ll receive an email confirmation shortly with your order details and tracking info.
                     </p>
-                    <div className="text-2xl font-bold mt-2">L.E {grandTotal.toLocaleString()}</div>
+                    <div className="text-2xl font-bold mt-2">L.E {grandTotal.toLocaleString('en-US')}</div>
                     <Link
                         href="/shop"
                         className="bg-primary text-primary-foreground px-8 h-12 flex items-center font-bold tracking-widest uppercase text-xs hover:opacity-90 transition-colors mt-4"
@@ -260,7 +260,7 @@ export default function CheckoutPaymentPage() {
                                                     <p className="text-sm font-bold text-foreground">{item.product.name}</p>
                                                     <p className="text-xs text-muted-foreground">{item.color} / {item.size} × {item.quantity}</p>
                                                 </div>
-                                                <p className="text-sm font-bold tabular-nums">L.E {(item.product.price * item.quantity).toLocaleString()}</p>
+                                                <p className="text-sm font-bold tabular-nums">L.E {(item.product.price * item.quantity).toLocaleString('en-US')}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -269,7 +269,7 @@ export default function CheckoutPaymentPage() {
                                 <div className="border-t border-border mt-4 pt-4 flex flex-col gap-3">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Subtotal</span>
-                                        <span>L.E {totalPrice.toLocaleString()}</span>
+                                        <span>L.E {totalPrice.toLocaleString('en-US')}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Shipping</span>
@@ -281,7 +281,7 @@ export default function CheckoutPaymentPage() {
                                     <div className="h-px bg-border my-1" />
                                     <div className="flex justify-between">
                                         <span className="font-bold uppercase tracking-wider text-sm">Total</span>
-                                        <span className="text-xl font-black text-foreground">L.E {grandTotal.toLocaleString()}</span>
+                                        <span className="text-xl font-black text-foreground">L.E {grandTotal.toLocaleString('en-US')}</span>
                                     </div>
                                 </div>
 
