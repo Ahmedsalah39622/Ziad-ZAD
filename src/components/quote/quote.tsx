@@ -1,4 +1,5 @@
 import { QuoteIcon } from "lucide-react";
+import { BrandMarquee } from "@/components/brand/brand-marquee";
 
 export function Quote() {
   return (
@@ -25,6 +26,10 @@ export function Quote() {
           <span className="text-xl font-bold tracking-widest uppercase">The ZAD Philosophy</span>
           <span className="text-muted-foreground text-sm font-medium tracking-wider">EST. 2026 // GENESIS EDITION</span>
         </cite>
+      </div>
+
+      <div className="mt-16 md:mt-24">
+        <BrandMarquee />
       </div>
     </section>
   );
