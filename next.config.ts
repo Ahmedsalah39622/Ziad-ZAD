@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "@grandchef/node-printer",
     "@mapbox/node-pre-gyp",
     "node-thermal-printer",
+    "@napi-rs/canvas",
   ],
   images: {
     remotePatterns: [

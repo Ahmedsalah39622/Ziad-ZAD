@@ -320,11 +320,11 @@ export class XPrinterService {
           data: finalBuffer,
           printer: printerName,
           type: "RAW",
-          success: (id: any) => {
+          success: (id: unknown) => {
             console.log(`✅ Arabic-Enabled TSPL Receipt printed successfully. Job ID: ${id}`);
             resolve(true);
           },
-          error: (err: any) => {
+          error: (err: unknown) => {
             console.error("❌ Arabic-Enabled TSPL Print error:", err);
             resolve(false);
           }
