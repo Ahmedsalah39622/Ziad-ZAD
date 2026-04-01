@@ -1,5 +1,6 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
+import { CharacterSet } from "node-thermal-printer";
 
 type ThermalPrinterLike = {
   isPrinterConnected?: () => Promise<boolean>;
@@ -40,7 +41,8 @@ export class XPrinterService {
         type: printerType,
         interface: printerInterface,
         driver: driver,
-        width: 58, // 58mm paper width (standard for XPrinter 370B)
+        width: 48, // Standard 58mm width (48 chars)
+        characterSet: CharacterSet.PC437_USA,
         lineCharacter: "=",
       });
 
@@ -85,10 +87,10 @@ export class XPrinterService {
       printer.bold?.(true);
       printer.setTextSize?.(2, 2);
       printer.newLine?.();
-      printer.print?.("🛍️ INVOICE");
+      printer.print?.("INVOICE"); // Removed emoji
       printer.newLine?.();
       printer.setTextSize?.(1, 1);
-      printer.print?.("═════════════════════");
+      printer.print?.("=====================");
       printer.newLine?.();
       printer.bold?.(false);
 
@@ -97,6 +99,7 @@ export class XPrinterService {
       printer.print?.(`Order: ${receiptData.orderId}`);
       printer.newLine?.();
       printer.print?.(`Date: ${receiptData.date}`);
+
       printer.newLine?.();
       printer.newLine?.();
 
@@ -114,13 +117,13 @@ export class XPrinterService {
       printer.newLine?.();
 
       // Items Header
-      printer.print?.("═════════════════════");
+      printer.print?.("=====================");
       printer.newLine?.();
       printer.bold?.(true);
       printer.print?.("Item Details:");
       printer.newLine?.();
       printer.bold?.(false);
-      printer.print?.("─────────────────────");
+      printer.print?.("---------------------");
       printer.newLine?.();
 
       // Items
@@ -149,7 +152,7 @@ export class XPrinterService {
       }
 
       // Totals Section
-      printer.print?.("═════════════════════");
+      printer.print?.("=====================");
       printer.newLine?.();
       printer.print?.(
         `Subtotal:`.padEnd(25) + this.formatPrice(receiptData.subtotal)
@@ -202,25 +205,23 @@ export class XPrinterService {
       }
 
       // Footer
+      printer.newLine?.();
       printer.alignCenter?.();
-      printer.print?.("Thank You!");
+      printer.print?.("THANK YOU FOR SHOPPING!"); // Removed emoji
       printer.newLine?.();
-      printer.print?.(`${new Date().toLocaleString("ar-EG")}`);
-      printer.newLine?.();
-      printer.print?.("═════════════════════");
+      printer.print?.("ZAD - BREAK YOUR LIMITS");
       printer.newLine?.();
       printer.newLine?.();
-      printer.newLine?.();
-
-      // Cut paper
       printer.cut?.();
 
-      // Execute/Print
+      const buffer = (printer as any).getBuffer?.() || Buffer.alloc(0);
+      console.log(`Buffer generated: ${buffer.length} bytes`);
+
       await (printer.execute?.() || Promise.resolve());
-      console.log("✅ Receipt printed successfully");
+      console.log("Receipt printed successfully");
       return true;
     } catch (error) {
-      console.error("❌ Print error:", error);
+      console.error("Print error:", error);
       return false;
     }
   }
