@@ -63,29 +63,6 @@ export default async function RootLayout({
     "priceRange": "$$"
   };
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const whatsappNumber = await getSetting("whatsapp_number", "");
-
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "ClothingStore",
-    "name": "ZAD",
-    "url": "https://zadfitt.com",
-    "logo": "https://zadfitt.com/icon.svg",
-    "image": "https://zadfitt.com/zad_green_shirt_studio2255.png",
-    "description": "Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "EG"
-    },
-    // Adding price range as it's a clothing store usually expected by Google
-    "priceRange": "$$"
-  };
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
