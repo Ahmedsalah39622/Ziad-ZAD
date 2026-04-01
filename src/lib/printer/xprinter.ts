@@ -1,12 +1,5 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
-let printerDriver: any = null;
-try {
-  printerDriver = require("@grandchef/node-printer");
-} catch {
-  // Native module not available (e.g. on Vercel) — printer features disabled
-}
 
 type ThermalPrinterLike = {
   isPrinterConnected?: () => Promise<boolean>;
@@ -23,6 +16,15 @@ type ThermalPrinterLike = {
   execute?: () => Promise<unknown>;
 };
 
+function loadPrinterDriver() {
+  try {
+    // Dynamic require hidden from webpack static analysis
+    return eval('require')("@grandchef/node-printer");
+  } catch {
+    return null;
+  }
+}
+
 // XPrinter 370B USB Printer Service
 export class XPrinterService {
   private printer: ThermalPrinterLike | null = null;
@@ -32,11 +34,12 @@ export class XPrinterService {
       const printerType =
         process.env.PRINTER_TYPE === "STAR" ? PrinterTypes.STAR : PrinterTypes.EPSON;
       const printerInterface = process.env.PRINTER_INTERFACE || "usb";
+      const driver = loadPrinterDriver();
 
       this.printer = new PrinterLib({
         type: printerType,
         interface: printerInterface,
-        driver: printerDriver,
+        driver: driver,
         width: 58, // 58mm paper width (standard for XPrinter 370B)
         lineCharacter: "=",
       });
