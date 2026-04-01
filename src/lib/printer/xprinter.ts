@@ -64,7 +64,9 @@ export class XPrinterService {
   }
 
   async printReceipt(receiptData: ReceiptData) {
-    if (!this.printer) {
+    const isTSPL = process.env.PRINTER_TYPE === "TSPL";
+
+    if (!isTSPL && !this.printer) {
       const initialized = await this.initialize();
       if (!initialized) {
         console.error("❌ Printer not available");
@@ -73,6 +75,10 @@ export class XPrinterService {
     }
 
     try {
+      if (isTSPL) {
+        return await this.printReceiptTSPL(receiptData);
+      }
+
       const printer = this.printer;
       if (!printer) {
         console.error("❌ Printer is null after initialization");
@@ -155,20 +161,20 @@ export class XPrinterService {
       printer.print?.("=====================");
       printer.newLine?.();
       printer.print?.(
-        `Subtotal:`.padEnd(25) + this.formatPrice(receiptData.subtotal)
+        `Subtotal:`.padEnd(21) + this.formatPrice(receiptData.subtotal)
       );
       printer.newLine?.();
 
       if (receiptData.discountAmount && receiptData.discountAmount > 0) {
         printer.print?.(
-          `Discount (${receiptData.discountPct}%):`.padEnd(25) +
+          `Discount (${receiptData.discountPct}%):`.padEnd(21) +
           `-${this.formatPrice(receiptData.discountAmount)}`
         );
         printer.newLine?.();
       }
 
       printer.print?.(
-        `Shipping:`.padEnd(25) + this.formatPrice(receiptData.shippingFee)
+        `Shipping:`.padEnd(21) + this.formatPrice(receiptData.shippingFee)
       );
       printer.newLine?.();
       printer.print?.("---------------------");
@@ -177,7 +183,7 @@ export class XPrinterService {
       printer.bold?.(true);
       printer.setTextSize?.(1, 2);
       printer.print?.(
-        `TOTAL:`.padEnd(25) + this.formatPrice(receiptData.total)
+        `TOTAL:`.padEnd(21) + this.formatPrice(receiptData.total)
       );
       printer.newLine?.();
       printer.setTextSize?.(1, 1);
@@ -225,6 +231,97 @@ export class XPrinterService {
       return true;
     } catch (error) {
       console.error("Print error:", error);
+      return false;
+    }
+  }
+
+  private async printReceiptTSPL(receiptData: ReceiptData) {
+    try {
+      const printerInterface = process.env.PRINTER_INTERFACE || "printer:Xprinter XP-370B";
+      const printerName = printerInterface.replace("printer:", "");
+      
+      // Calculate height based on items
+      const heightMm = 150 + (receiptData.items.length * 25);
+      
+      let commands = `SIZE 58 mm, ${heightMm} mm\n`;
+      commands += `GAP 0, 0\n`;
+      commands += `DIRECTION 1\n`;
+      commands += `CLS\n`;
+      
+      let y = 30;
+      
+      // Header
+      commands += `TEXT 230,${y},"3",0,1,1,2,"INVOICE"\n`;
+      y += 60;
+      commands += `TEXT 30,${y},"2",0,1,1,"=============================="\n`;
+      y += 40;
+      
+      // Order & Date
+      commands += `TEXT 30,${y},"2",0,1,1,"Order: ${receiptData.orderId}"\n`;
+      y += 30;
+      commands += `TEXT 30,${y},"2",0,1,1,"Date: ${receiptData.date}"\n`;
+      y += 60;
+      
+      // Customer
+      commands += `TEXT 30,${y},"3",0,1,1,"Customer:"\n`;
+      y += 40;
+      commands += `TEXT 30,${y},"2",0,1,1,"${receiptData.customerName}"\n`;
+      y += 30;
+      commands += `TEXT 30,${y},"2",0,1,1,"Tel: ${receiptData.customerPhone}"\n`;
+      y += 30;
+      commands += `TEXT 30,${y},"2",0,1,1,"Address: ${receiptData.address.substring(0, 35)}"\n`;
+      y += 60;
+      
+      commands += `TEXT 30,${y},"2",0,1,1,"=============================="\n`;
+      y += 40;
+      commands += `TEXT 30,${y},"3",0,1,1,"Item Details:"\n`;
+      y += 40;
+      
+      // Items
+      for (const item of receiptData.items) {
+        commands += `TEXT 30,${y},"2",0,1,1,"${item.name.substring(0, 30)}"\n`;
+        y += 30;
+        commands += `TEXT 30,${y},"2",0,1,1,"  Qty: ${item.quantity} x ${item.price.toFixed(0)}"\n`;
+        y += 40;
+      }
+      
+      y += 20;
+      commands += `TEXT 30,${y},"2",0,1,1,"------------------------------"\n`;
+      y += 40;
+      
+      // Totals
+      commands += `TEXT 30,${y},"3",0,1,1,"TOTAL: ${receiptData.total.toFixed(2)} EGP"\n`;
+      y += 60;
+      
+      commands += `TEXT 230,${y},"2",0,1,1,2,"THANK YOU!"\n`;
+      y += 40;
+      commands += `TEXT 230,${y},"2",0,1,1,2,"ZAD - BREAK LIMITS"\n`;
+
+      commands += `PRINT 1\n`;
+ 
+      const driver = loadPrinterDriver();
+      if (!driver) {
+        console.error("❌ Printer driver not found");
+        return false;
+      }
+ 
+      return new Promise((resolve) => {
+        driver.printDirect({
+          data: commands,
+          printer: printerName,
+          type: "RAW",
+          success: (id: any) => {
+            console.log(`✅ TSPL Receipt printed successfully. Job ID: ${id}`);
+            resolve(true);
+          },
+          error: (err: any) => {
+            console.error("❌ TSPL Print error:", err);
+            resolve(false);
+          }
+        });
+      });
+    } catch (error) {
+      console.error("❌ Failed to process TSPL receipt:", error);
       return false;
     }
   }
