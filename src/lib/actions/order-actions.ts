@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { generateReceiptQR, formatReceiptData } from "@/lib/printer/qr-receipt";
+import { getPrinterService } from "@/lib/printer/xprinter";
 
 // Lazy imports to keep server logic out of client bundles
 async function getPrisma() {
@@ -269,11 +271,12 @@ export async function createOrder(data: {
     total: number;
     discountCode?: string;
     shippingFee?: number;
+    paymentMethod?: string;
 }) {
     const session = await requireUser();
     const prisma = await getPrisma();
 
-    return prisma.$transaction(async (tx) => {
+    const createdOrder = await prisma.$transaction(async (tx) => {
         let discountPct = 0;
         if (data.discountCode) {
             const dc = await tx.discountCode.findUnique({ where: { code: data.discountCode } });
@@ -288,6 +291,11 @@ export async function createOrder(data: {
         }
 
         const finalTotal = (data.total * (1 - discountPct / 100)) + (data.shippingFee || 0);
+        
+        // Define initial status based on payment method
+        const isOnline = data.paymentMethod && data.paymentMethod !== "COD";
+        const initialStatus = isOnline ? "PENDING_PAYMENT" : "PENDING";
+
         const order = await tx.order.create({
             /* eslint-disable @typescript-eslint/no-explicit-any */
             data: {
@@ -302,7 +310,9 @@ export async function createOrder(data: {
                 discountCode: data.discountCode,
                 discountPct,
                 shippingFee: data.shippingFee || 0,
-                status: "PENDING",
+                status: initialStatus,
+                paymentMethod: data.paymentMethod || "COD",
+                paymentStatus: "UNPAID",
                 items: {
                     create: data.items.map((item) => ({
                         productId: item.productId,
@@ -320,7 +330,7 @@ export async function createOrder(data: {
         for (const item of data.items) {
             const product = await tx.product.findUnique({
                 where: { id: item.productId },
-                select: { sizes: true }
+                select: { sizes: true, name: true }
             });
 
             if (product) {
@@ -349,4 +359,80 @@ export async function createOrder(data: {
 
         return order;
     });
+
+    // Auto-print in the background for COD orders without blocking checkout success.
+    if ((createdOrder.paymentMethod || "COD") === "COD") {
+        void printOrderReceipt(createdOrder.id).catch((error) => {
+            console.error(`Auto-print failed for order ${createdOrder.id}:`, error);
+        });
+    }
+
+    return createdOrder;
+}
+
+// Helper function to print receipt after order creation
+export async function printOrderReceipt(orderId: string) {
+    try {
+        const prisma = await getPrisma();
+        
+        // Fetch complete order with items and product details
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            select: { name: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!order) {
+            console.error(`Order ${orderId} not found`);
+            return { success: false, error: "Order not found" };
+        }
+
+        // Generate QR code
+        const qrCode = await generateReceiptQR(order as any);
+
+        // Format receipt data with product names
+        const receiptData = {
+            orderId: order.id,
+            date: new Date(order.createdAt).toLocaleString("ar-EG"),
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            address: `${order.address}, ${order.city}`,
+            items: order.items.map((item) => ({
+                name: item.product.name,
+                quantity: item.quantity,
+                price: item.price,
+                size: item.size,
+                color: item.color,
+            })),
+            subtotal: order.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+            discountAmount: order.discountPct > 0 
+                ? (order.items.reduce((sum, item) => sum + item.price * item.quantity, 0) * order.discountPct) / 100 
+                : 0,
+            discountPct: order.discountPct,
+            shippingFee: order.shippingFee,
+            total: order.total,
+            paymentMethod: order.paymentMethod === "COD" ? "Cash on Delivery" : "Online Payment",
+            qrCode,
+        };
+
+        // Get printer service and print
+        const printerService = await getPrinterService();
+        if (printerService) {
+            const printed = await printerService.printReceipt(receiptData);
+            return { success: printed, error: printed ? undefined : "Print failed" };
+        } else {
+            console.warn("⚠️ Printer service not available - order created but not printed");
+            return { success: true, warning: "Printer not available" };
+        }
+    } catch (error) {
+        console.error("Error printing receipt:", error);
+        return { success: false, error: String(error) };
+    }
 }

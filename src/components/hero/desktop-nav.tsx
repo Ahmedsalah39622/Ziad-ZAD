@@ -12,6 +12,7 @@ import { useCart } from "@/lib/cart-context";
 import Link from "next/link";
 import { ShoppingBag, ShieldCheck, User } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { memo } from "react";
 import { UserNav } from "@/components/hero/user-nav";
 
 type Props = {
@@ -22,7 +23,7 @@ type Props = {
   className?: string;
 };
 
-export function DesktopNav({ items, className }: Props) {
+function DesktopNavComponent({ items, className }: Props) {
   const { data: session } = useSession();
   const user = session?.user;
   const { totalItems } = useCart();
@@ -94,3 +95,6 @@ export function DesktopNav({ items, className }: Props) {
     </nav>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export const DesktopNav = memo(DesktopNavComponent);

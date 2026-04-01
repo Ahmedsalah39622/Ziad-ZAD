@@ -1,7 +1,8 @@
 import { getSetting } from "@/lib/actions/settings-actions";
 import { RibbonForm } from "./ribbon-form";
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 1 minute
+export const revalidate = 60;
 
 export default async function AdminRibbonPage() {
     const ribbonSettingsRaw = await getSetting("ribbon_settings", JSON.stringify({

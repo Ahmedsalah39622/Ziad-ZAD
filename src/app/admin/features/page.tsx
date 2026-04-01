@@ -1,7 +1,8 @@
 import { getSetting } from "@/lib/actions/settings-actions";
 import { FeaturesForm } from "./features-form";
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 1 minute
+export const revalidate = 60;
 
 export default async function FeaturesAdminPage() {
     const settingsRaw = await getSetting("feature_settings", "{}");

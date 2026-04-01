@@ -11,7 +11,8 @@ import { getSetting } from "@/lib/actions/settings-actions";
 import { getProducts } from "@/lib/actions/product-actions";
 import { FeaturedCategory } from "@/components/home/featured-category";
 
-export const dynamic = "force-dynamic";
+// Cache for 10 minutes (instead of force-dynamic which kills caching)
+export const revalidate = 600;
 
 export default async function Home() {
   const settingsRaw = await getSetting("feature_settings", "{}");

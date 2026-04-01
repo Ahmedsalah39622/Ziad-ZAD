@@ -1,11 +1,21 @@
-import { getProductById } from "@/lib/actions/product-actions";
+import { getProductById, getProducts } from "@/lib/actions/product-actions";
 import { Nav } from "@/components/hero/nav";
 import { Footer } from "@/components/footer/footer";
 import Link from "next/link";
 import { ProductDetailsClient } from "@/components/shop/product-details-client";
 import { getSetting } from "@/lib/actions/settings-actions";
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 10 minutes
+export const revalidate = 600;
+
+// Generate static params for popular products
+export async function generateStaticParams() {
+    const products = await getProducts();
+    // Only generate for first 20 products (rest will be on-demand)
+    return products.slice(0, 20).map(product => ({
+        id: product.id,
+    }));
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

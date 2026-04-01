@@ -11,7 +11,8 @@ export const metadata: Metadata = {
     description: "Premium streetwear engineered with nanobana special effects.",
 };
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 5 minutes (300 seconds)
+export const revalidate = 300;
 
 export default async function ShopPage() {
     const rawProducts = await getProducts();

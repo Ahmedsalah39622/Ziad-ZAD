@@ -9,7 +9,8 @@ export const metadata = {
     title: "Product Discounts - Admin",
 };
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 1 minute
+export const revalidate = 60;
 
 export default async function ProductDiscountsPage() {
     const session = await auth();

@@ -10,14 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CreditCard, Truck, Package, CheckCircle2 } from "lucide-react";
+import { Loader2, CreditCard, Truck, Package, CheckCircle2, Wallet, Zap } from "lucide-react";
 import Image from "next/image";
+import { initiatePaymobPayment } from "@/lib/actions/payment-actions";
+
 
 export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: string | null; email?: string | null } | null, shippingFee?: number }) {
     const { items, totalItems, totalPrice, clearCart } = useCart();
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-
     const [formData, setFormData] = useState({
         customerName: user?.name || "",
         customerEmail: user?.email || "",
@@ -30,6 +31,7 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
 
     const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; pct: number } | null>(null);
     const [isValidating, setIsValidating] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<'COD' | 'CARD' | 'WALLET' | 'VALU'>('COD');
 
     const [isSuccess, setIsSuccess] = useState(false);
     const [orderId, setOrderId] = useState<string | null>(null);
@@ -136,15 +138,24 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
                 discountCode: appliedDiscount?.code || undefined,
                 items: orderItems,
                 total: totalPrice,
-                shippingFee: shippingFee
+                shippingFee: shippingFee,
+                paymentMethod: paymentMethod
             });
 
-            toast.success("Order placed successfully!");
-            setOrderId(result.id);
-            setIsSuccess(true);
-            clearCart();
-            // Pre-fetch shop for fast navigation back
-            router.prefetch('/shop');
+            if (paymentMethod === 'COD') {
+                toast.success("Order placed successfully!");
+
+                setOrderId(result.id);
+                setIsSuccess(true);
+                clearCart();
+                router.prefetch('/shop');
+            } else {
+                // Online Payment Flow
+                toast.info("Redirecting to secure payment...");
+                const checkoutUrl = await initiatePaymobPayment(result.id, paymentMethod);
+                clearCart(); // Clear cart before redirecting so user doesn't come back to a filled cart
+                window.location.href = checkoutUrl;
+            }
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to place order. Please try again.");
             setIsLoading(false);
@@ -257,12 +268,70 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
                             <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                                 <CreditCard className="h-5 w-5" /> Payment Method
                             </h3>
-                            <div className="p-4 rounded-xl border border-border bg-foreground/5 flex items-center gap-4">
-                                <div className="h-4 w-4 rounded-full border-2 border-foreground bg-foreground shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
-                                <div>
-                                    <p className="text-foreground font-medium">Cash on Delivery (COD)</p>
-                                    <p className="text-muted-foreground text-sm">Pay when you receive your order.</p>
-                                </div>
+                            <div className="grid grid-cols-1 gap-3">
+                                {/* COD */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('COD')}
+                                    className={`p-4 rounded-xl border flex items-center gap-4 transition-all duration-300 text-left ${paymentMethod === 'COD' ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/20'}`}
+                                >
+                                    <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'COD' ? 'border-foreground' : 'border-muted-foreground'}`}>
+                                        {paymentMethod === 'COD' && <div className="h-2 w-2 rounded-full bg-foreground" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-bold text-sm tracking-tight uppercase italic">Cash on Delivery</p>
+                                        <p className="text-muted-foreground text-xs">Pay with cash when your order arrives.</p>
+                                    </div>
+                                    <Truck className="h-5 w-5 text-muted-foreground/50" />
+                                </button>
+
+                                {/* CARD */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('CARD')}
+                                    className={`p-4 rounded-xl border flex items-center gap-4 transition-all duration-300 text-left ${paymentMethod === 'CARD' ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/20'}`}
+                                >
+                                    <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'CARD' ? 'border-foreground' : 'border-muted-foreground'}`}>
+                                        {paymentMethod === 'CARD' && <div className="h-2 w-2 rounded-full bg-foreground" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-bold text-sm tracking-tight uppercase italic font-mono uppercase italic">Credit / Debit Card</p>
+                                        <p className="text-muted-foreground text-xs">Secure payment via Paymob.</p>
+                                    </div>
+                                    <CreditCard className="h-5 w-5 text-muted-foreground/50" />
+                                </button>
+
+                                {/* WALLET */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('WALLET')}
+                                    className={`p-4 rounded-xl border flex items-center gap-4 transition-all duration-300 text-left ${paymentMethod === 'WALLET' ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/20'}`}
+                                >
+                                    <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'WALLET' ? 'border-foreground' : 'border-muted-foreground'}`}>
+                                        {paymentMethod === 'WALLET' && <div className="h-2 w-2 rounded-full bg-foreground" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-bold text-sm tracking-tight uppercase italic font-mono uppercase italic">Mobile Wallets</p>
+                                        <p className="text-muted-foreground text-xs">Vodafone Cash, Etisalat Cash, etc.</p>
+                                    </div>
+                                    <Wallet className="h-5 w-5 text-muted-foreground/50" />
+                                </button>
+
+                                {/* VALU */}
+                                <button
+                                    type="button"
+                                    onClick={() => setPaymentMethod('VALU')}
+                                    className={`p-4 rounded-xl border flex items-center gap-4 transition-all duration-300 text-left ${paymentMethod === 'VALU' ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/20'}`}
+                                >
+                                    <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'VALU' ? 'border-foreground' : 'border-muted-foreground'}`}>
+                                        {paymentMethod === 'VALU' && <div className="h-2 w-2 rounded-full bg-foreground" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-foreground font-bold text-sm tracking-tight uppercase italic font-mono uppercase italic">ValU / Installments</p>
+                                        <p className="text-muted-foreground text-xs">Pay in installments over 6-60 months.</p>
+                                    </div>
+                                    <Zap className="h-5 w-5 text-muted-foreground/50" />
+                                </button>
                             </div>
                         </div>
                     </form>

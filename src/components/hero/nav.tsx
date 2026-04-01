@@ -1,5 +1,6 @@
-"use client";
+﻿"use client";
 
+import { memo } from "react";
 import { MobileNav } from "@/components/hero/mobile-nav";
 import { DesktopNav } from "@/components/hero/desktop-nav";
 
@@ -20,7 +21,7 @@ const navItems = [
   },
 ];
 
-export function Nav() {
+function NavComponent() {
   return (
     <div className="flex flex-col w-full">
       <div className="w-full">
@@ -31,3 +32,6 @@ export function Nav() {
     </div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders when parent component updates
+export const Nav = memo(NavComponent);

@@ -6,6 +6,7 @@ import { useCart } from "@/lib/cart-context";
 import { Menu, ShoppingBag, ShieldCheck, User, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { memo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type Props = {
@@ -16,7 +17,7 @@ type Props = {
   className?: string;
 };
 
-export function MobileNav({ items, className }: Props) {
+function MobileNavComponent({ items, className }: Props) {
   const { data: session } = useSession();
   const user = session?.user;
   const { totalItems } = useCart();
@@ -125,3 +126,6 @@ export function MobileNav({ items, className }: Props) {
     </nav>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+export const MobileNav = memo(MobileNavComponent);

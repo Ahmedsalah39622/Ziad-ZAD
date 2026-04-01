@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import * as Icons from "lucide-react";
 
-export const dynamic = "force-dynamic";
+// ISR: Revalidate every 1 minute for auth checks, balance between security and performance
+export const revalidate = 60;
 
 import {
     LogOut,

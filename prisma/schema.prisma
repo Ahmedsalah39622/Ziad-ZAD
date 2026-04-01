@@ -58,6 +58,8 @@ model Order {
   city          String
   notes         String?
   status        String      @default("PENDING")
+  paymentMethod String      @default("COD")
+  paymentStatus String      @default("UNPAID")
   total         Float
   discountCode  String?
   discountPct   Float       @default(0)
