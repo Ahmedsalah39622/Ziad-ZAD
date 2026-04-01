@@ -187,12 +187,12 @@ export function verifyHMAC(obj: PaymobCallbackObj, hmac: string) {
         is_refunded,
         is_standalone_payment,
         is_voided,
-        order.id,
+        order?.id,
         owner,
         pending,
-        source_data.pan,
-        source_data.sub_type,
-        source_data.type,
+        source_data?.pan,
+        source_data?.sub_type,
+        source_data?.type,
         success
     ].join('');
 
