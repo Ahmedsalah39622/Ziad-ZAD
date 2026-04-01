@@ -16,6 +16,7 @@
     "@mapbox/node-pre-gyp": "^2.0.3"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.97",
     "@paddle/paddle-js": "^1.4.1",
     "@prisma/client": "^6.4.1",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -29,7 +30,6 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@vercel/analytics": "^1.6.1",
     "bcryptjs": "^3.0.3",
-    "canvas": "^3.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
