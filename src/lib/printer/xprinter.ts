@@ -1,5 +1,7 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const printerDriver = require("@grandchef/node-printer");
 
 type ThermalPrinterLike = {
   isPrinterConnected?: () => Promise<boolean>;
@@ -29,6 +31,7 @@ export class XPrinterService {
       this.printer = new PrinterLib({
         type: printerType,
         interface: printerInterface,
+        driver: printerDriver,
         width: 58, // 58mm paper width (standard for XPrinter 370B)
         lineCharacter: "=",
       });
