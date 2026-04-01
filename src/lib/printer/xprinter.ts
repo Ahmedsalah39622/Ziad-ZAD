@@ -171,7 +171,7 @@ export class XPrinterService {
         `Shipping:`.padEnd(25) + this.formatPrice(receiptData.shippingFee)
       );
       printer.newLine?.();
-      printer.print?.("─────────────────────");
+      printer.print?.("---------------------");
       printer.newLine?.();
 
       printer.bold?.(true);
@@ -183,7 +183,7 @@ export class XPrinterService {
       printer.setTextSize?.(1, 1);
       printer.bold?.(false);
 
-      printer.print?.("═════════════════════");
+      printer.print?.("=====================");
       printer.newLine?.();
       printer.newLine?.();
 
@@ -193,7 +193,8 @@ export class XPrinterService {
       printer.newLine?.();
       printer.newLine?.();
 
-      // QR Code
+      // QR Code - Disabled for testing
+      /*
       if (receiptData.qrCode) {
         try {
           printer.printImage?.(receiptData.qrCode);
@@ -203,6 +204,7 @@ export class XPrinterService {
           printer.newLine?.();
         }
       }
+      */
 
       // Footer
       printer.newLine?.();
