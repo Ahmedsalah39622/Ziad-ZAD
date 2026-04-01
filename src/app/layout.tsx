@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 // import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
@@ -45,6 +46,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? "";
   const whatsappNumber = await getSetting("whatsapp_number", "");
 
   const schemaData = {
@@ -67,10 +69,12 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html: `
               window.__DEBUG__ = true;
