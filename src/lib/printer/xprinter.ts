@@ -10,7 +10,8 @@ type ThermalPrinterLike = {
   setTextSize?: (width: number, height: number) => void;
   newLine?: () => void;
   print?: (text: string) => void;
-  printImage?: (img: string) => Promise<void> | void;
+  // Accept both PrintImage return types from node-thermal-printer.
+  printImage?: (img: string) => void | Promise<void> | Promise<Buffer>;
   cut?: () => void;
   execute?: () => Promise<unknown>;
 };
@@ -24,13 +25,11 @@ export class XPrinterService {
       const printerType =
         process.env.PRINTER_TYPE === "STAR" ? PrinterTypes.STAR : PrinterTypes.EPSON;
       const printerInterface = process.env.PRINTER_INTERFACE || "usb";
-      const characterSet = process.env.PRINTER_CHARSET || "WPC1256_ARABIC";
 
       this.printer = new PrinterLib({
         type: printerType,
         interface: printerInterface,
         width: 58, // 58mm paper width (standard for XPrinter 370B)
-        characterSet,
         lineCharacter: "=",
       });
 
@@ -62,6 +61,10 @@ export class XPrinterService {
 
     try {
       const printer = this.printer;
+      if (!printer) {
+        console.error("❌ Printer is null after initialization");
+        return false;
+      }
 
       // Clear buffer
       printer.clear?.();
