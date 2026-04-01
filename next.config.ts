@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   // Increase the body size limit for Server Actions (file uploads, large forms, etc.)
   // the default is 1mb, product creation can exceed that when sending images/base64
   // In Next 15 this setting must live under `experimental` so it's picked up.
+  serverExternalPackages: [
+    "@grandchef/node-printer",
+    "@mapbox/node-pre-gyp",
+    "node-thermal-printer",
+  ],
   images: {
     remotePatterns: [
       {
