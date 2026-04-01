@@ -102,6 +102,31 @@ async function printOrder(order: PendingOrder): Promise<boolean> {
   return printed;
 }
 
+async function sendHeartbeat() {
+  let status = "online";
+  try {
+    const service = await getPrinterService();
+    if (!service) {
+      status = "error";
+    }
+  } catch (error) {
+    status = "error";
+  }
+
+  try {
+    await fetch(`${BASE_URL}/api/print/heartbeat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-print-agent-secret": AGENT_SECRET,
+      },
+      body: JSON.stringify({ status }),
+    });
+  } catch (error) {
+    // Silently ignore heartbeat errors to not swamp the console
+  }
+}
+
 async function pollOnce() {
   const orders = await fetchPending();
   if (!orders.length) return;
@@ -135,6 +160,7 @@ async function start() {
 
   while (true) {
     try {
+      await sendHeartbeat();
       await pollOnce();
     } catch (error) {
       console.error("Polling error:", error);

@@ -5,7 +5,8 @@ import {
     Package,
     Users,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    Printer
 } from "lucide-react";
 import {
     Card,
@@ -16,20 +17,30 @@ import {
 } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format-currency";
 import { SalesChart } from "@/components/admin/sales-chart";
+import { getSetting } from "@/lib/actions/settings-actions";
 
 export default async function AdminDashboardPage() {
-    const stats = await getDashboardStats().catch(() => ({
-        totalProducts: 0,
-        totalOrders: 0,
-        totalRevenue: 0,
-        totalCustomers: 0,
-        recentOrders: [],
-        ordersByStatus: [],
-        dailyStats: [],
-        topProducts: [],
-        clientStats: [],
-        lowStockProducts: []
-    }));
+    const [stats, printerStatus, lastSeenStr] = await Promise.all([
+        getDashboardStats().catch(() => ({
+            totalProducts: 0,
+            totalOrders: 0,
+            totalRevenue: 0,
+            totalCustomers: 0,
+            recentOrders: [],
+            ordersByStatus: [],
+            dailyStats: [],
+            topProducts: [],
+            clientStats: [],
+            lowStockProducts: []
+        })),
+        getSetting("printer_status", "offline"),
+        getSetting("printer_last_seen", "")
+    ]);
+
+    const lastSeen = lastSeenStr ? new Date(lastSeenStr) : null;
+    const isOnline = lastSeen ? (new Date().getTime() - lastSeen.getTime()) < 30000 : false;
+    const displayStatus = isOnline ? (printerStatus === "online" ? "Online" : "Issue") : "Offline";
+    const statusColor = isOnline ? (printerStatus === "online" ? "text-emerald-500" : "text-amber-500") : "text-rose-500";
 
     const statCards = [
         {
@@ -59,6 +70,14 @@ export default async function AdminDashboardPage() {
             description: "+15% this week",
             icon: Users,
             trend: "up"
+        },
+        {
+            title: "Printer Status",
+            value: displayStatus,
+            description: lastSeen ? `Last seen: ${lastSeen.toLocaleTimeString()}` : "Never seen",
+            icon: Printer,
+            trend: isOnline ? "up" : "down",
+            color: statusColor
         }
     ];
 
@@ -70,17 +89,17 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 {statCards.map((card) => (
                     <Card key={card.title} className="border-border bg-card text-foreground shadow-lg">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
                                 {card.title}
                             </CardTitle>
-                            <card.icon className="h-4 w-4 text-muted-foreground" />
+                            <card.icon className={`h-4 w-4 ${card.color || 'text-muted-foreground'}`} />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{card.value}</div>
+                            <div className={`text-2xl font-bold ${card.color || ''}`}>{card.value}</div>
                             <p className="mt-1 flex items-center text-xs text-muted-foreground">
                                 {card.trend === "up" && <ArrowUpRight className="mr-1 h-3 w-3 text-foreground" />}
                                 {card.trend === "down" && <ArrowDownRight className="mr-1 h-3 w-3 text-rose-500" />}
