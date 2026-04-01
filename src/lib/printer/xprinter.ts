@@ -310,10 +310,12 @@ export class XPrinterService {
           data: commands,
           printer: printerName,
           type: "RAW",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           success: (id: any) => {
             console.log(`✅ TSPL Receipt printed successfully. Job ID: ${id}`);
             resolve(true);
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           error: (err: any) => {
             console.error("❌ TSPL Print error:", err);
             resolve(false);
