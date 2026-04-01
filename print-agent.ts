@@ -78,7 +78,7 @@ async function printOrder(order: PendingOrder): Promise<boolean> {
   const printerService = await getPrinterService();
   if (!printerService) return false;
 
-  const printed = await printerService.printReceipt({
+  const printed = (await printerService.printReceipt({
     orderId: order.id,
     date: new Date(order.createdAt).toLocaleString("ar-EG"),
     customerName: order.customerName,
@@ -97,7 +97,7 @@ async function printOrder(order: PendingOrder): Promise<boolean> {
     shippingFee: order.shippingFee,
     total: order.total,
     paymentMethod: order.paymentMethod,
-  });
+  })) as boolean;
 
   return printed;
 }

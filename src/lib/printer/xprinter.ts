@@ -63,7 +63,7 @@ export class XPrinterService {
     }
   }
 
-  async printReceipt(receiptData: ReceiptData) {
+  async printReceipt(receiptData: ReceiptData): Promise<boolean> {
     const isTSPL = process.env.PRINTER_TYPE === "TSPL";
 
     if (!isTSPL && !this.printer) {
@@ -235,7 +235,7 @@ export class XPrinterService {
     }
   }
 
-  private async printReceiptTSPL(receiptData: ReceiptData) {
+  private async printReceiptTSPL(receiptData: ReceiptData): Promise<boolean> {
     try {
       const printerInterface = process.env.PRINTER_INTERFACE || "printer:Xprinter XP-370B";
       const printerName = printerInterface.replace("printer:", "");
