@@ -152,7 +152,14 @@ export function CheckoutClient({ user, shippingFee = 0 }: { user: { name?: strin
             } else {
                 // Online Payment Flow
                 toast.info("Redirecting to secure payment...");
-                const checkoutUrl = await initiatePaymobPayment(result.id, paymentMethod);
+                const { checkoutUrl, error } = await initiatePaymobPayment(result.id, paymentMethod);
+
+                if (error || !checkoutUrl) {
+                    toast.error(error || "Failed to start online payment. Please try again.");
+                    setIsLoading(false);
+                    return;
+                }
+
                 clearCart(); // Clear cart before redirecting so user doesn't come back to a filled cart
                 window.location.href = checkoutUrl;
             }
