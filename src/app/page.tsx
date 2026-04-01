@@ -1,5 +1,5 @@
 import { FAQs } from "@/components/faqs/faqs";
-import { Features } from "@/components/features/features";
+import { Features, type FeatureSetting } from "@/components/features/features";
 import { Footer } from "@/components/footer/footer";
 import { Hero } from "@/components/hero/hero";
 import { Quote } from "@/components/quote/quote";
@@ -10,27 +10,57 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { getProducts } from "@/lib/actions/product-actions";
 import { FeaturedCategory } from "@/components/home/featured-category";
+import type { Product, Category } from "@prisma/client";
+
+type ProductWithCategory = Product & { category: Category | null };
 
 // Cache for 10 minutes (instead of force-dynamic which kills caching)
 export const revalidate = 600;
 
 export default async function Home() {
-  const settingsRaw = await getSetting("feature_settings", "{}");
-  const settings = JSON.parse(settingsRaw);
+  let settings: { [key: string]: FeatureSetting } = {};
+  let newReleasesSettings: Record<string, unknown> = {};
+  let flexiStyleProducts: ProductWithCategory[] = [];
 
-  const newReleasesRaw = await getSetting("new_releases_settings", JSON.stringify({
-    heroImage: "/zad_green_shirt_studio.png",
-    heroGlowHex: "#065f46",
-    heroAccentHex: "#10b981",
-    startingPrice: "L.E 599",
-    badgeDotColor: "#10b981",
-    badgeTextColor: "#10b981",
-    active: false,
-  }));
-  const newReleasesSettings = JSON.parse(newReleasesRaw);
+  try {
+    const settingsRaw = await getSetting("feature_settings", "{}");
+    settings = JSON.parse(settingsRaw);
+  } catch (error) {
+    console.error("Failed to fetch feature settings:", error);
+    settings = {};
+  }
 
-  const allProducts = await getProducts();
-  const flexiStyleProducts = allProducts.filter(p => p.active !== false).slice(0, 10);
+  try {
+    const newReleasesRaw = await getSetting("new_releases_settings", JSON.stringify({
+      heroImage: "/zad_green_shirt_studio.png",
+      heroGlowHex: "#065f46",
+      heroAccentHex: "#10b981",
+      startingPrice: "L.E 599",
+      badgeDotColor: "#10b981",
+      badgeTextColor: "#10b981",
+      active: false,
+    }));
+    newReleasesSettings = JSON.parse(newReleasesRaw);
+  } catch (error) {
+    console.error("Failed to fetch new releases settings:", error);
+    newReleasesSettings = {
+      heroImage: "/zad_green_shirt_studio.png",
+      heroGlowHex: "#065f46",
+      heroAccentHex: "#10b981",
+      startingPrice: "L.E 599",
+      badgeDotColor: "#10b981",
+      badgeTextColor: "#10b981",
+      active: false,
+    };
+  }
+
+  try {
+    const allProducts = await getProducts();
+    flexiStyleProducts = allProducts.filter(p => p.active !== false).slice(0, 10);
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    flexiStyleProducts = [];
+  }
 
   return (
     <SmoothScroll>

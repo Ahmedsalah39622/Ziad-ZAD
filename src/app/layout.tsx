@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { ClientOnly } from "@/components/providers/client-only";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { WhatsAppWidget } from "@/components/ui/whatsapp-widget";
 import { Analytics } from "@vercel/analytics/next";
@@ -62,6 +63,29 @@ export default async function RootLayout({
     "priceRange": "$$"
   };
 
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const whatsappNumber = await getSetting("whatsapp_number", "");
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "ZAD",
+    "url": "https://zadfitt.com",
+    "logo": "https://zadfitt.com/icon.svg",
+    "image": "https://zadfitt.com/zad_green_shirt_studio2255.png",
+    "description": "Premium box fit essentials engineered for those who demand structure, comfort, and uncompromising style.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "EG"
+    },
+    // Adding price range as it's a clothing store usually expected by Google
+    "priceRange": "$$"
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -69,14 +93,30 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.__DEBUG__ = true;
+              console.log('[ZAD] App initialization started');
+              window.addEventListener('error', (event) => {
+                console.error('[ZAD] Global error:', event.error);
+              });
+              window.addEventListener('unhandledrejection', (event) => {
+                console.error('[ZAD] Unhandled rejection:', event.reason);
+              });
+            `
+          }}
+        />
       </head>
-      <body className={`antialiased`}>
-        <AuthProvider>
-          <CartProvider>
-            {children}
-            <WhatsAppWidget phoneNumber={whatsappNumber} />
-          </CartProvider>
-        </AuthProvider>
+      <body className={`antialiased`} suppressHydrationWarning>
+        <ClientOnly>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              <WhatsAppWidget phoneNumber={whatsappNumber} />
+            </CartProvider>
+          </AuthProvider>
+        </ClientOnly>
         <Toaster />
         <Analytics />
       </body>
