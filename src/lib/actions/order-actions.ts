@@ -405,8 +405,8 @@ export async function printOrderReceipt(orderId: string) {
                 name: item.product.name,
                 quantity: item.quantity,
                 price: item.price,
-                size: item.size,
-                color: item.color,
+                size: item.size ?? undefined,
+                color: item.color ?? undefined,
             })),
             subtotal: order.items.reduce((sum, item) => sum + item.price * item.quantity, 0),
             discountAmount: order.discountPct > 0 
