@@ -1,7 +1,12 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const printerDriver = require("@grandchef/node-printer");
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
+let printerDriver: any = null;
+try {
+  printerDriver = require("@grandchef/node-printer");
+} catch {
+  // Native module not available (e.g. on Vercel) — printer features disabled
+}
 
 type ThermalPrinterLike = {
   isPrinterConnected?: () => Promise<boolean>;
