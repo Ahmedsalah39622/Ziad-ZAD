@@ -1,9 +1,23 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
 
+type ThermalPrinterLike = {
+  isPrinterConnected?: () => Promise<boolean>;
+  clear?: () => void;
+  alignCenter?: () => void;
+  alignLeft?: () => void;
+  bold?: (enabled: boolean) => void;
+  setTextSize?: (width: number, height: number) => void;
+  newLine?: () => void;
+  print?: (text: string) => void;
+  printImage?: (img: string) => Promise<void> | void;
+  cut?: () => void;
+  execute?: () => Promise<unknown>;
+};
+
 // XPrinter 370B USB Printer Service
 export class XPrinterService {
-  private printer: any = null;
+  private printer: ThermalPrinterLike | null = null;
 
   async initialize() {
     try {
@@ -12,8 +26,7 @@ export class XPrinterService {
       const printerInterface = process.env.PRINTER_INTERFACE || "usb";
       const characterSet = process.env.PRINTER_CHARSET || "WPC1256_ARABIC";
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.printer = new (PrinterLib as any)({
+      this.printer = new PrinterLib({
         type: printerType,
         interface: printerInterface,
         width: 58, // 58mm paper width (standard for XPrinter 370B)
@@ -22,7 +35,7 @@ export class XPrinterService {
       });
 
       // Real connection test (do not bypass failures).
-      const connected = await (this.printer as any).isPrinterConnected?.();
+      const connected = await this.printer.isPrinterConnected?.();
       if (connected === false) {
         console.error(`❌ Printer is not connected. interface=${printerInterface}`);
         this.printer = null;

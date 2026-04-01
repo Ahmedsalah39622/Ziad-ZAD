@@ -107,7 +107,38 @@ export async function getPaymentKey(params: {
  * HMAC Verification
  * Verifies the integrity of Paymob's callback data.
  */
-export function verifyHMAC(obj: any, hmac: string) {
+type PaymobSourceData = {
+    pan?: string;
+    sub_type?: string;
+    type?: string;
+};
+
+type PaymobOrderRef = {
+    id?: string | number;
+};
+
+type PaymobCallbackObj = {
+    amount_cents?: string | number;
+    created_at?: string;
+    currency?: string;
+    error_occured?: boolean;
+    has_parent_transaction?: boolean;
+    id?: string | number;
+    integration_id?: string | number;
+    is_3d_secure?: boolean;
+    is_auth?: boolean;
+    is_capture?: boolean;
+    is_refunded?: boolean;
+    is_standalone_payment?: boolean;
+    is_voided?: boolean;
+    order?: PaymobOrderRef;
+    owner?: string | number;
+    pending?: boolean;
+    source_data?: PaymobSourceData;
+    success?: boolean;
+};
+
+export function verifyHMAC(obj: PaymobCallbackObj, hmac: string) {
     const secret = process.env.PAYMOB_HMAC_SECRET;
     if (!secret) throw new Error("PAYMOB_HMAC_SECRET is not defined");
 

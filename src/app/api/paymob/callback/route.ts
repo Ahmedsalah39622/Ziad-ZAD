@@ -48,8 +48,6 @@ export async function POST(req: NextRequest) {
 
         const success = obj.success;
         const merchantOrderId = obj?.order?.merchant_order_id as string | undefined; // Our internal Order ID
-        const paymobTransactionId = obj?.id;
-
         if (!merchantOrderId) {
             return NextResponse.json({ error: "Missing merchant_order_id" }, { status: 400 });
         }

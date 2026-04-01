@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { generateReceiptQR, formatReceiptData } from "@/lib/printer/qr-receipt";
+import type { Prisma } from "@prisma/client";
+import { generateReceiptQR } from "@/lib/printer/qr-receipt";
 import { getPrinterService } from "@/lib/printer/xprinter";
 
 // Lazy imports to keep server logic out of client bundles
@@ -35,8 +36,7 @@ async function requireUser() {
 
 export async function getOrders(options?: { status?: string; startDate?: Date; endDate?: Date }) {
     const { status, startDate, endDate } = options || {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     if (status && status !== "ALL") where.status = status;
     if (startDate || endDate) {
         where.createdAt = {};
@@ -98,8 +98,7 @@ export async function getDashboardStats(options?: { startDate?: Date; endDate?: 
     const { startDate, endDate } = options || {};
     await requireAdmin();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {};
+    const where: Prisma.OrderWhereInput = {};
     if (startDate || endDate) {
         where.createdAt = {};
         if (startDate) {
@@ -297,7 +296,6 @@ export async function createOrder(data: {
         const initialStatus = isOnline ? "PENDING_PAYMENT" : "PENDING";
 
         const order = await tx.order.create({
-            /* eslint-disable @typescript-eslint/no-explicit-any */
             data: {
                 user: session.user?.id ? { connect: { id: session.user.id } } : undefined,
                 customerName: data.customerName,
@@ -322,8 +320,7 @@ export async function createOrder(data: {
                         color: item.color,
                     })),
                 },
-            } as any,
-            /* eslint-enable @typescript-eslint/no-explicit-any */
+            },
         });
 
         // Update stock
@@ -337,12 +334,12 @@ export async function createOrder(data: {
                 let sizes = JSON.parse(product.sizes || "[]");
                 if (Array.isArray(sizes) && sizes.length > 0 && typeof sizes[0] === 'object') {
                     // Modern format: [{name, stock}]
-                    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                    sizes = sizes.map((s: any) =>
-                        s.name === item.size
-                            ? { ...s, stock: Math.max(0, (s.stock || 0) - item.quantity) }
-                            : s
-                    );
+                    sizes = (sizes as Array<{ name?: string; stock?: number }>).map((s) => {
+                        if (s.name === item.size) {
+                            return { ...s, stock: Math.max(0, (s.stock || 0) - item.quantity) };
+                        }
+                        return s;
+                    });
                 }
 
                 await tx.product.update({
@@ -395,7 +392,7 @@ export async function printOrderReceipt(orderId: string) {
         }
 
         // Generate QR code
-        const qrCode = await generateReceiptQR(order as any);
+        const qrCode = await generateReceiptQR(order);
 
         // Format receipt data with product names
         const receiptData = {
