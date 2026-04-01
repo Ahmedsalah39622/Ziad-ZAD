@@ -214,8 +214,9 @@ export class XPrinterService {
       printer.newLine?.();
       printer.cut?.();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buffer = (printer as any).getBuffer?.() || Buffer.alloc(0);
-      console.log(`Buffer generated: ${buffer.length} bytes`);
+      console.log(`🖨️ Buffer generated: ${buffer.length} bytes`);
 
       await (printer.execute?.() || Promise.resolve());
       console.log("Receipt printed successfully");
