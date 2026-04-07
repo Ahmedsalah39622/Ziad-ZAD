@@ -22,7 +22,13 @@ cd /d "%~dp0"
 :: Check for node_modules
 if not exist "node_modules\" (
     echo [INFO] First time setup: Installing dependencies...
-    call npm install
+    where pnpm >nul 2>nul
+    if %errorlevel% equ 0 (
+        call pnpm install
+    ) else (
+        echo [WARNING] pnpm not found, using npm install instead.
+        call npm install
+    )
 )
 
 echo [INFO] Starting the agent...
@@ -30,7 +36,12 @@ echo [INFO] Keep this window open for the printer to work.
 echo.
 
 :: Run the agent
-call npm run print:agent
+where pnpm >nul 2>nul
+if %errorlevel% equ 0 (
+    call pnpm exec tsx print-agent.ts
+) else (
+    call npx tsx print-agent.ts
+)
 
 if %errorlevel% neq 0 (
     echo.

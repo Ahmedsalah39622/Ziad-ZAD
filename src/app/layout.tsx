@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Script from "next/script";
 // import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
@@ -68,13 +69,18 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
+        <Script
+          id="schema-data"
           nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
+          strategy="beforeInteractive"
+          suppressHydrationWarning
         />
-        <script
+        <Script
+          id="app-debug"
           nonce={nonce}
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.__DEBUG__ = true;
@@ -87,6 +93,7 @@ export default async function RootLayout({
               });
             `
           }}
+          suppressHydrationWarning
         />
       </head>
       <body className={`antialiased`} suppressHydrationWarning>

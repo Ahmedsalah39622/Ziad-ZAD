@@ -29,10 +29,20 @@ export class XPrinterService {
 
   async initialize() {
     try {
+      const isTSPL = process.env.PRINTER_TYPE === "TSPL";
+      if (isTSPL) {
+        console.log("ℹ️ TSPL mode detected — skipping node-thermal-printer initialization.");
+        return true;
+      }
+
       const printerType =
         process.env.PRINTER_TYPE === "STAR" ? PrinterTypes.STAR : PrinterTypes.EPSON;
       const printerInterface = process.env.PRINTER_INTERFACE || "usb";
       const driver = loadPrinterDriver();
+
+      if (!driver) {
+        throw new Error("Printer driver '@grandchef/node-printer' is not installed.");
+      }
 
       this.printer = new PrinterLib({
         type: printerType,
@@ -182,139 +192,97 @@ export class XPrinterService {
       const { renderTextToTsplBitmap } = await import("./arabic-utils");
 
       const printerInterface = process.env.PRINTER_INTERFACE || "printer:Xprinter XP-370B";
-      const printerName = printerInterface.replace("printer:", "");
-      
+      const printerName = printerInterface.replace(/^printer:/, "").trim();
+
       const DOTS_PER_MM = 8;
-      const WIDTH_DOTS = 58 * DOTS_PER_MM - 40; // Use usable width
-      const CENTER_X = (58 * DOTS_PER_MM) / 2;
-      
-      let y = 30;
+      const WIDTH_DOTS = 58 * DOTS_PER_MM - 20;
+      let y = 20;
       const cmdParts: (string | Buffer)[] = [];
 
-      // 1. Header (Logo)
-      cmdParts.push(`TEXT ${CENTER_X},${y},"4",0,2,2,2,"Z A D"\n`);
-      y += 80;
-      cmdParts.push(`TEXT ${CENTER_X},${y},"2",0,1,1,2,"BREAK YOUR LIMITS"\n`);
-      y += 50;
-      cmdParts.push(`BAR 30,${y},400,3\n`);
-      y += 30;
+      const leftX = 20;
+      const rightPriceX = WIDTH_DOTS - 80;
+      const textWidth = WIDTH_DOTS - 40;
 
-      // 2. Order Info
-      cmdParts.push(`TEXT 30,${y},"3",0,1,1,"ORDER: ${receiptData.orderId}"\n`);
-      y += 40;
-      cmdParts.push(`TEXT 30,${y},"2",0,1,1,"DATE:  ${receiptData.date}"\n`);
-      y += 60;
+      const pushBitmapLine = (text: string, fontSize = 16, bold = false, maxWidth = textWidth) => {
+        const bmp = renderTextToTsplBitmap(text, leftX, y, maxWidth, fontSize, bold);
+        cmdParts.push(bmp.command, bmp.data, "\n");
+        y += bmp.height + 6;
+      };
 
-      // 3. Customer Section (Arabic Support)
-      cmdParts.push(`TEXT 30,${y},"3",0,1,1,1,"CUSTOMER DETAILS"\n`);
-      y += 40;
+      const pushLabelValue = (label: string, value: string) => {
+        pushBitmapLine(`${label} ${value}`, 16, true);
+      };
 
-      // Name (Arabic)
-      const nameBmp = renderTextToTsplBitmap(receiptData.customerName, 30, y, WIDTH_DOTS, 24, true);
-      cmdParts.push(nameBmp.command);
-      cmdParts.push(nameBmp.data);
-      cmdParts.push("\n");
-      y += nameBmp.height + 10;
+      const pushSimpleLine = (text: string, fontSize = 16, bold = false) => {
+        pushBitmapLine(text, fontSize, bold);
+      };
 
-      // Tel (Standard)
-      cmdParts.push(`TEXT 30,${y},"2",0,1,1,"TEL:  ${receiptData.customerPhone}"\n`);
-      y += 35;
+      pushSimpleLine("ZAD ORDER SLIP", 18, true);
+      pushLabelValue("Order:", receiptData.orderId);
+      pushLabelValue("Date:", receiptData.date);
+      pushSimpleLine("Customer:", 16, true);
+      pushBitmapLine(receiptData.customerName, 16, true);
+      pushBitmapLine(`Tel: ${receiptData.customerPhone}`, 16);
+      pushBitmapLine(receiptData.address, 14);
 
-      // Address (Arabic)
-      const addrBmp = renderTextToTsplBitmap(receiptData.address, 30, y, WIDTH_DOTS, 20);
-      cmdParts.push(addrBmp.command);
-      cmdParts.push(addrBmp.data);
-      cmdParts.push("\n");
-      y += addrBmp.height + 40;
-
-      // 4. Items Table
-      cmdParts.push(`BAR 30,${y},400,2\n`);
-      y += 20;
-      cmdParts.push(`TEXT 30,${y},"2",0,1,1,"ITEMS"\n`);
-      cmdParts.push(`TEXT 320,${y},"2",0,1,1,"EGP"\n`);
-      y += 40;
-      cmdParts.push(`BAR 30,${y},400,1\n`);
-      y += 20;
+      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
+      y += 18;
+      pushSimpleLine("ITEMS", 16, true);
+      y -= 6;
+      cmdParts.push(`TEXT ${rightPriceX},${y},"1",0,1,1,"PRICE"\n`);
+      y += 24;
+      cmdParts.push(`BAR ${leftX},${y},${textWidth},1\n`);
+      y += 18;
 
       for (const item of receiptData.items) {
-        // Item Name (Arabic Support)
-        const itemBmp = renderTextToTsplBitmap(item.name, 30, y, WIDTH_DOTS - 80, 20);
-        cmdParts.push(itemBmp.command);
-        cmdParts.push(itemBmp.data);
-        cmdParts.push("\n");
-        // We'll put the price on the same level as the bitmap if height is small, or below
-        const priceY = y + 5;
-        cmdParts.push(`TEXT 320,${priceY},"2",0,1,1,"${(item.quantity * item.price).toFixed(0)}"\n`);
-        
-        y += itemBmp.height + 5;
-        
-        // Qty details
-        cmdParts.push(`TEXT 45,${y},"1",0,1,1,"${item.quantity} x ${item.price.toFixed(0)}"\n`);
-        y += 25;
-
-        const specs = [item.size, item.color].filter(Boolean).join(" / ");
-        if (specs) {
-          cmdParts.push(`TEXT 45,${y},"1",0,1,1,"[ ${specs} ]"\n`);
-          y += 25;
-        }
-        y += 15;
+        const itemName = `${item.quantity} x ${item.name}`;
+        const itemBmp = renderTextToTsplBitmap(itemName, leftX, y, WIDTH_DOTS - 120, 14);
+        cmdParts.push(itemBmp.command, itemBmp.data, "\n");
+        cmdParts.push(`TEXT ${rightPriceX},${y},"1",0,1,1,"${(item.quantity * item.price).toFixed(0)}"\n`);
+        y += itemBmp.height + 6;
       }
-      
-      y += 10;
-      cmdParts.push(`BAR 30,${y},400,2\n`);
-      y += 40;
 
-      // 5. Totals
+      y += 6;
+      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
+      y += 18;
+
       if (receiptData.discountAmount && receiptData.discountAmount > 0) {
-        cmdParts.push(`TEXT 30,${y},"2",0,1,1,"Subtotal:"\n`);
-        cmdParts.push(`TEXT 320,${y},"2",0,1,1,"${receiptData.subtotal.toFixed(2)}"\n`);
-        y += 35;
-        cmdParts.push(`TEXT 30,${y},"2",0,1,1,"Discount:"\n`);
-        cmdParts.push(`TEXT 320,${y},"2",0,1,1,"-${receiptData.discountAmount.toFixed(2)}"\n`);
-        y += 35;
+        pushLabelValue("Subtotal:", receiptData.subtotal.toFixed(2));
+        pushLabelValue("Discount:", `-${receiptData.discountAmount.toFixed(2)}`);
       }
 
-      cmdParts.push(`TEXT 30,${y},"2",0,1,1,"Shipping:"\n`);
-      cmdParts.push(`TEXT 320,${y},"2",0,1,1,"${receiptData.shippingFee.toFixed(2)}"\n`);
-      y += 50;
+      pushLabelValue("Shipping:", receiptData.shippingFee.toFixed(2));
 
-      cmdParts.push(`TEXT 30,${y},"3",0,1,1,1,"TOTAL:"\n`);
-      cmdParts.push(`TEXT 240,${y},"4",0,1,1,"${receiptData.total.toFixed(2)}"\n`);
-      y += 70;
+      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
+      y += 18;
 
-      cmdParts.push(`TEXT ${CENTER_X},${y},"2",0,1,1,2,"Payment: ${receiptData.paymentMethod.toUpperCase()}"\n`);
-      y += 60;
+      pushSimpleLine("TOTAL:", 18, true);
+      cmdParts.push(`TEXT ${rightPriceX},${y - 18},"2",0,1,1,"${receiptData.total.toFixed(2)}"\n`);
+      y += 20;
 
-      // 7. Codes
-      const qrData = `https://zadfitt.com/order/${receiptData.orderId}`;
-      cmdParts.push(`QRCODE ${CENTER_X - 60},${y},M,5,A,0,"${qrData}"\n`);
-      y += 150;
+      pushBitmapLine(`Payment: ${receiptData.paymentMethod}`, 16);
+      pushBitmapLine("Delivered with order slip", 14);
 
-      cmdParts.push(`BARCODE ${CENTER_X - 150},${y},"128",60,1,0,2,2,"${receiptData.orderId}"\n`);
-      y += 100;
-
-      cmdParts.push(`TEXT ${CENTER_X},${y},"2",0,1,1,2,"*** THANK YOU FOR SHOPPING ***"\n`);
-      y += 40;
-      
       const finalHeightMm = Math.ceil(y / DOTS_PER_MM) + 10;
-      
       let headerText = `SIZE 58 mm, ${finalHeightMm} mm\n`;
       headerText += `GAP 0, 0\n`;
       headerText += `DIRECTION 1\n`;
       headerText += `CLS\n`;
-      
+
       const footerText = `PRINT 1\n`;
-      
-      // Combine all parts into a single buffer
       const finalBuffer = Buffer.concat([
         Buffer.from(headerText),
-        ...cmdParts.map(p => (typeof p === "string" ? Buffer.from(p) : p)),
-        Buffer.from(footerText)
+        ...cmdParts.map((p) => (typeof p === "string" ? Buffer.from(p) : p)),
+        Buffer.from(footerText),
       ]);
- 
+
       const driver = loadPrinterDriver();
-      if (!driver) return false;
- 
+      console.log(`ℹ️ TSPL print debug: printerName='${printerName}', driverLoaded=${!!driver}, bufferLength=${finalBuffer.length}`);
+      if (!driver) {
+        console.error("❌ TSPL driver is not loaded. Make sure @grandchef/node-printer is installed and can be required.");
+        return false;
+      }
+
       return new Promise((resolve) => {
         driver.printDirect({
           data: finalBuffer,
@@ -327,7 +295,7 @@ export class XPrinterService {
           error: (err: unknown) => {
             console.error("❌ Arabic-Enabled TSPL Print error:", err);
             resolve(false);
-          }
+          },
         });
       });
     } catch (error) {

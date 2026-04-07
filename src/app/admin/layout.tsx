@@ -6,14 +6,9 @@ import * as Icons from "lucide-react";
 // ISR: Revalidate every 1 minute for auth checks, balance between security and performance
 export const revalidate = 60;
 
-import {
-    LogOut,
-    ChevronRight
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { logoutAction } from "@/lib/actions/auth-actions";
-
+import { ChevronRight } from "lucide-react";
 import { MobileHeader } from "@/components/admin/mobile-header";
+import { AdminLogoutButton } from "@/components/admin/admin-logout-button";
 
 export default async function AdminLayout({
     children,
@@ -75,15 +70,7 @@ export default async function AdminLayout({
                 </nav>
 
                 <div className="absolute bottom-4 w-full px-4">
-                    <form action={logoutAction}>
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start gap-3 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                        >
-                            <LogOut className="h-4 w-4" />
-                            Sign Out
-                        </Button>
-                    </form>
+                    <AdminLogoutButton />
                 </div>
             </aside>
 
