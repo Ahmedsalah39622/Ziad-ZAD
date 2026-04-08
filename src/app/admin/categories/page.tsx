@@ -96,9 +96,8 @@ export default async function CategoriesPage() {
                         ) : (
                             categories.map((cat) => (
                                 // Prevent deletion when category still has products
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 (() => {
-                                    const productCount = (cat as any)._count?.products || 0;
+                                    const productCount = cat._count?.products || 0;
                                     const canDelete = productCount === 0;
                                     return (
                                 <tr key={cat.id} className="hover:bg-foreground/5 transition-colors">
