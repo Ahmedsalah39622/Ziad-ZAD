@@ -4,11 +4,9 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Generate a nonce
-    const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
     const cspHeader = `
         default-src 'self';
-        script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://cdn.paddle.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""};
+        script-src 'self' 'unsafe-inline' https://cdn.paddle.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ""};
         style-src 'self' 'unsafe-inline';
         img-src 'self' blob: data: https:;
         font-src 'self' data:;
@@ -21,8 +19,6 @@ export async function middleware(request: NextRequest) {
     `.replace(/\s{2,}/g, " ").trim();
 
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-nonce", nonce);
-    requestHeaders.set("Content-Security-Policy", cspHeader);
 
     // Initial response configured with updated request headers
     let response = NextResponse.next({
