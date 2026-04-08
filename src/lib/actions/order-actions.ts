@@ -79,12 +79,75 @@ export async function getOrderById(id: string) {
 export async function updateOrderStatus(id: string, status: string) {
     await requireAdmin();
     const prisma = await getPrisma();
-    const result = await prisma.order.update({
-        where: { id },
-        data: { status },
+    const result = await prisma.$transaction(async (tx) => {
+        const existingOrder = await tx.order.findUnique({
+            where: { id },
+            include: {
+                items: {
+                    select: {
+                        productId: true,
+                        quantity: true,
+                        size: true,
+                    },
+                },
+            },
+        });
+
+        if (!existingOrder) {
+            throw new Error("Order not found");
+        }
+
+        const isCancelling = status === "CANCELLED" && existingOrder.status !== "CANCELLED";
+
+        if (isCancelling) {
+            for (const item of existingOrder.items) {
+                const product = await tx.product.findUnique({
+                    where: { id: item.productId },
+                    select: { sizes: true },
+                });
+
+                if (!product) continue;
+
+                let nextSizes = product.sizes;
+
+                try {
+                    const parsed = JSON.parse(product.sizes || "[]");
+                    if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "object") {
+                        nextSizes = JSON.stringify(
+                            (parsed as Array<{ name?: string; stock?: number }>).map((s) => {
+                                if (s.name === item.size) {
+                                    return { ...s, stock: (s.stock || 0) + item.quantity };
+                                }
+                                return s;
+                            })
+                        );
+                    }
+                } catch {
+                    nextSizes = product.sizes;
+                }
+
+                await tx.product.update({
+                    where: { id: item.productId },
+                    data: {
+                        stock: {
+                            increment: item.quantity,
+                        },
+                        sizes: nextSizes,
+                    },
+                });
+            }
+        }
+
+        return tx.order.update({
+            where: { id },
+            data: { status },
+        });
     });
+
     revalidatePath("/admin/orders");
     revalidatePath(`/admin/orders/${id}`);
+    revalidatePath("/shop");
+    revalidatePath("/");
     return result;
 }
 

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import Script from "next/script";
 // import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
@@ -47,7 +46,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get("x-nonce") ?? "";
   const whatsappNumber = await getSetting("whatsapp_number", "");
 
   const schemaData = {
@@ -71,7 +69,6 @@ export default async function RootLayout({
       <head>
         <Script
           id="schema-data"
-          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
           strategy="beforeInteractive"
@@ -79,7 +76,6 @@ export default async function RootLayout({
         />
         <Script
           id="app-debug"
-          nonce={nonce}
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `

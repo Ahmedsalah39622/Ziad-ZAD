@@ -18,6 +18,11 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     const router = useRouter();
     const { addItem } = useCart();
 
+    const currentPrice = typeof product.price === "number" ? product.price : Number(product.price);
+    const compareAtPrice =
+        typeof product.compareAtPrice === "number" ? product.compareAtPrice : Number(product.compareAtPrice);
+    const isOnSale = Number.isFinite(compareAtPrice) && compareAtPrice > currentPrice;
+
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
@@ -158,9 +163,24 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                         <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none mb-6">
                             {product.name}
                         </h1>
-                        <p className="text-3xl font-bold text-foreground/90">
-                            {typeof product.price === 'number' ? `L.E ${product.price.toLocaleString('en-US')}` : product.price}
-                        </p>
+                        <div className="flex flex-col items-start gap-1">
+                            {isOnSale && (
+                                <p className="text-sm md:text-base text-muted-foreground line-through font-medium tabular-nums">
+                                    {`L.E ${compareAtPrice.toLocaleString("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })} EGP`}
+                                </p>
+                            )}
+                            <p className="text-3xl font-black text-foreground tabular-nums tracking-tight">
+                                {Number.isFinite(currentPrice)
+                                    ? `L.E ${currentPrice.toLocaleString("en-US", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })} EGP`
+                                    : product.price}
+                            </p>
+                        </div>
                     </div>
 
                     {/* Description */}
