@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 // import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { CartProvider } from "@/lib/cart-context";
@@ -67,28 +66,10 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <Script
+        <script
           id="schema-data"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-          strategy="beforeInteractive"
-          suppressHydrationWarning
-        />
-        <Script
-          id="app-debug"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.__DEBUG__ = true;
-              console.log('[ZAD] App initialization started');
-              window.addEventListener('error', (event) => {
-                console.error('[ZAD] Global error:', event.error);
-              });
-              window.addEventListener('unhandledrejection', (event) => {
-                console.error('[ZAD] Unhandled rejection:', event.reason);
-              });
-            `
-          }}
           suppressHydrationWarning
         />
       </head>
