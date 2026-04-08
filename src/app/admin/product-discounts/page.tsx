@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import { BadgePercent, Palette, Package, Sparkles } from "lucide-react";
-import { formatCurrency } from "@/lib/format-currency";
 
 export const metadata = {
     title: "Product Discounts - Admin",
@@ -13,6 +12,10 @@ export const metadata = {
 
 // ISR: Revalidate every 1 minute
 export const revalidate = 60;
+
+function formatDiscountDisplayPrice(value: number) {
+    return `LE ${value.toFixed(2)} EGP`;
+}
 
 export default async function ProductDiscountsPage() {
     const session = await auth();
@@ -152,6 +155,10 @@ export default async function ProductDiscountsPage() {
 
                             const isOnSale = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);
                             const ribbon = ribbonSettings[product.id];
+                            const formattedSalePrice = formatDiscountDisplayPrice(product.price);
+                            const formattedCompareAtPrice = product.compareAtPrice
+                                ? formatDiscountDisplayPrice(product.compareAtPrice)
+                                : null;
 
                             return (
                                 <tr key={product.id} className="group transition-colors hover:bg-foreground/[0.03]">
@@ -184,6 +191,17 @@ export default async function ProductDiscountsPage() {
                                     <td className="px-6 py-5 align-top">
                                         <form action={handleUpdate} className="flex flex-wrap items-center gap-3 lg:gap-4">
                                             <input type="hidden" name="id" value={product.id} />
+
+                                            <div className="w-full flex items-center gap-2">
+                                                {formattedCompareAtPrice && isOnSale ? (
+                                                    <span className="text-sm font-medium text-muted-foreground line-through tabular-nums">
+                                                        {formattedCompareAtPrice}
+                                                    </span>
+                                                ) : null}
+                                                <span className="text-3xl leading-none font-black tracking-tight text-foreground tabular-nums">
+                                                    {formattedSalePrice}
+                                                </span>
+                                            </div>
 
                                             <div className="flex items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 shadow-sm">
                                                 <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground">L.E</span>
