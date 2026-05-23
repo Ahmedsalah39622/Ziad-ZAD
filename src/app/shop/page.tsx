@@ -15,9 +15,15 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function ShopPage() {
-    const rawProducts = await getProducts();
-    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
+    let rawProducts: Awaited<ReturnType<typeof getProducts>> = [];
+    let ribbonSettings: Record<string, unknown> = {};
+    try {
+        rawProducts = await getProducts();
+        const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
+        ribbonSettings = JSON.parse(ribbonSettingsRaw);
+    } catch {
+        // DB unavailable — show empty shop
+    }
 
     // Parse JSON data on the server for stable hydration
     const products = rawProducts.map(p => {

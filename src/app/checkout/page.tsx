@@ -10,8 +10,13 @@ export default async function CheckoutPage() {
     redirect("/login?callbackUrl=/checkout");
   }
 
-  const shippingFeeStr = await getSetting("global_shipping_fee", "0");
-  const shippingFee = parseFloat(shippingFeeStr) || 0;
+  let shippingFee = 0;
+  try {
+    const shippingFeeStr = await getSetting("global_shipping_fee", "0");
+    shippingFee = parseFloat(shippingFeeStr) || 0;
+  } catch {
+    // DB unavailable — default shipping fee 0
+  }
 
   return (
     <main className="min-h-screen bg-background pt-20 px-4 md:px-8">

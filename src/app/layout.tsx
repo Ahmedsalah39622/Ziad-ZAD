@@ -45,7 +45,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const whatsappNumber = await getSetting("whatsapp_number", "");
+  let whatsappNumber = "";
+  try {
+    whatsappNumber = await getSetting("whatsapp_number", "");
+  } catch {
+    // DB unavailable — WhatsApp widget won't show, but site still loads
+  }
 
   const schemaData = {
     "@context": "https://schema.org",
