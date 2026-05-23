@@ -4,18 +4,7 @@ import { getProducts } from '@/lib/actions/product-actions';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://zadfitt.com';
 
-    // Get all active products
-    const products = await getProducts();
-    const activeProducts = products.filter((p) => p.active !== false);
-
-    const productUrls = activeProducts.map((product) => ({
-        url: `${baseUrl}/shop/${product.id}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-    }));
-
-    return [
+    const staticUrls: MetadataRoute.Sitemap = [
         {
             url: baseUrl,
             lastModified: new Date(),
@@ -34,6 +23,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'monthly',
             priority: 0.8,
         },
-        ...productUrls,
     ];
+
+    try {
+        // Get all active products — may fail at build time if DB isn't reachable
+        const products = await getProducts();
+        const activeProducts = products.filter((p) => p.active !== false);
+
+        const productUrls = activeProducts.map((product) => ({
+            url: `${baseUrl}/shop/${product.id}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        }));
+
+        return [...staticUrls, ...productUrls];
+    } catch {
+        // DB not available at build time — return static URLs only
+        return staticUrls;
+    }
 }
