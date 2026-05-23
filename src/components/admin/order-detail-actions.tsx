@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateOrderStatus } from "@/lib/actions/order-actions";
+import { printOrderReceipt, updateOrderStatus } from "@/lib/actions/order-actions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, Printer } from "lucide-react";
@@ -33,17 +33,36 @@ export function OrderDetailActions({
         }
     };
 
+    const handlePrint = async () => {
+        setIsLoading("PRINT");
+        try {
+            const result = await printOrderReceipt(orderId);
+            if (result.success) {
+                toast.success("Receipt printed successfully");
+            } else if (result.warning) {
+                toast.info(result.warning);
+            } else {
+                toast.error(result.error || "Failed to print receipt");
+            }
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to print receipt");
+        } finally {
+            setIsLoading(null);
+        }
+    };
+
     if (currentStatus === "CANCELLED") return null;
 
     return (
         <div className="flex flex-wrap gap-3">
             <Button
                 variant="outline"
-                onClick={() => window.print()}
+                onClick={handlePrint}
+                disabled={!!isLoading}
                 className="border-border text-foreground hover:bg-foreground/5 font-bold uppercase text-xs tracking-widest no-print"
             >
-                <Printer className="mr-2 h-4 w-4" />
-                Print Invoice
+                {isLoading === "PRINT" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
+                {isLoading === "PRINT" ? "Printing..." : "Print Invoice"}
             </Button>
             {nextStatusId && currentStatus !== 'DELIVERED' && (
                 <Button

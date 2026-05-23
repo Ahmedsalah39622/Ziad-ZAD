@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateOrderStatus } from "@/lib/actions/order-actions";
+import { printOrderReceipt, updateOrderStatus } from "@/lib/actions/order-actions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Truck, Loader2, Check, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +29,24 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         }
     };
 
+    const handlePrint = async () => {
+        setIsLoading("PRINT");
+        try {
+            const result = await printOrderReceipt(orderId);
+            if (result.success) {
+                toast.success("Receipt printed successfully");
+            } else if (result.warning) {
+                toast.info(result.warning);
+            } else {
+                toast.error(result.error || "Failed to print receipt");
+            }
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to print receipt");
+        } finally {
+            setIsLoading(null);
+        }
+    };
+
     if (currentStatus === "DELIVERED" || currentStatus === "CANCELLED") {
         return null; // No further actions needed for these statuses
     }
@@ -38,11 +56,12 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => window.print()}
+                onClick={handlePrint}
+                disabled={!!isLoading}
                 className="h-8 w-8 text-muted-foreground hover:text-foreground no-print"
                 title="Print Order"
             >
-                <Printer className="h-4 w-4" />
+                {isLoading === "PRINT" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
             </Button>
             {currentStatus === "PENDING" && (
                 <Button

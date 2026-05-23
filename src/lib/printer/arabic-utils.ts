@@ -1,4 +1,4 @@
-import { createCanvas, GlobalFonts } from "@napi-rs/canvas";
+import { createCanvas, GlobalFonts, loadImage } from "@napi-rs/canvas";
 import fs from "fs";
 
 // Load Arial font explicitly from Windows to ensure Arabic characters render properly
@@ -85,5 +85,73 @@ export function renderTextToTsplBitmap(
         command,
         data: bitmapBuffer,
         height
+    };
+}
+
+/**
+ * Renders an image file into a 1-bit TSPL bitmap command.
+ */
+export async function renderImageToTsplBitmap(
+    imagePath: string,
+    x: number,
+    y: number,
+    targetWidth: number,
+    targetHeight: number
+): Promise<{ command: string; data: Buffer; width: number; height: number }> {
+    const img = await loadImage(imagePath);
+
+    const canvas = createCanvas(targetWidth, targetHeight);
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+    const imageRatio = img.width / img.height;
+    const boxRatio = targetWidth / targetHeight;
+
+    let drawWidth = targetWidth;
+    let drawHeight = targetHeight;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (imageRatio > boxRatio) {
+        drawWidth = targetWidth;
+        drawHeight = Math.round(targetWidth / imageRatio);
+        offsetY = Math.round((targetHeight - drawHeight) / 2);
+    } else {
+        drawHeight = targetHeight;
+        drawWidth = Math.round(targetHeight * imageRatio);
+        offsetX = Math.round((targetWidth - drawWidth) / 2);
+    }
+
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+    const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+    const { data, width, height } = imageData;
+    const widthBytes = Math.ceil(width / 8);
+    const bitmapBuffer = Buffer.alloc(widthBytes * height, 255);
+
+    for (let row = 0; row < height; row++) {
+        for (let col = 0; col < width; col++) {
+            const idx = (row * width + col) * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+            const a = data[idx + 3];
+            const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+            if (a > 100 && luminance < 180) {
+                const byteIdx = row * widthBytes + Math.floor(col / 8);
+                const bitIdx = 7 - (col % 8);
+                bitmapBuffer[byteIdx] &= ~(1 << bitIdx);
+            }
+        }
+    }
+
+    return {
+        command: `BITMAP ${x},${y},${widthBytes},${height},0,`,
+        data: bitmapBuffer,
+        width,
+        height,
     };
 }

@@ -3,16 +3,43 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+const DATABASE_FAILURE_COOLDOWN_MS = 60_000;
+
+let databaseUnavailableUntil = 0;
+
+function isDatabaseConnectionError(error: unknown) {
+    if (!(error instanceof Error)) return false;
+
+    return (
+        error.name === "PrismaClientInitializationError" ||
+        error.message.includes("Can't reach database server")
+    );
+}
+
+function isDatabaseTemporarilyUnavailable() {
+    return Date.now() < databaseUnavailableUntil;
+}
+
 /**
  * Get a single site setting by key.
  */
 export async function getSetting(key: string, defaultValue: string = "") {
+    if (isDatabaseTemporarilyUnavailable()) {
+        return defaultValue;
+    }
+
     try {
         const setting = await prisma.siteSetting.findUnique({
             where: { key },
         });
         return setting?.value ?? defaultValue;
     } catch (error) {
+        if (isDatabaseConnectionError(error)) {
+            databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
+            console.warn(`Database unavailable while fetching setting ${key}; using default value.`);
+            return defaultValue;
+        }
+
         console.error(`Failed to fetch setting ${key}:`, error);
         return defaultValue;
     }
@@ -22,6 +49,10 @@ export async function getSetting(key: string, defaultValue: string = "") {
  * Set a site setting and revalidate the layout.
  */
 export async function setSetting(key: string, value: string) {
+    if (isDatabaseTemporarilyUnavailable()) {
+        return { success: false, error: "Database temporarily unavailable." };
+    }
+
     try {
         await prisma.siteSetting.upsert({
             where: { key },
@@ -34,6 +65,12 @@ export async function setSetting(key: string, value: string) {
         revalidatePath("/", "layout");
         return { success: true };
     } catch (error) {
+        if (isDatabaseConnectionError(error)) {
+            databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
+            console.warn(`Database unavailable while saving setting ${key}.`);
+            return { success: false, error: "Database temporarily unavailable." };
+        }
+
         console.error(`Failed to set setting ${key}:`, error);
         return { success: false, error: "Failed to update setting." };
     }

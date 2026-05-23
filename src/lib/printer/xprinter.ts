@@ -1,6 +1,8 @@
 import { printer as PrinterLib } from "node-thermal-printer";
 import { types as PrinterTypes } from "node-thermal-printer";
 import { CharacterSet } from "node-thermal-printer";
+import fs from "fs";
+import path from "path";
 
 type ThermalPrinterLike = {
   isPrinterConnected?: () => Promise<boolean>;
@@ -189,82 +191,96 @@ export class XPrinterService {
 
   private async printReceiptTSPL(receiptData: ReceiptData): Promise<boolean> {
     try {
-      const { renderTextToTsplBitmap } = await import("./arabic-utils");
+      const { renderTextToTsplBitmap, renderImageToTsplBitmap } = await import("./arabic-utils");
 
       const printerInterface = process.env.PRINTER_INTERFACE || "printer:Xprinter XP-370B";
       const printerName = printerInterface.replace(/^printer:/, "").trim();
 
       const DOTS_PER_MM = 8;
-      const WIDTH_DOTS = 58 * DOTS_PER_MM - 20;
-      let y = 20;
+      const PAPER_WIDTH_MM = 50;
+      const PAPER_HEIGHT_MM = 80;
+      const WIDTH_DOTS = PAPER_WIDTH_MM * DOTS_PER_MM;
+      const HEIGHT_DOTS = PAPER_HEIGHT_MM * DOTS_PER_MM;
       const cmdParts: (string | Buffer)[] = [];
 
-      const leftX = 20;
-      const rightPriceX = WIDTH_DOTS - 80;
-      const textWidth = WIDTH_DOTS - 40;
-
-      const pushBitmapLine = (text: string, fontSize = 16, bold = false, maxWidth = textWidth) => {
-        const bmp = renderTextToTsplBitmap(text, leftX, y, maxWidth, fontSize, bold);
+      const pushBitmap = (text: string, x: number, y: number, maxWidth: number, fontSize = 16, bold = true) => {
+        const bmp = renderTextToTsplBitmap(text, x, y, maxWidth, fontSize, bold);
         cmdParts.push(bmp.command, bmp.data, "\n");
-        y += bmp.height + 6;
+        return bmp.height;
       };
 
-      const pushLabelValue = (label: string, value: string) => {
-        pushBitmapLine(`${label} ${value}`, 16, true);
-      };
+      const trimText = (value: string, maxLength: number) =>
+        value.length > maxLength ? `${value.slice(0, maxLength - 1)}...` : value;
 
-      const pushSimpleLine = (text: string, fontSize = 16, bold = false) => {
-        pushBitmapLine(text, fontSize, bold);
-      };
+      const logoPath = path.join(process.cwd(), "public", "amulet-logo.png");
+      const logoX = 20;
+      const logoY = 16;
+      const logoWidth = 156;
+      const logoHeight = 78;
 
-      pushSimpleLine("ZAD ORDER SLIP", 18, true);
-      pushLabelValue("Order:", receiptData.orderId);
-      pushLabelValue("Date:", receiptData.date);
-      pushSimpleLine("Customer:", 16, true);
-      pushBitmapLine(receiptData.customerName, 16, true);
-      pushBitmapLine(`Tel: ${receiptData.customerPhone}`, 16);
-      pushBitmapLine(receiptData.address, 14);
-
-      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
-      y += 18;
-      pushSimpleLine("ITEMS", 16, true);
-      y -= 6;
-      cmdParts.push(`TEXT ${rightPriceX},${y},"1",0,1,1,"PRICE"\n`);
-      y += 24;
-      cmdParts.push(`BAR ${leftX},${y},${textWidth},1\n`);
-      y += 18;
-
-      for (const item of receiptData.items) {
-        const itemName = `${item.quantity} x ${item.name}`;
-        const itemBmp = renderTextToTsplBitmap(itemName, leftX, y, WIDTH_DOTS - 120, 14);
-        cmdParts.push(itemBmp.command, itemBmp.data, "\n");
-        cmdParts.push(`TEXT ${rightPriceX},${y},"1",0,1,1,"${(item.quantity * item.price).toFixed(0)}"\n`);
-        y += itemBmp.height + 6;
+      if (fs.existsSync(logoPath)) {
+        try {
+          const logoBmp = await renderImageToTsplBitmap(logoPath, logoX, logoY, logoWidth, logoHeight);
+          cmdParts.push(logoBmp.command, logoBmp.data, "\n");
+        } catch {
+          pushBitmap("ZAD", logoX, logoY + 16, logoWidth, 34, true);
+        }
+      } else {
+        pushBitmap("ZAD", logoX, logoY + 16, logoWidth, 34, true);
       }
 
-      y += 6;
-      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
-      y += 18;
+      const rightHeaderX = 166;
+      let rightHeaderY = 18;
+      rightHeaderY += pushBitmap(`Order: ${receiptData.orderId}`, rightHeaderX, rightHeaderY, 214, 17, true) + 8;
+      rightHeaderY += pushBitmap(`Date: ${receiptData.date}`, rightHeaderX, rightHeaderY, 214, 16) + 6;
+      rightHeaderY += pushBitmap(`Customer: ${trimText(receiptData.customerName, 12)}`, rightHeaderX, rightHeaderY, 214, 16) + 6;
+      rightHeaderY += pushBitmap(`Tel: ${receiptData.customerPhone}`, rightHeaderX, rightHeaderY, 214, 16) + 6;
+
+      const dividerY = Math.max(rightHeaderY + 6, logoY + logoHeight + 10);
+      cmdParts.push(`BAR 20,${dividerY},${WIDTH_DOTS - 40},2\n`);
+
+      let itemsY = dividerY + 14;
+      itemsY += pushBitmap("Order Items", 24, itemsY, 352, 20, true) + 8;
+      for (const item of receiptData.items.slice(0, 5)) {
+        const itemLine = `${item.quantity}x ${trimText(item.name, 22)}`;
+        itemsY += pushBitmap(itemLine, 24, itemsY, 352, 16) + 6;
+      }
+      if (receiptData.items.length > 5) {
+        pushBitmap(`+${receiptData.items.length - 5} more items`, 24, itemsY, 352, 14);
+      }
+
+      const summaryX1 = 170;
+      const summaryY1 = 360;
+      const summaryX2 = WIDTH_DOTS - 20;
+      const summaryY2 = 562;
+      cmdParts.push(`BOX ${summaryX1},${summaryY1},${summaryX2},${summaryY2},2\n`);
+
+      // QR code for quickly visiting the website.
+      const websiteUrl = "https://www.zadfitt.com";
+      const qrX = 24;
+      const qrY = 372;
+      cmdParts.push(`QRCODE ${qrX},${qrY},H,4,A,0,M2,S7,\"${websiteUrl}\"\n`);
+      pushBitmap("Scan to visit", 20, 532, 140, 13, true);
+
+      let summaryY = summaryY1 + 14;
+      summaryY += pushBitmap("ORDER DETAILS", summaryX1 + 10, summaryY, 194, 15, true) + 8;
+      summaryY += pushBitmap(`Items: ${receiptData.items.length}`, summaryX1 + 10, summaryY, 194, 13) + 5;
+      summaryY += pushBitmap(`Shipping: ${receiptData.shippingFee.toFixed(2)} EGP`, summaryX1 + 10, summaryY, 194, 13) + 5;
+      summaryY += pushBitmap(`Payment: ${receiptData.paymentMethod}`, summaryX1 + 10, summaryY, 194, 13) + 8;
 
       if (receiptData.discountAmount && receiptData.discountAmount > 0) {
-        pushLabelValue("Subtotal:", receiptData.subtotal.toFixed(2));
-        pushLabelValue("Discount:", `-${receiptData.discountAmount.toFixed(2)}`);
+        summaryY += pushBitmap(`Discount: -${receiptData.discountAmount.toFixed(2)} EGP`, summaryX1 + 10, summaryY, 194, 13, true) + 8;
       }
 
-      pushLabelValue("Shipping:", receiptData.shippingFee.toFixed(2));
+      pushBitmap(`TOTAL: ${receiptData.total.toFixed(2)} EGP`, summaryX1 + 10, Math.min(summaryY, 520), 194, 20, true);
 
-      cmdParts.push(`BAR ${leftX},${y},${textWidth},2\n`);
-      y += 18;
+      const domain = "www.zadfitt.com";
+      const domainWidth = 280;
+      const domainX = Math.floor((WIDTH_DOTS - domainWidth) / 2);
+      const domainY = HEIGHT_DOTS - 34;
+      pushBitmap(domain, domainX, domainY, domainWidth, 14, true);
 
-      pushSimpleLine("TOTAL:", 18, true);
-      cmdParts.push(`TEXT ${rightPriceX},${y - 18},"2",0,1,1,"${receiptData.total.toFixed(2)}"\n`);
-      y += 20;
-
-      pushBitmapLine(`Payment: ${receiptData.paymentMethod}`, 16);
-      pushBitmapLine("Delivered with order slip", 14);
-
-      const finalHeightMm = Math.ceil(y / DOTS_PER_MM) + 10;
-      let headerText = `SIZE 58 mm, ${finalHeightMm} mm\n`;
+      let headerText = `SIZE ${PAPER_WIDTH_MM} mm, ${PAPER_HEIGHT_MM} mm\n`;
       headerText += `GAP 0, 0\n`;
       headerText += `DIRECTION 1\n`;
       headerText += `CLS\n`;
