@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { generateDiscountCodes, getDiscountCodes } from "@/lib/actions/discount-actions";
 import { DiscountCode } from "@prisma/client";
 

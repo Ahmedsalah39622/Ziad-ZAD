@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getProducts, updateProductPrices } from "@/lib/actions/product-actions";
 import { getSetting, setSetting } from "@/lib/actions/settings-actions";
 import { revalidatePath } from "next/cache";

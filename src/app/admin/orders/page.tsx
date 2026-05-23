@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getOrders } from "@/lib/actions/order-actions";
 import { Search, Eye, Filter, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";

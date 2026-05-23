@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getOrderById } from "@/lib/actions/order-actions";
 import { notFound } from "next/navigation";
 import {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getSetting } from "@/lib/actions/settings-actions";
 import { NewReleasesForm } from "./new-releases-form";
 

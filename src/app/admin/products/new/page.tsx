@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCategories } from "@/lib/actions/category-actions";
 import { ProductForm } from "@/components/admin/product-form";
 

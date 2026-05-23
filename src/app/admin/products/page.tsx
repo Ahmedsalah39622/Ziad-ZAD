@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getProducts } from "@/lib/actions/product-actions";
 import { Plus, Search, Edit, Package } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";

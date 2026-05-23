@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getDashboardStats } from "@/lib/actions/order-actions";
 import { formatCurrency } from "@/lib/format-currency";
 import { ArrowLeft, Activity } from "lucide-react";

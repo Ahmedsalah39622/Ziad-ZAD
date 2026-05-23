@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getDashboardStats } from "@/lib/actions/order-actions";
 import {
     TrendingUp,

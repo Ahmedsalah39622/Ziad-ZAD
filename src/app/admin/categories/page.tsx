@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { createCategory, deleteCategory, getCategories, updateCategory } from "@/lib/actions/category-actions";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
