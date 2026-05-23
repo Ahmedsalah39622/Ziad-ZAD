@@ -73,5 +73,11 @@
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@grandchef/node-printer",
+      "@mapbox/node-pre-gyp"
+    ]
   }
 }

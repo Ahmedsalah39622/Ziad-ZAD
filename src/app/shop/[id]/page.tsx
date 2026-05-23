@@ -8,13 +8,21 @@ import { getSetting } from "@/lib/actions/settings-actions";
 // ISR: Revalidate every 10 minutes
 export const revalidate = 600;
 
+// Allow on-demand rendering for products not pre-generated
+export const dynamicParams = true;
+
 // Generate static params for popular products
 export async function generateStaticParams() {
-    const products = await getProducts();
-    // Only generate for first 20 products (rest will be on-demand)
-    return products.slice(0, 20).map(product => ({
-        id: product.id,
-    }));
+    try {
+        const products = await getProducts();
+        // Only generate for first 20 products (rest will be on-demand)
+        return products.slice(0, 20).map(product => ({
+            id: product.id,
+        }));
+    } catch {
+        // DB not available at build time — pages will be rendered on-demand at runtime
+        return [];
+    }
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
