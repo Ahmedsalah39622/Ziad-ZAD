@@ -89,6 +89,15 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
         return c !== undefined && c !== null ? String(c) : undefined;
     };
 
+    // Helper to safely extract an image URL
+    const getImageUrl = (img: unknown): string => {
+        if (img && typeof img === 'object') {
+            const r = img as Record<string, unknown>;
+            return r.url ? String(r.url) : "";
+        }
+        return img !== undefined && img !== null ? String(img) : "";
+    };
+
     // When color changes, try to find an associated image
     useEffect(() => {
         const selectedColor = colors[selectedColorIndex];
@@ -121,10 +130,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
         }
 
         // Use the currently displayed image for the cart
-        const mainImg = images[mainImageIndex] ?? images[0];
-        const mainImageUrl = (mainImg && typeof mainImg === 'object' && 'url' in mainImg)
-            ? String((mainImg as Record<string, unknown>).url)
-            : (mainImg !== undefined && mainImg !== null ? String(mainImg) : "");
+        const mainImageUrl = getImageUrl(images[mainImageIndex]) || getImageUrl(images[0]) || "";
 
         const cartProduct = {
             ...product,
@@ -170,7 +176,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                         ) : null}
                         {images.length > 0 ? (
                             <Image
-                                src={images[mainImageIndex]?.url || ""}
+                                src={getImageUrl(images[mainImageIndex]) || getImageUrl(images[0]) || ""}
                                 alt={product.name}
                                 fill
                                 className="object-cover transition-all duration-700 ease-in-out"
