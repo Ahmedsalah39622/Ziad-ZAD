@@ -34,7 +34,7 @@ model Product {
   compareAtPrice Float?
   description    String      @db.Text
   details     String      @default("[]") @db.Text
-  images      String      @default("[]") @db.Text
+  images      String      @default("[]") @db.LongText
   sizes       String      @default("[]") @db.Text
   colors      String      @default("[]") @db.Text
   category    Category?   @relation(fields: [categoryId], references: [id])
