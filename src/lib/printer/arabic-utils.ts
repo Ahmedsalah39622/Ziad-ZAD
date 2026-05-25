@@ -25,11 +25,12 @@ export function renderTextToTsplBitmap(
     bold: boolean = false
 ): { command: string, data: Buffer, height: number } {
     const preparedText = prepareArabicText(text);
+    const hasArabic = /[\u0600-\u06FF]/.test(preparedText);
     
     // Create a temporary canvas to measure height/width
     const tempCanvas = createCanvas(maxWidth, 100);
     const ctx = tempCanvas.getContext("2d");
-    ctx.direction = "rtl";
+    ctx.direction = hasArabic ? "rtl" : "ltr";
     ctx.font = `${bold ? 'bold ' : ''}${fontSize}px "Arial", "sans-serif"`;
     
     // We use a fixed width for the receipt (e.g. 400 dots)
@@ -44,11 +45,11 @@ export function renderTextToTsplBitmap(
     cctx.fillRect(0, 0, canvasWidth, canvasHeight);
     
     // Draw text (Black)
-    cctx.direction = "rtl";
+    cctx.direction = hasArabic ? "rtl" : "ltr";
     cctx.fillStyle = "black";
     cctx.font = `${bold ? 'bold ' : ''}${fontSize}px "Arial", "sans-serif"`;
-    cctx.textAlign = "right";
-    cctx.fillText(preparedText, canvasWidth - 5, fontSize); // 5px margin from right
+    cctx.textAlign = hasArabic ? "right" : "left";
+    cctx.fillText(preparedText, hasArabic ? canvasWidth - 5 : 5, fontSize); // 5px margin from edge
     
     // Convert canvas to monochrome bitmask
     const imageData = cctx.getImageData(0, 0, canvasWidth, canvasHeight);

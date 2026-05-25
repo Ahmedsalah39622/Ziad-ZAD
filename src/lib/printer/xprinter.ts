@@ -239,11 +239,20 @@ export class XPrinterService {
       const dividerY = Math.max(rightHeaderY + 6, logoY + logoHeight + 10);
       cmdParts.push(`BAR 20,${dividerY},${WIDTH_DOTS - 40},2\n`);
 
-      let itemsY = dividerY + 14;
-      itemsY += pushBitmap("Order Items", 24, itemsY, 352, 20, true) + 8;
+      let addressY = dividerY + 8;
+      addressY += pushBitmap(`Address: ${receiptData.address}`, 20, addressY, WIDTH_DOTS - 40, 16) + 6;
+
+      cmdParts.push(`BAR 20,${addressY},${WIDTH_DOTS - 40},2\n`);
+
+      let itemsY = addressY + 10;
+      itemsY += pushBitmap("Order Items", 24, itemsY, 352, 18, true) + 8;
       for (const item of receiptData.items.slice(0, 5)) {
-        const itemLine = `${item.quantity}x ${trimText(item.name, 22)}`;
-        itemsY += pushBitmap(itemLine, 24, itemsY, 352, 16) + 6;
+        const details = [];
+        if (item.size) details.push(item.size);
+        if (item.color) details.push(item.color);
+        const detailsStr = details.length > 0 ? ` [${details.join('/')}]` : '';
+        const itemLine = `${item.quantity}x ${trimText(item.name, 20)}${detailsStr}`;
+        itemsY += pushBitmap(itemLine, 24, itemsY, 352, 15) + 6;
       }
       if (receiptData.items.length > 5) {
         pushBitmap(`+${receiptData.items.length - 5} more items`, 24, itemsY, 352, 14);
