@@ -8,7 +8,15 @@ export const revalidate = 60;
 
 export default async function FeaturesAdminPage() {
     const settingsRaw = await getSetting("feature_settings", "{}");
-    const settings = JSON.parse(settingsRaw);
+    let settings = {};
+    try {
+        settings = JSON.parse(settingsRaw);
+        if (typeof settings !== 'object' || settings === null) {
+            settings = {};
+        }
+    } catch {
+        settings = {};
+    }
 
     return (
         <div className="space-y-6">
