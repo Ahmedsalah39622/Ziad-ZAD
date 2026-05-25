@@ -343,10 +343,10 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     <div className="pt-6">
                         <button
                             onClick={handleAddToCart}
-                            disabled={!selectedSize || (selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock <= 0)}
+                            disabled={!selectedSize || !!(selectedSizeData && typeof selectedSizeData === 'object' && (selectedSizeData as Record<string, unknown>).stock <= 0)}
                             className={`w-full h-16 rounded-2xl font-black tracking-[0.3em] uppercase text-xs flex items-center justify-center gap-4 transition-all duration-500 ${added
                                 ? "bg-foreground text-background shadow-[0_0_30px_rgba(0,0,0,0.1)]"
-                                : (selectedSize && (typeof selectedSizeData === 'object' ? selectedSizeData.stock > 0 : product.stock > 0))
+                                : (selectedSize && (typeof selectedSizeData === 'object' && selectedSizeData !== null ? Number((selectedSizeData as Record<string, unknown>).stock) > 0 : Number(product.stock) > 0))
                                     ? "bg-primary text-primary-foreground hover:opacity-90 shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:-translate-y-1"
                                     : "bg-secondary text-muted-foreground cursor-pointer grayscale border border-border"
                                 }`}
@@ -360,7 +360,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                                 <>
                                     <ShoppingBag className="w-5 h-5" />
                                     {selectedSize
-                                        ? (selectedSizeData && typeof selectedSizeData === 'object' && selectedSizeData.stock <= 0
+                                        ? (selectedSizeData && typeof selectedSizeData === 'object' && (selectedSizeData as Record<string, unknown>).stock <= 0
                                             ? "Sold Out"
                                             : "Secure Order")
                                         : "Select Size First"
