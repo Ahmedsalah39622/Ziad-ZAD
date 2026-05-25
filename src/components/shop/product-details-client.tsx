@@ -47,28 +47,35 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     // Main image state
     const [mainImageIndex, setMainImageIndex] = useState(0);
 
-    const selectedSizeData = useMemo(() => {
+    const selectedSizeData = useMemo<{ name: string; stock: number } | null>(() => {
         if (!selectedSize) return null;
         const sizes = Array.isArray(product.sizes) ? (product.sizes as unknown[]) : [];
-        return sizes.find((s: unknown) => {
+        const found = sizes.find((s: unknown) => {
             if (s && typeof s === 'object') {
                 const rec = s as Record<string, unknown>;
                 return String(rec.name) === selectedSize;
             }
             return String(s) === selectedSize;
-        }) ?? null;
-    }, [selectedSize, product.sizes]);
+        });
+        if (!found) return null;
+        if (typeof found === 'object' && found !== null) {
+            const rec = found as Record<string, unknown>;
+            return {
+                name: String(rec.name || selectedSize),
+                stock: typeof rec.stock === 'number' ? rec.stock : Number(rec.stock) || 0
+            };
+        }
+        return {
+            name: String(found),
+            stock: typeof product.stock === 'number' ? product.stock : Number(product.stock) || 0
+        };
+    }, [selectedSize, product.sizes, product.stock]);
 
     // Compute max stock for the selected size
     const maxStock = useMemo(() => {
         const fallbackProductStock = typeof product.stock === 'number' ? product.stock : Number(product.stock) || 0;
         if (!selectedSizeData) return fallbackProductStock;
-        if (selectedSizeData && typeof selectedSizeData === 'object') {
-            const rec = selectedSizeData as Record<string, unknown>;
-            const s = rec.stock;
-            return typeof s === 'number' ? s : Number(s) || fallbackProductStock;
-        }
-        return fallbackProductStock;
+        return selectedSizeData.stock;
     }, [selectedSizeData, product.stock]);
 
     // Reset quantity to 1 when size changes
@@ -343,10 +350,10 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     <div className="pt-6">
                         <button
                             onClick={handleAddToCart}
-                            disabled={!selectedSize || !!(selectedSizeData && typeof selectedSizeData === 'object' && (selectedSizeData as Record<string, unknown>).stock <= 0)}
+                            disabled={!selectedSize || (selectedSizeData !== null && selectedSizeData.stock <= 0)}
                             className={`w-full h-16 rounded-2xl font-black tracking-[0.3em] uppercase text-xs flex items-center justify-center gap-4 transition-all duration-500 ${added
                                 ? "bg-foreground text-background shadow-[0_0_30px_rgba(0,0,0,0.1)]"
-                                : (selectedSize && (typeof selectedSizeData === 'object' && selectedSizeData !== null ? Number((selectedSizeData as Record<string, unknown>).stock) > 0 : Number(product.stock) > 0))
+                                : (selectedSize && (selectedSizeData !== null ? selectedSizeData.stock > 0 : Number(product.stock) > 0))
                                     ? "bg-primary text-primary-foreground hover:opacity-90 shadow-[0_0_30px_rgba(0,0,0,0.1)] hover:-translate-y-1"
                                     : "bg-secondary text-muted-foreground cursor-pointer grayscale border border-border"
                                 }`}
@@ -360,7 +367,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                                 <>
                                     <ShoppingBag className="w-5 h-5" />
                                     {selectedSize
-                                        ? (selectedSizeData && typeof selectedSizeData === 'object' && (selectedSizeData as Record<string, unknown>).stock <= 0
+                                        ? (selectedSizeData !== null && selectedSizeData.stock <= 0
                                             ? "Sold Out"
                                             : "Secure Order")
                                         : "Select Size First"
