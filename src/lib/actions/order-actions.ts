@@ -493,6 +493,10 @@ export async function printOrderReceipt(orderId: string) {
         const printerService = await getPrinterService();
         if (printerService) {
             const printed = await printerService.printReceipt(receiptData);
+            if (printed) {
+                // Print a second copy (policy/receipt) as requested by the user
+                await printerService.printReceipt(receiptData);
+            }
             return { success: printed, error: printed ? undefined : "Print failed" };
         } else {
             console.warn("⚠️ Printer service not available - order created but not printed");
