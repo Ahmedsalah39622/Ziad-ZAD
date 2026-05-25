@@ -75,15 +75,6 @@
     "seed": "npx tsx prisma/seed.ts"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@napi-rs/canvas",
-      "@prisma/client",
-      "@prisma/engines",
-      "esbuild",
-      "prisma",
-      "sharp",
-      "unrs-resolver"
-    ],
     "ignoredBuiltDependencies": [
       "@grandchef/node-printer",
       "@mapbox/node-pre-gyp"
