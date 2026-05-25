@@ -30,25 +30,39 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL", "XXXL"];
 
     // Dynamic Arrays - Handle JSON parsing if needed
+    function parseJson<T>(raw: unknown, fallback: T): T {
+        if (raw === undefined || raw === null) return fallback;
+        if (typeof raw !== "string") return raw as T;
+        try {
+            return JSON.parse(raw) as T;
+        } catch (e) {
+            console.warn("Failed to parse JSON in ProductForm initial data", e);
+            return fallback;
+        }
+    }
     const [colors, setColors] = useState<{ name: string; hex: string }[]>(
-        initialData?.colors ? (typeof initialData.colors === 'string' ? JSON.parse(initialData.colors) : initialData.colors) : []
+        initialData?.colors ? parseJson<{ name: string; hex: string }[]>(initialData.colors, []) : []
     );
     const [images, setImages] = useState<{ url: string; color?: string }[]>(
-        initialData?.images ? (typeof initialData.images === 'string' ? JSON.parse(initialData.images) : initialData.images) : []
+        initialData?.images ? parseJson<{ url: string; color?: string }[]>(initialData.images, []) : []
     );
     const [details, setDetails] = useState<string[]>(
-        initialData?.details ? (typeof initialData.details === 'string' ? JSON.parse(initialData.details) : initialData.details) : [""]
+        initialData?.details ? parseJson<string[]>(initialData.details, [""]) : [""]
     );
 
     // Sizes with stock: [{ name: "S", stock: 10 }, ...]
     const [sizes, setSizes] = useState<{ name: string; stock: number }[]>(() => {
         if (!initialData?.sizes) return [];
-        const parsed = typeof initialData.sizes === 'string' ? JSON.parse(initialData.sizes) : initialData.sizes;
+        const parsed = parseJson<unknown[]>(initialData.sizes, []);
         // Migration: If it's just a string array, convert to objects with current total stock
-        if (Array.isArray(parsed) && typeof parsed[0] === 'string') {
+        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
             return (parsed as string[]).map(s => ({ name: s, stock: initialData.stock || 0 }));
         }
-        return parsed || [];
+        // If it's already array of objects, try to coerce
+        if (Array.isArray(parsed)) {
+            return (parsed as any[]).map(item => ({ name: item?.name || String(item), stock: item?.stock || 0 }));
+        }
+        return [];
     });
 
     // Helpers
