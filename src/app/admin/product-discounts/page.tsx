@@ -40,8 +40,13 @@ export default async function ProductDiscountsPage() {
         await updateProductPrices(id, price, compareAtPrice);
 
         // Update custom ribbon settings
-        const currentSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-        const currentSettings = JSON.parse(currentSettingsRaw);
+        let currentSettings: Record<string, unknown> = {};
+        try {
+            currentSettings = JSON.parse(currentSettingsRaw);
+            if (typeof currentSettings !== 'object' || currentSettings === null) currentSettings = {};
+        } catch {
+            currentSettings = {};
+        }
 
         if (ribbonText) {
             currentSettings[id] = { text: ribbonText, color: ribbonColor || "#ef4444" };
@@ -57,8 +62,15 @@ export default async function ProductDiscountsPage() {
         revalidatePath("/");
     }
 
-    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-    const ribbonSettings = JSON.parse(ribbonSettingsRaw) as Record<string, { text?: string; color?: string }>;
+    let ribbonSettings: Record<string, { text?: string; color?: string }> = {};
+    try {
+        const parsed = JSON.parse(ribbonSettingsRaw);
+        if (parsed && typeof parsed === 'object') {
+            ribbonSettings = parsed as Record<string, { text?: string; color?: string }>;
+        }
+    } catch {
+        ribbonSettings = {};
+    }
 
     const totalProducts = products.length;
     const onSaleProducts = products.filter((product) => product.compareAtPrice && product.compareAtPrice > product.price).length;
@@ -152,7 +164,10 @@ export default async function ProductDiscountsPage() {
                             let imgUrl = "";
                             try {
                                 const parsed = JSON.parse(product.images || "[]");
-                                if (parsed.length > 0) imgUrl = parsed[0].url;
+                                if (parsed.length > 0) {
+                                    const first = parsed[0];
+                                    imgUrl = typeof first === 'string' ? first : (first?.url || "");
+                                }
                             } catch { }
 
                             const isOnSale = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);

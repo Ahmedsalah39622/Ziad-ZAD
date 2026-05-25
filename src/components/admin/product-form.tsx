@@ -60,7 +60,16 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         }
         // If it's already array of objects, try to coerce
         if (Array.isArray(parsed)) {
-            return (parsed as any[]).map(item => ({ name: item?.name || String(item), stock: item?.stock || 0 }));
+            return (parsed as unknown[]).map(item => {
+                if (item && typeof item === 'object') {
+                    const rec = item as Record<string, unknown>;
+                    return {
+                        name: rec.name ? String(rec.name) : String(item),
+                        stock: typeof rec.stock === 'number' ? (rec.stock as number) : Number(rec.stock ?? 0)
+                    };
+                }
+                return { name: String(item), stock: initialData.stock || 0 };
+            });
         }
         return [];
     });

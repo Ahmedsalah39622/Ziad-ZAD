@@ -8,10 +8,26 @@ import Link from "next/link";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Check } from "lucide-react";
 import { toast } from "sonner";
 import { DiagonalRibbon } from "@/components/ui/diagonal-ribbon";
+import type { Product } from "@/lib/products";
 
 interface ProductDetailsClientProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    product: any;
+    product: {
+        id: string;
+        name: string;
+        price: number | string;
+        priceDisplay?: string;
+        description?: string | null;
+        category?: string | null;
+        stock?: number | string | null;
+        details?: unknown;
+        images?: unknown;
+        colors?: unknown;
+        sizes?: unknown;
+        tag?: string | null;
+        compareAtPrice?: number | string | null;
+        discountRibbon?: { text?: string; color?: string } | null;
+        [key: string]: unknown;
+    };
 }
 
 export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
@@ -33,16 +49,26 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
 
     const selectedSizeData = useMemo(() => {
         if (!selectedSize) return null;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (product.sizes || []).find((s: any) =>
-            (typeof s === 'object' ? s.name : s) === selectedSize
-        );
+        const sizes = Array.isArray(product.sizes) ? (product.sizes as unknown[]) : [];
+        return sizes.find((s: unknown) => {
+            if (s && typeof s === 'object') {
+                const rec = s as Record<string, unknown>;
+                return String(rec.name) === selectedSize;
+            }
+            return String(s) === selectedSize;
+        }) ?? null;
     }, [selectedSize, product.sizes]);
 
     // Compute max stock for the selected size
     const maxStock = useMemo(() => {
-        if (!selectedSizeData) return product.stock || 0;
-        return typeof selectedSizeData === 'object' ? selectedSizeData.stock : product.stock || 0;
+        const fallbackProductStock = typeof product.stock === 'number' ? product.stock : Number(product.stock) || 0;
+        if (!selectedSizeData) return fallbackProductStock;
+        if (selectedSizeData && typeof selectedSizeData === 'object') {
+            const rec = selectedSizeData as Record<string, unknown>;
+            const s = rec.stock;
+            return typeof s === 'number' ? s : Number(s) || fallbackProductStock;
+        }
+        return fallbackProductStock;
     }, [selectedSizeData, product.stock]);
 
     // Reset quantity to 1 when size changes
@@ -51,15 +77,30 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
     }, [selectedSize]);
 
     // Filter images by color or show all
-    const images = useMemo(() => product.images || [], [product.images]);
-    const colors = useMemo(() => product.colors || [], [product.colors]);
+    const images = useMemo(() => Array.isArray(product.images) ? (product.images as unknown[]) : [], [product.images]);
+    const colors = useMemo(() => Array.isArray(product.colors) ? (product.colors as unknown[]) : [], [product.colors]);
+
+    // Helper to safely extract a color name
+    const getColorName = (c: unknown): string | undefined => {
+        if (c && typeof c === 'object') {
+            const r = c as Record<string, unknown>;
+            return r.name ? String(r.name) : undefined;
+        }
+        return c !== undefined && c !== null ? String(c) : undefined;
+    };
 
     // When color changes, try to find an associated image
     useEffect(() => {
         const selectedColor = colors[selectedColorIndex];
-        if (selectedColor) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const associatedImageIndex = images.findIndex((img: any) => img.color === selectedColor.name);
+        const selectedColorName = getColorName(selectedColor) ?? "";
+        if (selectedColorName) {
+            const associatedImageIndex = images.findIndex((img: unknown) => {
+                if (img && typeof img === 'object') {
+                    const rec = img as Record<string, unknown>;
+                    return String(rec.color) === selectedColorName;
+                }
+                return false;
+            });
             if (associatedImageIndex !== -1) {
                 setMainImageIndex(associatedImageIndex);
             }
@@ -80,13 +121,19 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
         }
 
         // Use the currently displayed image for the cart
+        const mainImg = images[mainImageIndex] ?? images[0];
+        const mainImageUrl = (mainImg && typeof mainImg === 'object' && 'url' in mainImg)
+            ? String((mainImg as Record<string, unknown>).url)
+            : (mainImg !== undefined && mainImg !== null ? String(mainImg) : "");
+
         const cartProduct = {
             ...product,
-            image: images[mainImageIndex]?.url || images[0]?.url || ""
+            image: mainImageUrl
         };
 
+        const selectedColorName = getColorName(colors[selectedColorIndex]) ?? "";
         for (let i = 0; i < quantity; i++) {
-            addItem(cartProduct, selectedSize, colors[selectedColorIndex]?.name);
+            addItem(cartProduct as unknown as Product, selectedSize!, selectedColorName);
         }
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
@@ -113,7 +160,7 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     <div className="aspect-[4/5] bg-secondary/50 relative overflow-hidden rounded-2xl border border-border">
                         {product.discountRibbon && product.compareAtPrice && product.compareAtPrice > product.price ? (
                             <DiagonalRibbon
-                                text={product.discountRibbon.text}
+                                text={product.discountRibbon.text || ""}
                                 color={product.discountRibbon.color}
                             />
                         ) : product.tag ? (
@@ -139,14 +186,13 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     {/* Thumbnails */}
                     {images.length > 1 && (
                         <div className="grid grid-cols-5 gap-4">
-                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {images.map((img: any, i: number) => (
+                            {images.map((img: unknown, i: number) => (
                                 <button
                                     key={i}
                                     onClick={() => setMainImageIndex(i)}
                                     className={`aspect-square relative rounded-xl overflow-hidden border-2 transition-all ${mainImageIndex === i ? "border-foreground scale-95 shadow-[0_0_15px_rgba(0,0,0,0.1)]" : "border-border hover:border-muted-foreground"}`}
                                 >
-                                    <Image src={img.url} alt={`Thumbnail ${i}`} fill className="object-cover" />
+                                    <Image src={(typeof img === 'object' && img && 'url' in img) ? String((img as Record<string, unknown>).url) : String(img)} alt={`Thumbnail ${i}`} fill className="object-cover" />
                                 </button>
                             ))}
                         </div>
@@ -193,20 +239,19 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                         {colors.length > 0 && (
                             <div>
                                 <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground mb-4">
-                                    Available Colors — <span className="text-foreground">{colors[selectedColorIndex]?.name}</span>
+                                    Available Colors — <span className="text-foreground">{getColorName(colors[selectedColorIndex]) ?? ""}</span>
                                 </p>
                                 <div className="flex gap-4">
-                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                    {colors.map((color: any, i: number) => (
+                                    {colors.map((color: unknown, i: number) => (
                                         <button
-                                            key={color.name}
+                                            key={getColorName(color) ?? `color-${i}`}
                                             onClick={() => setSelectedColorIndex(i)}
                                             className={`w-12 h-12 rounded-full border-2 transition-all duration-300 relative group ${selectedColorIndex === i ? "border-foreground scale-110 shadow-[0_0_20px_rgba(0,0,0,0.1)]" : "border-border hover:border-foreground/30"}`}
-                                            title={color.name}
+                                            title={typeof color === 'object' && color ? String((color as Record<string, unknown>).name) : String(color)}
                                         >
                                             <div
                                                 className="absolute inset-1 rounded-full"
-                                                style={{ backgroundColor: color.hex }}
+                                                style={{ backgroundColor: typeof color === 'object' && color ? String((color as Record<string, unknown>).hex) : '#000' }}
                                             />
                                             {selectedColorIndex === i && (
                                                 <div className="absolute -top-1 -right-1 bg-foreground rounded-full p-0.5 shadow-lg">
@@ -228,10 +273,9 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
 
                             </div>
                             <div className="flex flex-wrap gap-3">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {product.sizes.map((size: any) => {
-                                    const sizeName = typeof size === 'object' ? size.name : size;
-                                    const sizeStock = typeof size === 'object' ? size.stock : product.stock;
+                                {(Array.isArray(product.sizes) ? (product.sizes as unknown[]) : []).map((size: unknown) => {
+                                    const sizeName = (size && typeof size === 'object') ? String((size as Record<string, unknown>).name) : String(size);
+                                    const sizeStock = (size && typeof size === 'object') ? Number((size as Record<string, unknown>).stock ?? product.stock) : Number(product.stock);
                                     const isOutOfStock = sizeStock <= 0;
 
                                     return (
@@ -321,18 +365,18 @@ export function ProductDetailsClient({ product }: ProductDetailsClientProps) {
                     </div>
 
                     {/* Product Details Points */}
-                    {product.details.length > 0 && (
+                    {Array.isArray(product.details) && product.details.length > 0 && (
                         <div className="border-t border-border pt-10">
                             <p className="text-[10px] font-black tracking-widest uppercase text-muted-foreground mb-6">
                                 Technical Specifications
                             </p>
                             <ul className="grid gap-4">
-                                {product.details.map((detail: string, i: number) => (
+                                {Array.isArray(product.details) ? product.details.map((detail: string, i: number) => (
                                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-4 group">
                                         <div className="w-1.5 h-1.5 bg-foreground rounded-full shrink-0 group-hover:scale-150 transition-transform mt-1.5 shadow-[0_0_10px_rgba(0,0,0,0.1)]" />
                                         <span className="group-hover:text-foreground transition-colors">{detail}</span>
                                     </li>
-                                ))}
+                                )) : null}
                             </ul>
                         </div>
                     )}

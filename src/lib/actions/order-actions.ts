@@ -394,11 +394,18 @@ export async function createOrder(data: {
             });
 
             if (product) {
-                let sizes = JSON.parse(product.sizes || "[]");
-                if (Array.isArray(sizes) && sizes.length > 0 && typeof sizes[0] === 'object') {
+                let sizes: unknown[] = [];
+                try {
+                    const parsed = JSON.parse(product.sizes || "[]");
+                    sizes = Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    sizes = [];
+                }
+                
+                if (sizes.length > 0 && typeof sizes[0] === 'object') {
                     // Modern format: [{name, stock}]
                     sizes = (sizes as Array<{ name?: string; stock?: number }>).map((s) => {
-                        if (s.name === item.size) {
+                        if (s?.name === item.size) {
                             return { ...s, stock: Math.max(0, (s.stock || 0) - item.quantity) };
                         }
                         return s;

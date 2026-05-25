@@ -78,8 +78,19 @@ export default async function OrdersPage() {
                                             <div className="flex flex-col gap-2">
                                                 {order.items.map((item, idx) => {
                                                     // Parse images if it's a string
-                                                    const productImages = typeof item.product.images === 'string' ? JSON.parse(item.product.images) : (item.product.images || []);
-                                                    const firstImage = productImages[0]?.url || "";
+                                                    let productImages: unknown[] = [];
+                                                    try {
+                                                        const rawImg = item.product.images;
+                                                        productImages = typeof rawImg === 'string' ? JSON.parse(rawImg) : (Array.isArray(rawImg) ? rawImg : []);
+                                                    } catch {
+                                                        productImages = [];
+                                                    }
+                                                    const firstImgObj = productImages[0];
+                                                    const firstImage = typeof firstImgObj === 'string' 
+                                                        ? firstImgObj 
+                                                        : (firstImgObj && typeof firstImgObj === 'object' && 'url' in firstImgObj) 
+                                                            ? String((firstImgObj as Record<string, unknown>).url) 
+                                                            : "";
 
                                                     return (
                                                         <div key={idx} className="flex items-center gap-3 group">

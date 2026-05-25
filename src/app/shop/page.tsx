@@ -43,8 +43,8 @@ export default async function ShopPage() {
         return {
             ...p,
             images: images.length > 0 ? [images[0]] : [],
-            colors: parseJson<unknown[]>(p.colors || "[]"),
-            sizes: parseJson<unknown[]>(p.sizes || "[]"),
+            colors: parseJson<unknown[]>(p.colors || "[]", []),
+            sizes: parseJson<unknown[]>(p.sizes || "[]", []),
             details: [], // Do not send rich text details to the grid
             categoryName: p.category?.name || "Streetwear",
             stock: p.stock,

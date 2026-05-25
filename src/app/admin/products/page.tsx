@@ -65,8 +65,11 @@ export default async function ProductsPage() {
                                                 {(() => {
                                                     try {
                                                         const images = JSON.parse(product.images);
-                                                        if (images && images.length > 0 && images[0].url) {
-                                                            return <img src={images[0].url} alt={product.name} className="h-full w-full object-cover" />;
+                                                        if (images && images.length > 0) {
+                                                            const url = typeof images[0] === 'string' ? images[0] : (images[0]?.url || '');
+                                                            if (url) {
+                                                                return <img src={url} alt={product.name} className="h-full w-full object-cover" />;
+                                                            }
                                                         }
                                                     } catch { }
                                                     return <Package className="h-5 w-5" />;

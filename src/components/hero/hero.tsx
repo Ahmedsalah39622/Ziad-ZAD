@@ -27,7 +27,7 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
     setMounted(true);
 
     async function fetchSettings() {
-      const raw = await getSetting("new_releases_settings", JSON.stringify({
+      const defaultObj = {
         heroImage: "/zad_green_shirt_studio.png",
         heroGlowHex: "#065f46",
         heroAccentHex: "#10b981",
@@ -35,9 +35,19 @@ export function Hero({ initialSettings }: { initialSettings?: HeroSettings | nul
         badgeDotColor: "#10b981",
         badgeTextColor: "#10b981",
         active: false,
-      }));
-      setSettings(JSON.parse(raw));
+      } as const;
+
+      const raw = await getSetting("new_releases_settings", JSON.stringify(defaultObj));
+
+      try {
+        const parsed = JSON.parse(raw);
+        setSettings(parsed ?? defaultObj);
+      } catch (e) {
+        console.warn("Failed to parse new_releases_settings, using defaults.", e);
+        setSettings(defaultObj);
+      }
     }
+
     if (!initialSettings) {
       fetchSettings();
     }

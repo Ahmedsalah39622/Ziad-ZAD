@@ -32,11 +32,11 @@ model Product {
   name           String
   price          Float
   compareAtPrice Float?
-  description    String
-  details     String      @default("[]")
-  images      String      @default("[]")
-  sizes       String      @default("[]")
-  colors      String      @default("[]")
+  description    String      @db.Text
+  details     String      @default("[]") @db.Text
+  images      String      @default("[]") @db.Text
+  sizes       String      @default("[]") @db.Text
+  colors      String      @default("[]") @db.Text
   category    Category?   @relation(fields: [categoryId], references: [id])
   categoryId  String?
   stock       Int         @default(0)

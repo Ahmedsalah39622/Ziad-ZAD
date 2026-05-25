@@ -152,7 +152,12 @@ export default async function OrderDetailPage({
                                 } catch {
                                     productImages = [];
                                 }
-                                const productImage = productImages[0]?.url;
+                                const firstImgObj = productImages[0];
+                                const productImage = typeof firstImgObj === 'string'
+                                    ? firstImgObj
+                                    : (firstImgObj && typeof firstImgObj === 'object' && 'url' in firstImgObj)
+                                        ? String((firstImgObj as Record<string, unknown>).url)
+                                        : "";
 
                                 return (
                                     <div key={item.id} className="p-6 flex items-center justify-between group hover:bg-foreground/[0.01] transition-colors">
