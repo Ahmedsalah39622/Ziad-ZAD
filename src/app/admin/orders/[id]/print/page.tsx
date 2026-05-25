@@ -23,28 +23,65 @@ export default async function OrderPrintPage({
     const finalTotal = order.total;
 
     return (
-        <div className="min-h-screen bg-zinc-100 py-10 print:bg-white print:py-0">
+        <div className="min-h-screen bg-zinc-100 py-10 print:bg-white print:py-0 flex flex-col items-center">
+            {/* Styles for exact thermal printer sizing (80mm Width) */}
+            <style dangerouslySetInnerHTML={{ __html: `
+                @media print {
+                    @page {
+                        size: 80mm auto;
+                        margin: 0;
+                    }
+                    body {
+                        background: white !important;
+                        color: black !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .print-receipt-container {
+                        width: 80mm !important;
+                        max-width: 80mm !important;
+                        padding: 6mm 6mm 4mm 6mm !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        margin: 0 !important;
+                        page-break-inside: avoid;
+                    }
+                    .no-print {
+                        display: none !important;
+                    }
+                }
+            `}} />
+
             {/* Action Bar - Hidden on print */}
-            <div className="max-w-[80mm] mx-auto mb-6 flex justify-between gap-4 print:hidden no-print">
+            <div className="w-[80mm] mb-6 flex justify-between gap-4 print:hidden no-print">
                 <PrinterHomeButton />
             </div>
 
             {/* Receipt Container */}
-            <div className="max-w-[80mm] mx-auto bg-white p-6 shadow-md border border-zinc-200 print:shadow-none print:border-none font-mono text-xs text-black">
-                <div className="text-center space-y-2 mb-6">
-                    <h1 className="text-2xl font-bold tracking-wider">ZAD</h1>
-                    <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Break Your Limits</p>
-                    <p className="text-[9px]">www.zadfitt.com</p>
+            <div className="print-receipt-container w-[80mm] bg-white p-6 shadow-md border border-zinc-200 print:shadow-none print:border-none font-mono text-[11px] leading-relaxed text-black box-border">
+                
+                {/* Header */}
+                <div className="text-center space-y-1 mb-4">
+                    <h1 className="text-xl font-bold tracking-wider">ZAD</h1>
+                    <p className="text-[9px] uppercase tracking-widest text-zinc-600">Break Your Limits</p>
+                    <p className="text-[8px] text-zinc-500">www.zadfitt.com</p>
                 </div>
 
-                <div className="border-t border-b border-dashed border-black py-3 my-4 space-y-1">
+                {/* Metadata */}
+                <div className="border-t border-b border-dashed border-black py-2 my-3 space-y-1">
                     <div className="flex justify-between">
                         <span>ORDER ID:</span>
                         <span className="font-bold">#{order.id.substring(0, 8).toUpperCase()}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>DATE:</span>
-                        <span>{new Date(order.createdAt).toLocaleString("ar-EG")}</span>
+                        <span>{new Date(order.createdAt).toLocaleString("ar-EG", {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</span>
                     </div>
                     <div className="flex justify-between">
                         <span>PAYMENT:</span>
@@ -53,7 +90,7 @@ export default async function OrderPrintPage({
                 </div>
 
                 {/* Customer Details */}
-                <div className="mb-6 space-y-1">
+                <div className="mb-4 space-y-1">
                     <div className="font-bold uppercase border-b border-black pb-1 mb-2">Customer Details</div>
                     <div className="flex justify-between">
                         <span>NAME:</span>
@@ -70,14 +107,14 @@ export default async function OrderPrintPage({
                 </div>
 
                 {/* Items */}
-                <div className="mb-6">
+                <div className="mb-4">
                     <div className="font-bold uppercase border-b border-black pb-1 mb-2">Items</div>
-                    <table className="w-full text-left text-xs border-collapse">
+                    <table className="w-full text-left text-[11px] border-collapse">
                         <thead>
                             <tr className="border-b border-dashed border-black">
-                                <th className="py-1">Desc</th>
-                                <th className="py-1 text-center">Qty</th>
-                                <th className="py-1 text-right">Total</th>
+                                <th className="py-1 font-normal">Desc</th>
+                                <th className="py-1 text-center font-normal">Qty</th>
+                                <th className="py-1 text-right font-normal">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,8 +127,8 @@ export default async function OrderPrintPage({
                                 return (
                                     <tr key={idx} className="border-b border-zinc-100 last:border-none align-top">
                                         <td className="py-2 pr-2">
-                                            <div>{item.product.name}</div>
-                                            {detailsStr && <div className="text-[10px] text-zinc-500 font-sans">{detailsStr}</div>}
+                                            <div className="font-medium">{item.product.name}</div>
+                                            {detailsStr && <div className="text-[9px] text-zinc-500 font-sans">{detailsStr}</div>}
                                         </td>
                                         <td className="py-2 text-center">{item.quantity}</td>
                                         <td className="py-2 text-right font-bold">{formatCurrency(item.price * item.quantity)}</td>
@@ -103,7 +140,7 @@ export default async function OrderPrintPage({
                 </div>
 
                 {/* Summary */}
-                <div className="border-t border-dashed border-black pt-4 space-y-2">
+                <div className="border-t border-dashed border-black pt-3 space-y-1.5">
                     <div className="flex justify-between">
                         <span>Subtotal:</span>
                         <span>{formatCurrency(subtotal)}</span>
@@ -118,14 +155,15 @@ export default async function OrderPrintPage({
                         <span>Shipping:</span>
                         <span>{shippingFee === 0 ? "FREE" : formatCurrency(shippingFee)}</span>
                     </div>
-                    <div className="border-t border-black pt-2 flex justify-between text-sm font-bold">
+                    <div className="border-t border-black pt-2 flex justify-between font-bold">
                         <span>TOTAL:</span>
                         <span>{formatCurrency(finalTotal)}</span>
                     </div>
                 </div>
 
-                <div className="text-center mt-8 space-y-1">
-                    <p className="text-[10px]">Thank you for shopping with us!</p>
+                {/* Footer */}
+                <div className="text-center mt-6 space-y-1">
+                    <p className="text-[9px]">Thank you for shopping with us!</p>
                 </div>
             </div>
 
