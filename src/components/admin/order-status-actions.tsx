@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { printOrderReceipt, updateOrderStatus } from "@/lib/actions/order-actions";
+import { updateOrderStatus } from "@/lib/actions/order-actions";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Truck, Loader2, Check, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -29,22 +29,8 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         }
     };
 
-    const handlePrint = async () => {
-        setIsLoading("PRINT");
-        try {
-            const result = await printOrderReceipt(orderId);
-            if (result.success) {
-                toast.success("Receipt printed successfully");
-            } else if (result.warning) {
-                toast.info(result.warning);
-            } else {
-                toast.error(result.error || "Failed to print receipt");
-            }
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to print receipt");
-        } finally {
-            setIsLoading(null);
-        }
+    const handlePrint = () => {
+        window.open(`/admin/orders/${orderId}/print`, "_blank");
     };
 
     if (currentStatus === "DELIVERED" || currentStatus === "CANCELLED") {
