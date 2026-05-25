@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 // Lazily import server-only utilities to avoid client bundling
 async function getPrisma() {
     const m = await import("@/lib/prisma");
@@ -58,7 +60,7 @@ export async function createProduct({ payload }: { payload: string }) {
     };
 
     const prisma = await getPrisma();
-    return prisma.product.create({
+    const product = await prisma.product.create({
         data: {
             name: data.name,
             price: data.price,
@@ -75,6 +77,11 @@ export async function createProduct({ payload }: { payload: string }) {
             active: data.active ?? true,
         },
     });
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath("/admin/products");
+    return product;
 }
 
 export async function updateProduct(
@@ -113,20 +120,38 @@ export async function updateProduct(
     if (data.tag !== undefined) updateData.tag = data.tag || null;
     if (data.active !== undefined) updateData.active = data.active;
 
-    return prisma.product.update({ where: { id }, data: updateData });
+    const product = await prisma.product.update({ where: { id }, data: updateData });
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath(`/shop/${id}`);
+    revalidatePath("/admin/products");
+    return product;
 }
 
 export async function deleteProduct(id: string) {
     await requireAdmin();
     const prisma = await getPrisma();
-    return prisma.product.delete({ where: { id } });
+    const product = await prisma.product.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath(`/shop/${id}`);
+    revalidatePath("/admin/products");
+    return product;
 }
 
 export async function updateProductPrices(id: string, price: number, compareAtPrice: number | null) {
     await requireAdmin();
     const prisma = await getPrisma();
-    return prisma.product.update({
+    const product = await prisma.product.update({
         where: { id },
         data: { price, compareAtPrice },
     });
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath(`/shop/${id}`);
+    revalidatePath("/admin/products");
+    return product;
 }
