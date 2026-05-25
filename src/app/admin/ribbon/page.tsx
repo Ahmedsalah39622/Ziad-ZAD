@@ -7,14 +7,21 @@ import { RibbonForm } from "./ribbon-form";
 export const revalidate = 60;
 
 export default async function AdminRibbonPage() {
-    const ribbonSettingsRaw = await getSetting("ribbon_settings", JSON.stringify({
+    const defaultRibbonSettings = JSON.stringify({
         text: "🔥 MASSIVE SALE: GET 20% OFF EVERYTHING INC. NEW DROPS!",
         bgHex: "#ef4444",
         textHex: "#ffffff",
         active: false,
-    }));
+    });
 
-    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
+    const ribbonSettingsRaw = await getSetting("ribbon_settings", defaultRibbonSettings);
+    let ribbonSettings;
+
+    try {
+        ribbonSettings = JSON.parse(ribbonSettingsRaw);
+    } catch {
+        ribbonSettings = JSON.parse(defaultRibbonSettings);
+    }
 
     return (
         <div className="space-y-6">

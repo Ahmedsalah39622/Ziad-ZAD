@@ -7,6 +7,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+function parseRibbonSettings(raw: string, fallback: string) {
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return JSON.parse(fallback);
+    }
+}
+
 export function Ribbon() {
     const pathname = usePathname();
     const [settings, setSettings] = useState<{
@@ -37,7 +45,7 @@ export function Ribbon() {
             });
 
             const ribbonSettingsRaw = await getSetting(settingKey, defaultValue);
-            setSettings(JSON.parse(ribbonSettingsRaw));
+            setSettings(parseRibbonSettings(ribbonSettingsRaw, defaultValue));
         }
         fetchRibbon();
     }, [pathname]);
