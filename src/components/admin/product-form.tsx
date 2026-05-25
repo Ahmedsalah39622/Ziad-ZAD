@@ -43,9 +43,38 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     const [colors, setColors] = useState<{ name: string; hex: string }[]>(
         initialData?.colors ? parseJson<{ name: string; hex: string }[]>(initialData.colors, []) : []
     );
-    const [images, setImages] = useState<{ url: string; color?: string }[]>(
-        initialData?.images ? parseJson<{ url: string; color?: string }[]>(initialData.images, []) : []
-    );
+    const [images, setImages] = useState<{ url: string; color?: string }[]>(() => {
+        if (!initialData?.images) return [];
+        const raw = initialData.images;
+        if (typeof raw !== "string") return (raw as { url: string; color?: string }[]) || [];
+        try {
+            const parsed = JSON.parse(raw);
+            const arr = Array.isArray(parsed) ? parsed : [parsed];
+            return arr.map(it => {
+                if (typeof it === 'string') return { url: it, color: '' };
+                if (it && typeof it === 'object' && 'url' in it) {
+                    return { url: String(it.url), color: String(it.color || '') };
+                }
+                return { url: String(it), color: '' };
+            }).filter(it => it.url);
+        } catch (e) {
+            console.warn("Failed to parse images JSON, extracting URLs via regex", e);
+            const urls: { url: string; color?: string }[] = [];
+            const base64Matches = raw.match(/data:image\/[a-zA-Z+-]+;base64,[A-Za-z0-9+/=]+/g);
+            if (base64Matches) {
+                base64Matches.forEach(url => urls.push({ url, color: '' }));
+            }
+            const httpMatches = raw.match(/https?:\/\/[^\s"']+/g);
+            if (httpMatches) {
+                httpMatches.forEach(url => urls.push({ url, color: '' }));
+            }
+            const pathMatches = raw.match(/\/[-a-zA-Z0-9@:%_\+.~#?&//=]+\.(png|jpg|jpeg|gif|webp|svg)/g);
+            if (pathMatches) {
+                pathMatches.forEach(url => urls.push({ url, color: '' }));
+            }
+            return urls;
+        }
+    });
     const [details, setDetails] = useState<string[]>(
         initialData?.details ? parseJson<string[]>(initialData.details, [""]) : [""]
     );
