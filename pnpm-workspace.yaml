@@ -1,3 +1,5 @@
+dangerouslyAllowAllBuilds: true
+
 onlyBuiltDependencies:
   - '@napi-rs/canvas'
   - '@prisma/client'
