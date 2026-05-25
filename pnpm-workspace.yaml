@@ -1,0 +1,13 @@
+onlyBuiltDependencies:
+  - '@napi-rs/canvas'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - 'esbuild'
+  - 'prisma'
+  - 'sharp'
+  - 'unrs-resolver'
+  - '@grandchef/node-printer'
+  - '@mapbox/node-pre-gyp'
+
+overrides:
+  es-toolkit: '1.46.1'
