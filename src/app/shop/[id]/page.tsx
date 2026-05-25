@@ -5,6 +5,14 @@ import Link from "next/link";
 import { ProductDetailsClient } from "@/components/shop/product-details-client";
 import { getSetting } from "@/lib/actions/settings-actions";
 
+function parseJson<T>(raw: string, fallback: T): T {
+    try {
+        return JSON.parse(raw) as T;
+    } catch {
+        return fallback;
+    }
+}
+
 // ISR: Revalidate every 10 minutes
 export const revalidate = 600;
 
@@ -43,16 +51,16 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     }
 
     const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-    const ribbonSettings = JSON.parse(ribbonSettingsRaw);
+    const ribbonSettings = parseJson<Record<string, unknown>>(ribbonSettingsRaw, {});
 
     // Parse JSON data from DB
     const product = {
         ...productData,
         priceDisplay: `L.E ${productData.price}`,
-        details: JSON.parse(productData.details),
-        images: JSON.parse(productData.images),
-        sizes: JSON.parse(productData.sizes),
-        colors: JSON.parse(productData.colors),
+        details: parseJson<string[]>(productData.details, []),
+        images: parseJson<string[]>(productData.images, []),
+        sizes: parseJson<unknown[]>(productData.sizes, []),
+        colors: parseJson<unknown[]>(productData.colors, []),
         category: productData.category?.name || "Uncategorized",
         discountRibbon: ribbonSettings[productData.id] || null,
     };
