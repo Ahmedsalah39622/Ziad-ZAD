@@ -7,7 +7,7 @@ import { NewReleasesForm } from "./new-releases-form";
 export const revalidate = 60;
 
 export default async function NewReleasesAdminPage() {
-    const settingsRaw = await getSetting("new_releases_settings", JSON.stringify({
+    const defaultSettings = {
         text: "NEW DROP: THE FUTURE IS HERE. SHOP THE COLLECTION NOW.",
         bgHex: "#000000",
         textHex: "#ffffff",
@@ -19,9 +19,19 @@ export default async function NewReleasesAdminPage() {
         badgeDotColor: "#10b981",
         badgeTextColor: "#10b981",
         active: false,
-    }));
+    };
 
-    const settings = JSON.parse(settingsRaw);
+    const settingsRaw = await getSetting("new_releases_settings", JSON.stringify(defaultSettings));
+
+    let settings = defaultSettings;
+    try {
+        const parsed = JSON.parse(settingsRaw);
+        if (parsed && typeof parsed === 'object') {
+            settings = { ...defaultSettings, ...parsed };
+        }
+    } catch {
+        settings = defaultSettings;
+    }
 
     return (
         <div className="space-y-6">
