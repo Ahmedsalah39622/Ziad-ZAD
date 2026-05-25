@@ -1,2 +1,8 @@
 onlyBuiltDependencies:
-  - '@grandchef/node-printer'
+  - '@napi-rs/canvas'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - 'esbuild'
+  - 'prisma'
+  - 'sharp'
+  - 'unrs-resolver'
