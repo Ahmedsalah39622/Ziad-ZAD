@@ -1,16 +1,17 @@
 export const dynamic = 'force-dynamic';
 
-import { generateDiscountCodes, getDiscountCodes } from "@/lib/actions/discount-actions";
+import { generateDiscountCodes, getDiscountCodes, updateDiscountCode, deleteDiscountCode } from "@/lib/actions/discount-actions";
 import { DiscountCode } from "@prisma/client";
+import { Edit, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { revalidatePath } from "next/cache";
 
 export const metadata = {
     title: "Discount Codes - Admin",
 };
 
-import { revalidatePath } from "next/cache";
-
 export default async function DiscountsPage() {
-    // server action invoked by the form
+    // server action invoked by the form to create codes
     async function createCodes(formData: FormData) {
         'use server';
         const quantity = parseInt(formData.get('quantity') as string) || 1;
@@ -19,6 +20,38 @@ export default async function DiscountsPage() {
         const usesPerCode = parseInt(formData.get('usesPerCode') as string) || 1;
 
         await generateDiscountCodes({ quantity, discountPct, validDays: validDays || undefined, usesPerCode });
+        revalidatePath("/admin/discounts");
+    }
+
+    async function handleUpdateDiscount(formData: FormData) {
+        'use server';
+        const id = String(formData.get('id') || '');
+        const code = String(formData.get('code') || '').trim();
+        const discountPct = parseFloat(formData.get('discountPct') as string) || 0;
+        const usesPerCode = parseInt(formData.get('usesPerCode') as string) || 1;
+        const usedCount = parseInt(formData.get('usedCount') as string) || 0;
+        const expiresAtRaw = formData.get('expiresAt') as string;
+        const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
+
+        if (!id) throw new Error('Discount ID is required');
+        if (!code) throw new Error('Discount code is required');
+
+        await updateDiscountCode(id, {
+            code,
+            discountPct,
+            usesPerCode,
+            usedCount,
+            expiresAt
+        });
+        revalidatePath("/admin/discounts");
+    }
+
+    async function handleDeleteDiscount(formData: FormData) {
+        'use server';
+        const id = String(formData.get('id') || '');
+        if (!id) throw new Error('Discount ID is required');
+
+        await deleteDiscountCode(id);
         revalidatePath("/admin/discounts");
     }
 
@@ -78,29 +111,111 @@ export default async function DiscountsPage() {
                             <th className="px-6 py-4">Code</th>
                             <th className="px-6 py-4">Discount</th>
                             <th className="px-6 py-4">Expires</th>
-                            <th className="px-6 py-4">Uses/Max</th>
+                            <th className="px-6 py-4">Uses (Used / Max)</th>
                             <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border/5">
-                        {codes.map((c) => (
-                            <tr key={c.id} className="hover:bg-foreground/5 transition-colors">
-                                <td className="px-6 py-4 font-mono">{c.code}</td>
-                                <td className="px-6 py-4">{c.discountPct}%</td>
-                                <td className="px-6 py-4">{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : '-'} </td>
-                                <td className="px-6 py-4">{c.usedCount}/{c.usesPerCode}</td>
-                                <td className="px-6 py-4">
-                                    {c.usedCount >= c.usesPerCode ? (
-                                        <span className="text-rose-500 font-bold">Used</span>
-                                    ) : (
-                                        <span className="text-emerald-500 font-bold">Active</span>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
+                        {codes.map((c) => {
+                            const expiryValue = c.expiresAt ? new Date(c.expiresAt).toISOString().split('T')[0] : '';
+                            return (
+                                <tr key={c.id} className="hover:bg-foreground/5 transition-colors">
+                                    <td className="px-6 py-4 font-mono">
+                                        <input
+                                            form={`update-discount-${c.id}`}
+                                            name="code"
+                                            defaultValue={c.code}
+                                            required
+                                            className="h-9 w-full max-w-[180px] rounded-md border border-border bg-background px-3 text-sm font-mono outline-none focus:border-primary"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-1">
+                                            <input
+                                                form={`update-discount-${c.id}`}
+                                                name="discountPct"
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                step={0.1}
+                                                defaultValue={c.discountPct}
+                                                required
+                                                className="h-9 w-20 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+                                            />
+                                            <span>%</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <input
+                                            form={`update-discount-${c.id}`}
+                                            name="expiresAt"
+                                            type="date"
+                                            defaultValue={expiryValue}
+                                            className="h-9 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                form={`update-discount-${c.id}`}
+                                                name="usedCount"
+                                                type="number"
+                                                min={0}
+                                                defaultValue={c.usedCount}
+                                                required
+                                                className="h-9 w-16 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+                                                title="Used Count"
+                                            />
+                                            <span>/</span>
+                                            <input
+                                                form={`update-discount-${c.id}`}
+                                                name="usesPerCode"
+                                                type="number"
+                                                min={1}
+                                                defaultValue={c.usesPerCode}
+                                                required
+                                                className="h-9 w-16 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+                                                title="Uses Per Code"
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {c.usedCount >= c.usesPerCode ? (
+                                            <span className="text-rose-500 font-bold">Used</span>
+                                        ) : (
+                                            <span className="text-emerald-500 font-bold">Active</span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <form id={`update-discount-${c.id}`} action={handleUpdateDiscount}>
+                                                <input type="hidden" name="id" value={c.id} />
+                                                <Button type="submit" variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" title="Save Changes">
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </form>
+                                            <form action={handleDeleteDiscount}>
+                                                <input type="hidden" name="id" value={c.id} />
+                                                <Button
+                                                    type="submit"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-rose-500/70 hover:text-rose-500"
+                                                    title="Delete Promo Code"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
         </div>
     );
 }
+

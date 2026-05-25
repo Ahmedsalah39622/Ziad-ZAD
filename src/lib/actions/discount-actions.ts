@@ -78,3 +78,34 @@ export async function validateDiscountCode(code: string) {
     }
     return dc;
 }
+
+export async function deleteDiscountCode(id: string) {
+    try {
+        return await prisma.discountCode.delete({ where: { id } });
+    } catch (e) {
+        console.error("prisma.deleteDiscountCode error", e);
+        throw e;
+    }
+}
+
+export async function updateDiscountCode(
+    id: string,
+    data: {
+        code: string;
+        discountPct: number;
+        usesPerCode: number;
+        usedCount: number;
+        expiresAt: Date | null;
+    }
+) {
+    try {
+        return await prisma.discountCode.update({
+            where: { id },
+            data,
+        });
+    } catch (e) {
+        console.error("prisma.updateDiscountCode error", e);
+        throw e;
+    }
+}
+
