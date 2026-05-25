@@ -40,6 +40,7 @@ export default async function ProductDiscountsPage() {
         await updateProductPrices(id, price, compareAtPrice);
 
         // Update custom ribbon settings
+        const currentSettingsRaw = await getSetting("product_discount_ribbons", "{}");
         let currentSettings: Record<string, unknown> = {};
         try {
             currentSettings = JSON.parse(currentSettingsRaw);
@@ -62,6 +63,7 @@ export default async function ProductDiscountsPage() {
         revalidatePath("/");
     }
 
+    const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
     let ribbonSettings: Record<string, { text?: string; color?: string }> = {};
     try {
         const parsed = JSON.parse(ribbonSettingsRaw);
