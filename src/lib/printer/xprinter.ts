@@ -182,6 +182,9 @@ export class XPrinterService {
       printer.cut?.();
 
       await (printer.execute?.() || Promise.resolve());
+      // Print second copy for non-TSPL with a short delay to allow spooler processing
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await (printer.execute?.() || Promise.resolve());
       return true;
     } catch (error) {
       console.error("Print error:", error);
@@ -294,7 +297,7 @@ export class XPrinterService {
       headerText += `DIRECTION 1\n`;
       headerText += `CLS\n`;
 
-      const footerText = `PRINT 1\n`;
+      const footerText = `PRINT 2\n`;
       const finalBuffer = Buffer.concat([
         Buffer.from(headerText),
         ...cmdParts.map((p) => (typeof p === "string" ? Buffer.from(p) : p)),
