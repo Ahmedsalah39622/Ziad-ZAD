@@ -36,11 +36,15 @@ export default async function ShopPage() {
     // Parse JSON data on the server for stable hydration
     const products = rawProducts.map(p => {
         const parsedImages = parseJson<unknown[]>(p.images || "[]", []);
+        const images = Array.isArray(parsedImages)
+            ? parsedImages.map(it => (typeof it === 'string' ? { url: it, color: '' } : it))
+            : [];
+
         return {
             ...p,
-            images: parsedImages.length > 0 ? [parsedImages[0]] : [],
-            colors: parseJson<unknown[]>(p.colors || "[]", []),
-            sizes: parseJson<unknown[]>(p.sizes || "[]", []),
+            images: images.length > 0 ? [images[0]] : [],
+            colors: parseJson<unknown[]>(p.colors || "[]"),
+            sizes: parseJson<unknown[]>(p.sizes || "[]"),
             details: [], // Do not send rich text details to the grid
             categoryName: p.category?.name || "Streetwear",
             stock: p.stock,

@@ -54,11 +54,17 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     const ribbonSettings = parseJson<Record<string, unknown>>(ribbonSettingsRaw, {});
 
     // Parse JSON data from DB
+    // Normalize images to objects { url, color? } so the client can rely on `img.url`
+    const rawImages = parseJson<unknown[]>(productData.images, []);
+    const images = Array.isArray(rawImages)
+        ? rawImages.map((it) => (typeof it === 'string' ? { url: it, color: '' } : it))
+        : [];
+
     const product = {
         ...productData,
         priceDisplay: `L.E ${productData.price}`,
         details: parseJson<string[]>(productData.details, []),
-        images: parseJson<string[]>(productData.images, []),
+        images,
         sizes: parseJson<unknown[]>(productData.sizes, []),
         colors: parseJson<unknown[]>(productData.colors, []),
         category: productData.category?.name || "Uncategorized",
