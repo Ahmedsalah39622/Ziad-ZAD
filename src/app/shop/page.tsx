@@ -6,6 +6,14 @@ import type { Metadata } from "next";
 import { getProducts } from "@/lib/actions/product-actions";
 import { getSetting } from "@/lib/actions/settings-actions";
 
+function parseJson<T>(raw: string, fallback: T): T {
+    try {
+        return JSON.parse(raw) as T;
+    } catch {
+        return fallback;
+    }
+}
+
 export const metadata: Metadata = {
     title: "ZAD - Shop Collection 001",
     description: "Premium streetwear engineered with nanobana special effects.",
@@ -20,19 +28,19 @@ export default async function ShopPage() {
     try {
         rawProducts = await getProducts();
         const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
-        ribbonSettings = JSON.parse(ribbonSettingsRaw);
+        ribbonSettings = parseJson<Record<string, unknown>>(ribbonSettingsRaw, {});
     } catch {
         // DB unavailable — show empty shop
     }
 
     // Parse JSON data on the server for stable hydration
     const products = rawProducts.map(p => {
-        const parsedImages = JSON.parse(p.images || "[]");
+        const parsedImages = parseJson<unknown[]>(p.images || "[]", []);
         return {
             ...p,
             images: parsedImages.length > 0 ? [parsedImages[0]] : [],
-            colors: JSON.parse(p.colors || "[]"),
-            sizes: JSON.parse(p.sizes || "[]"),
+            colors: parseJson<unknown[]>(p.colors || "[]", []),
+            sizes: parseJson<unknown[]>(p.sizes || "[]", []),
             details: [], // Do not send rich text details to the grid
             categoryName: p.category?.name || "Streetwear",
             stock: p.stock,
