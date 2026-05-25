@@ -6,6 +6,36 @@ import type { Metadata } from "next";
 import { getProducts } from "@/lib/actions/product-actions";
 import { getSetting } from "@/lib/actions/settings-actions";
 
+function parseProductImages(raw: string | null | undefined): { url: string; color?: string }[] {
+    if (!raw) return [];
+    try {
+        const parsed = JSON.parse(raw);
+        const arr = Array.isArray(parsed) ? parsed : [parsed];
+        return arr.map(it => {
+            if (typeof it === 'string') return { url: it, color: '' };
+            if (it && typeof it === 'object' && 'url' in it) {
+                return { url: String(it.url), color: String(it.color || '') };
+            }
+            return { url: String(it), color: '' };
+        }).filter(it => it.url);
+    } catch {
+        const urls: { url: string; color?: string }[] = [];
+        const base64Matches = raw.match(/data:image\/[a-zA-Z+-]+;base64,[A-Za-z0-9+/=]+/g);
+        if (base64Matches) {
+            base64Matches.forEach(url => urls.push({ url, color: '' }));
+        }
+        const httpMatches = raw.match(/https?:\/\/[^\s"']+/g);
+        if (httpMatches) {
+            httpMatches.forEach(url => urls.push({ url, color: '' }));
+        }
+        const pathMatches = raw.match(/\/[-a-zA-Z0-9@:%_\+.~#?&//=]+\.(png|jpg|jpeg|gif|webp|svg)/g);
+        if (pathMatches) {
+            pathMatches.forEach(url => urls.push({ url, color: '' }));
+        }
+        return urls;
+    }
+}
+
 function parseJson<T>(raw: string, fallback: T): T {
     try {
         return JSON.parse(raw) as T;
@@ -35,10 +65,7 @@ export default async function ShopPage() {
 
     // Parse JSON data on the server for stable hydration
     const products = rawProducts.map(p => {
-        const parsedImages = parseJson<unknown[]>(p.images || "[]", []);
-        const images = Array.isArray(parsedImages)
-            ? parsedImages.map(it => (typeof it === 'string' ? { url: it, color: '' } : it))
-            : [];
+        const images = parseProductImages(p.images);
 
         return {
             ...p,
