@@ -14,7 +14,9 @@ function UserNavComponent() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { name, email, image, role } = session?.user || {};
-    const initials = name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
+    const initials = name
+        ? name.split(" ").map(n => n[0]).join("").toUpperCase()
+        : "U";
     const isAdmin = (role as string) === "ADMIN";
 
     useEffect(() => {

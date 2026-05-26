@@ -23,7 +23,9 @@ function MobileNavComponent({ items, className }: Props) {
   const { totalItems } = useCart();
   const isAdmin = (user as { role?: string })?.role === "ADMIN";
 
-  const initials = user?.name?.split(" ").map(n => n[0]).join("").toUpperCase() || "U";
+  const initials = user?.name
+    ? user.name.split(" ").map(n => n[0]).join("").toUpperCase()
+    : "U";
 
   return (
     <nav className={cn("flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3", className)}>
