@@ -354,13 +354,16 @@ export async function createOrder(data: {
 
         const finalTotal = (data.total * (1 - discountPct / 100)) + (data.shippingFee || 0);
         
-        // Define initial status based on payment method
+        const userExists = session.user?.id
+            ? await tx.user.findUnique({ where: { id: session.user.id } })
+            : null;
+
         const isOnline = data.paymentMethod && data.paymentMethod !== "COD";
         const initialStatus = isOnline ? "PENDING_PAYMENT" : "PENDING";
 
         const order = await tx.order.create({
             data: {
-                user: session.user?.id ? { connect: { id: session.user.id } } : undefined,
+                user: userExists ? { connect: { id: userExists.id } } : undefined,
                 customerName: data.customerName,
                 customerEmail: data.customerEmail,
                 customerPhone: data.customerPhone,
