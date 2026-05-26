@@ -363,6 +363,9 @@ let printerInstance: XPrinterService | null = null;
 
 export async function getPrinterService(): Promise<XPrinterService | null> {
   try {
+    if (process.env.VERCEL === "1") {
+      return null;
+    }
     if (!printerInstance) {
       printerInstance = new XPrinterService();
       const initialized = await printerInstance.initialize();

@@ -428,7 +428,8 @@ export async function createOrder(data: {
     });
 
     // Auto-print in the background for COD orders without blocking checkout success.
-    if ((createdOrder.paymentMethod || "COD") === "COD") {
+    // Only attempt direct printing if not running on Vercel (Vercel is serverless and doesn't have a local printer).
+    if ((createdOrder.paymentMethod || "COD") === "COD" && process.env.VERCEL !== "1") {
         void printOrderReceipt(createdOrder.id).catch((error) => {
             console.error(`Auto-print failed for order ${createdOrder.id}:`, error);
         });
