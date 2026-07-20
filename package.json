@@ -76,16 +76,6 @@
     "tsx": "^4.19.2",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@grandchef/node-printer",
-      "@prisma/client",
-      "@prisma/engines",
-      "esbuild",
-      "prisma",
-      "sharp",
-      "unrs-resolver"
-    ]
+  
   }
 }
