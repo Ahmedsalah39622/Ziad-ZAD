@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && (chmod -R +x node_modules/.prisma 2>/dev/null || true) && (chmod -R +x node_modules/@prisma 2>/dev/null || true) && (chmod -R +x node_modules/.pnpm/@prisma+engines 2>/dev/null || true)",
     "db:push": "prisma db push",
     "print:agent": "tsx print-agent.ts"
   },
