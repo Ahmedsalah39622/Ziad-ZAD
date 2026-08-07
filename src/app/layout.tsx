@@ -6,7 +6,6 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import { ClientOnly } from "@/components/providers/client-only";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { WhatsAppWidget } from "@/components/ui/whatsapp-widget";
-import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // const inter = Inter({
@@ -88,7 +87,6 @@ export default async function RootLayout({
           </AuthProvider>
         </ClientOnly>
         <Toaster />
-        <Analytics />
       </body>
     </html>
   );
