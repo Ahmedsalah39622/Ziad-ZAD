@@ -55,8 +55,11 @@ export default async function Home() {
   }
 
   try {
-    const allProducts = await getProducts();
-    flexiStyleProducts = allProducts.filter(p => p.active !== false).slice(0, 10);
+    const allProducts = await getProducts({ sort: "featured" });
+    flexiStyleProducts = allProducts
+      .filter(p => p.active !== false)
+      .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
+      .slice(0, 10);
   } catch (error) {
     console.error("Failed to fetch products:", error);
     flexiStyleProducts = [];
