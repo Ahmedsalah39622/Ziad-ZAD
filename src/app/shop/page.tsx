@@ -52,11 +52,12 @@ export const metadata: Metadata = {
 // ISR: Revalidate every 5 minutes (300 seconds)
 export const revalidate = 300;
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ sort?: string }> }) {
+    const { sort } = await searchParams;
     let rawProducts: Awaited<ReturnType<typeof getProducts>> = [];
     let ribbonSettings: Record<string, unknown> = {};
     try {
-        rawProducts = await getProducts();
+        rawProducts = await getProducts({ sort: sort === "newest" || sort === "price-desc" || sort === "price-asc" ? sort : "featured" });
         const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
         ribbonSettings = parseJson<Record<string, unknown>>(ribbonSettingsRaw, {});
     } catch {
@@ -119,7 +120,7 @@ export default async function ShopPage() {
                 </div>
             </div>
 
-            <ShopFilters />
+            <ShopFilters currentSort={sort} />
 
             <ShopGrid initialProducts={products} />
 

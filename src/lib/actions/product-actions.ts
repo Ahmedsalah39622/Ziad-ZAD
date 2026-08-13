@@ -22,15 +22,32 @@ async function requireAdmin() {
     return session;
 }
 
-export async function getProducts(search?: string) {
-    const where = search
-        ? { name: { contains: search } }
+type ProductSort = "featured" | "newest" | "price-desc" | "price-asc";
+
+type ProductQueryOptions = {
+    search?: string;
+    sort?: ProductSort;
+};
+
+export async function getProducts(options?: string | ProductQueryOptions) {
+    const query = typeof options === "string" ? { search: options } : (options || {});
+    const where = query.search
+        ? { name: { contains: query.search } }
         : {};
     const prisma = await getPrisma();
+    const orderBy =
+        query.sort === "price-desc"
+            ? [{ price: "desc" as const }, { createdAt: "desc" as const }]
+            : query.sort === "price-asc"
+                ? [{ price: "asc" as const }, { createdAt: "desc" as const }]
+                : query.sort === "newest"
+                    ? [{ createdAt: "desc" as const }]
+                    : [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }];
+
     return prisma.product.findMany({
         where,
         include: { category: true },
-        orderBy: { createdAt: "desc" },
+        orderBy,
     });
 }
 
@@ -60,6 +77,7 @@ export async function createProduct({ payload }: { payload: string }) {
     };
 
     const prisma = await getPrisma();
+    const maxSortOrder = (await prisma.product.aggregate({ _max: { sortOrder: true } }))._max.sortOrder;
     const product = await prisma.product.create({
         data: {
             name: data.name,
@@ -75,6 +93,7 @@ export async function createProduct({ payload }: { payload: string }) {
             stock: data.stock,
             tag: data.tag || null,
             active: data.active ?? true,
+            sortOrder: (maxSortOrder ?? -1) + 1,
         },
     });
 
@@ -99,6 +118,7 @@ export async function updateProduct(
         tag?: string;
         active?: boolean;
         compareAtPrice?: number | null;
+        sortOrder?: number;
     }
 ) {
     await requireAdmin();
@@ -119,6 +139,7 @@ export async function updateProduct(
     if (data.stock !== undefined) updateData.stock = data.stock;
     if (data.tag !== undefined) updateData.tag = data.tag || null;
     if (data.active !== undefined) updateData.active = data.active;
+    if (data.sortOrder !== undefined) updateData.sortOrder = data.sortOrder;
 
     const product = await prisma.product.update({ where: { id }, data: updateData });
 
@@ -154,4 +175,42 @@ export async function updateProductPrices(id: string, price: number, compareAtPr
     revalidatePath(`/shop/${id}`);
     revalidatePath("/admin/products");
     return product;
+}
+
+export async function moveProductOrder(id: string, direction: "up" | "down") {
+    await requireAdmin();
+
+    const prisma = await getPrisma();
+    const products = await prisma.product.findMany({
+        select: { id: true },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+
+    const currentIndex = products.findIndex((product) => product.id === id);
+    if (currentIndex === -1) {
+        throw new Error("Product not found");
+    }
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= products.length) {
+        return null;
+    }
+
+    const reordered = [...products];
+    const [movedProduct] = reordered.splice(currentIndex, 1);
+    reordered.splice(targetIndex, 0, movedProduct);
+
+    await prisma.$transaction(
+        reordered.map((product, index) =>
+            prisma.product.update({
+                where: { id: product.id },
+                data: { sortOrder: index },
+            })
+        )
+    );
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath("/admin/products");
+    return true;
 }

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { getProducts } from "@/lib/actions/product-actions";
 import { Plus, Search, Edit, Package } from "lucide-react";
 import { DeleteProductButton } from "@/components/admin/delete-product-button";
+import { ProductOrderControls } from "@/components/admin/product-order-controls";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -43,6 +44,7 @@ export default async function ProductsPage() {
                 <table className="w-full text-left text-sm text-foreground">
                     <thead className="border-b border-border bg-foreground/5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                         <tr>
+                            <th className="px-6 py-4">Order</th>
                             <th className="px-6 py-4">Product</th>
                             <th className="px-6 py-4">Category</th>
                             <th className="px-6 py-4">Price</th>
@@ -54,11 +56,18 @@ export default async function ProductsPage() {
                     <tbody className="divide-y divide-border/5">
                         {products.length === 0 ? (
                             <tr>
-                                <td colSpan={6} className="px-6 py-10 text-center text-muted-foreground/40 italic">No products found.</td>
+                                <td colSpan={7} className="px-6 py-10 text-center text-muted-foreground/40 italic">No products found.</td>
                             </tr>
                         ) : (
-                            products.map((product) => (
+                            products.map((product, index) => (
                                 <tr key={product.id} className="hover:bg-foreground/5 transition-colors">
+                                    <td className="px-6 py-4">
+                                        <ProductOrderControls
+                                            productId={product.id}
+                                            canMoveUp={index > 0}
+                                            canMoveDown={index < products.length - 1}
+                                        />
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 shrink-0 rounded border border-border bg-secondary overflow-hidden flex items-center justify-center text-muted-foreground/20">

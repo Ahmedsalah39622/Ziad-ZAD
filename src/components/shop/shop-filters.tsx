@@ -1,13 +1,41 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 
 const filters = ["All", "New Releases", "Tops", "Bottoms", "Outerwear", "Accessories"];
 
-export function ShopFilters() {
+const sortOptions = [
+    { value: "featured", label: "Featured" },
+    { value: "newest", label: "Newest" },
+    { value: "price-desc", label: "Price: High-Low" },
+    { value: "price-asc", label: "Price: Low-High" },
+];
+
+export function ShopFilters({ currentSort }: { currentSort?: string }) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const [activeFilter, setActiveFilter] = useState("All");
+    const [selectedSort, setSelectedSort] = useState(currentSort || searchParams.get("sort") || "featured");
+
+    useEffect(() => {
+        setSelectedSort(currentSort || searchParams.get("sort") || "featured");
+    }, [currentSort, searchParams]);
+
+    const handleSortChange = (value: string) => {
+        setSelectedSort(value);
+        const params = new URLSearchParams(searchParams.toString());
+        if (value === "featured") {
+            params.delete("sort");
+        } else {
+            params.set("sort", value);
+        }
+        const query = params.toString();
+        router.push(query ? `${pathname}?${query}` : pathname);
+    };
 
     return (
         <div className="w-full px-6 md:px-12 py-6">
@@ -34,11 +62,16 @@ export function ShopFilters() {
                 {/* Sort */}
                 <div className="items-center gap-4 hidden lg:flex shrink-0">
                     <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-                    <select className="bg-transparent text-xs font-bold tracking-wider uppercase focus:outline-none cursor-pointer text-muted-foreground/60">
-                        <option className="bg-background">Featured</option>
-                        <option className="bg-background">Newest</option>
-                        <option className="bg-background">Price: High-Low</option>
-                        <option className="bg-background">Price: Low-High</option>
+                    <select
+                        value={selectedSort}
+                        onChange={(e) => handleSortChange(e.target.value)}
+                        className="bg-transparent text-xs font-bold tracking-wider uppercase focus:outline-none cursor-pointer text-muted-foreground/60"
+                    >
+                        {sortOptions.map((option) => (
+                            <option key={option.value} value={option.value} className="bg-background">
+                                {option.label}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
