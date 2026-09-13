@@ -6,10 +6,13 @@ const nextConfig: NextConfig = {
   // the default is 1mb, product creation can exceed that when sending images/base64
   // In Next 15 this setting must live under `experimental` so it's picked up.
   serverExternalPackages: [
+    "@prisma/client",
+    "prisma",
     "@grandchef/node-printer",
     "@mapbox/node-pre-gyp",
     "node-thermal-printer",
     "@napi-rs/canvas",
+    "bcryptjs",
   ],
   images: {
     remotePatterns: [
