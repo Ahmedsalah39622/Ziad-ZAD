@@ -12,6 +12,16 @@ export default function Error({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Automatically reload if a chunk fails to load due to a new deployment
+    if (
+      error.message?.includes("Loading chunk") ||
+      error.message?.includes("ChunkLoadError") ||
+      error.name === "ChunkLoadError"
+    ) {
+      window.location.reload();
+      return;
+    }
+
     setMounted(true);
     // Log the error to an error reporting service
     console.error("[ZAD] Error Page - Full Error:", {
