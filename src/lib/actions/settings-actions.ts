@@ -1,6 +1,5 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 const DATABASE_FAILURE_COOLDOWN_MS = 60_000;
@@ -29,6 +28,7 @@ export async function getSetting(key: string, defaultValue: string = "") {
     }
 
     try {
+        const { prisma } = await import("@/lib/prisma");
         const setting = await prisma.siteSetting.findUnique({
             where: { key },
         });
@@ -54,6 +54,7 @@ export async function setSetting(key: string, value: string) {
     }
 
     try {
+        const { prisma } = await import("@/lib/prisma");
         await prisma.siteSetting.upsert({
             where: { key },
             update: { value },
