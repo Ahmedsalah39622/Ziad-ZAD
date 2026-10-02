@@ -60,8 +60,14 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         rawProducts = await getProducts({ sort: sort === "newest" || sort === "price-desc" || sort === "price-asc" ? sort : "featured" });
         const ribbonSettingsRaw = await getSetting("product_discount_ribbons", "{}");
         ribbonSettings = parseJson<Record<string, unknown>>(ribbonSettingsRaw, {});
-    } catch {
-        // DB unavailable — show empty shop
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const safeMessage = message.replace(/mysql:\/\/\S+/gi, "mysql://[redacted]");
+        console.error("Failed to load shop products or settings.", {
+            name: error instanceof Error ? error.name : "UnknownError",
+            code: message.match(/\bP\d{4}\b/)?.[0],
+            message: safeMessage,
+        });
     }
 
     // Parse JSON data on the server for stable hydration
