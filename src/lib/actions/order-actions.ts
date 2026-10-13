@@ -11,6 +11,11 @@ async function getPrisma() {
     return m.prisma;
 }
 
+async function getWithRetry() {
+    const m = await import("@/lib/prisma");
+    return m.withRetry;
+}
+
 async function getAuth() {
     const m = await import("@/lib/auth");
     return m.auth;
@@ -53,27 +58,33 @@ export async function getOrders(options?: { status?: string; startDate?: Date; e
         }
     }
     const prisma = await getPrisma();
-    return prisma.order.findMany({
-        where,
-        include: {
-            items: {
-                include: { product: true },
+    const withRetry = await getWithRetry();
+    return withRetry(() =>
+        prisma.order.findMany({
+            where,
+            include: {
+                items: {
+                    include: { product: true },
+                },
             },
-        },
-        orderBy: { createdAt: "desc" },
-    });
+            orderBy: { createdAt: "desc" },
+        })
+    );
 }
 
 export async function getOrderById(id: string) {
     const prisma = await getPrisma();
-    return prisma.order.findUnique({
-        where: { id },
-        include: {
-            items: {
-                include: { product: true },
+    const withRetry = await getWithRetry();
+    return withRetry(() =>
+        prisma.order.findUnique({
+            where: { id },
+            include: {
+                items: {
+                    include: { product: true },
+                },
             },
-        },
-    });
+        })
+    );
 }
 
 export async function updateOrderStatus(id: string, status: string) {

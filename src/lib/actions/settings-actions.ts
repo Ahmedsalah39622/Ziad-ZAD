@@ -9,9 +9,17 @@ let databaseUnavailableUntil = 0;
 function isDatabaseConnectionError(error: unknown) {
     if (!(error instanceof Error)) return false;
 
+    const msg = error.message.toLowerCase();
     return (
         error.name === "PrismaClientInitializationError" ||
-        error.message.includes("Can't reach database server")
+        msg.includes("can't reach database server") ||
+        msg.includes("server has closed the connection") ||
+        msg.includes("connection") && (
+            msg.includes("closed") ||
+            msg.includes("lost") ||
+            msg.includes("reset") ||
+            msg.includes("gone away")
+        )
     );
 }
 
@@ -28,22 +36,23 @@ export async function getSetting(key: string, defaultValue: string = "") {
     }
 
     try {
-        const { prisma } = await import("@/lib/prisma");
-        const setting = await prisma.siteSetting.findUnique({
-            where: { key },
-        });
+        const { prisma, withRetry } = await import("@/lib/prisma");
+        const setting = await withRetry(() =>
+            prisma.siteSetting.findUnique({ where: { key } })
+        );
         return setting?.value ?? defaultValue;
     } catch (error) {
         if (isDatabaseConnectionError(error)) {
             databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
-            console.warn(`Database unavailable while fetching setting ${key}; using default value.`);
+            console.warn(`[ZAD][db] Database unavailable while fetching setting "${key}"; using default value.`);
             return defaultValue;
         }
 
-        console.error(`Failed to fetch setting ${key}:`, error);
+        console.error(`[ZAD][db] Failed to fetch setting "${key}":`, error);
         return defaultValue;
     }
 }
+
 
 /**
  * Set a site setting and revalidate the layout.
@@ -54,28 +63,31 @@ export async function setSetting(key: string, value: string) {
     }
 
     try {
-        const { prisma } = await import("@/lib/prisma");
-        await prisma.siteSetting.upsert({
-            where: { key },
-            update: { value },
-            create: { key, value },
-        });
+        const { prisma, withRetry } = await import("@/lib/prisma");
+        await withRetry(() =>
+            prisma.siteSetting.upsert({
+                where: { key },
+                update: { value },
+                create: { key, value },
+            })
+        );
 
-        // Revalidation happens globally to instantly show the ribbon 
+        // Revalidation happens globally to instantly show the ribbon
         // across all cached pages where the header/hero is.
         revalidatePath("/", "layout");
         return { success: true };
     } catch (error) {
         if (isDatabaseConnectionError(error)) {
             databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
-            console.warn(`Database unavailable while saving setting ${key}.`);
+            console.warn(`[ZAD][db] Database unavailable while saving setting "${key}".`);
             return { success: false, error: "Database temporarily unavailable." };
         }
 
-        console.error(`Failed to set setting ${key}:`, error);
+        console.error(`[ZAD][db] Failed to set setting "${key}":`, error);
         return { success: false, error: "Failed to update setting." };
     }
 }
+
 
 /**
  * Upload a hero image from base64 and return the base64 data.

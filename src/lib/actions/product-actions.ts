@@ -8,6 +8,11 @@ async function getPrisma() {
     return m.prisma;
 }
 
+async function getWithRetry() {
+    const m = await import("@/lib/prisma");
+    return m.withRetry;
+}
+
 async function getAuth() {
     const m = await import("@/lib/auth");
     return m.auth;
@@ -35,6 +40,7 @@ export async function getProducts(options?: string | ProductQueryOptions) {
         ? { name: { contains: query.search } }
         : {};
     const prisma = await getPrisma();
+    const withRetry = await getWithRetry();
     const orderBy =
         query.sort === "price-desc"
             ? [{ price: "desc" as const }, { createdAt: "desc" as const }]
@@ -44,19 +50,24 @@ export async function getProducts(options?: string | ProductQueryOptions) {
                     ? [{ createdAt: "desc" as const }]
                     : [{ sortOrder: "asc" as const }, { createdAt: "desc" as const }];
 
-    return prisma.product.findMany({
-        where,
-        include: { category: true },
-        orderBy,
-    });
+    return withRetry(() =>
+        prisma.product.findMany({
+            where,
+            include: { category: true },
+            orderBy,
+        })
+    );
 }
 
 export async function getProductById(id: string) {
     const prisma = await getPrisma();
-    return prisma.product.findUnique({
-        where: { id },
-        include: { category: true },
-    });
+    const withRetry = await getWithRetry();
+    return withRetry(() =>
+        prisma.product.findUnique({
+            where: { id },
+            include: { category: true },
+        })
+    );
 }
 
 export async function createProduct({ payload }: { payload: string }) {
