@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createProduct, updateProduct } from "@/lib/actions/product-actions";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Category, Product } from "@/db/schema";
 
 interface ProductFormProps {
@@ -164,13 +165,16 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
         try {
             if (initialData?.id) {
                 await updateProduct(initialData.id, data);
+                toast.success("Product updated successfully!");
             } else {
                 await createProduct({ payload: JSON.stringify(data) });
+                toast.success("Product created successfully!");
             }
             router.push("/admin/products");
             router.refresh();
         } catch (error) {
             console.error("Failed to save product:", error);
+            toast.error(error instanceof Error ? error.message : "Failed to save product. Please check your admin login.");
         } finally {
             setIsLoading(false);
         }
