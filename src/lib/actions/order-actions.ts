@@ -49,8 +49,7 @@ async function attachItemsToOrders(rawOrders: Order[]) {
   const itemRows = await db
     .select({
       item: orderItems,
-      productName: products.name,
-      productPrice: products.price,
+      product: products,
     })
     .from(orderItems)
     .leftJoin(products, eq(orderItems.productId, products.id))
@@ -60,7 +59,7 @@ async function attachItemsToOrders(rawOrders: Order[]) {
     string,
     Array<
       typeof itemRows[0]["item"] & {
-        product: { name: string; price: number };
+        product: typeof products.$inferSelect;
       }
     >
   >();
@@ -69,9 +68,23 @@ async function attachItemsToOrders(rawOrders: Order[]) {
     const arr = itemsMap.get(r.item.orderId) || [];
     arr.push({
       ...r.item,
-      product: {
-        name: r.productName ?? r.item.productId,
-        price: r.productPrice ?? r.item.price,
+      product: r.product || {
+        id: r.item.productId,
+        name: r.item.productId,
+        price: r.item.price,
+        compareAtPrice: null,
+        description: "",
+        details: "[]",
+        images: "[]",
+        sizes: "[]",
+        colors: "[]",
+        categoryId: null,
+        stock: 0,
+        active: true,
+        tag: null,
+        sortOrder: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     });
     itemsMap.set(r.item.orderId, arr);
