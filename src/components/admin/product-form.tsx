@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createProduct, updateProduct } from "@/lib/actions/product-actions";
 import { useRouter } from "next/navigation";
-import { Category, Product } from "@prisma/client";
+import type { Category, Product } from "@/db/schema";
 
 interface ProductFormProps {
     categories: Category[];

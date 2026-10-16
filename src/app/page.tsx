@@ -10,7 +10,7 @@ import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import { getSetting } from "@/lib/actions/settings-actions";
 import { getProducts } from "@/lib/actions/product-actions";
 import { FeaturedCategory } from "@/components/home/featured-category";
-import type { Product, Category } from "@prisma/client";
+import type { Product, Category } from "@/db/schema";
 
 type ProductWithCategory = Product & { category: Category | null };
 

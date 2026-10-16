@@ -1,76 +1,77 @@
 // Guard against accidental client-side imports
 if (typeof window !== "undefined") {
-    throw new Error("Do not import auth helpers on the client");
+  throw new Error("Do not import auth helpers on the client");
 }
 
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { db, users } from "@/lib/db";
+import { eq } from "drizzle-orm";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    secret:
-        process.env.AUTH_SECRET ||
-        process.env.NEXTAUTH_SECRET ||
-        "zadfitt_auth_secure_secret_key_2026_jwt_token_sign",
-    trustHost: true,
-    providers: [
-        Credentials({
-            name: "credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    "zadfitt_auth_secure_secret_key_2026_jwt_token_sign",
+  trustHost: true,
+  providers: [
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
 
-                try {
-                    const { prisma } = await import("@/lib/prisma");
-                    const user = await prisma.user.findUnique({
-                        where: { email: credentials.email as string },
-                    });
+        try {
+          const user = await db.query.users.findFirst({
+            where: eq(users.email, credentials.email as string),
+          });
 
-                    if (!user) return null;
+          if (!user) return null;
 
-                    const passwordMatch = await bcrypt.compare(
-                        credentials.password as string,
-                        user.password
-                    );
+          const passwordMatch = await bcrypt.compare(
+            credentials.password as string,
+            user.password
+          );
 
-                    if (!passwordMatch) return null;
+          if (!passwordMatch) return null;
 
-                    return {
-                        id: user.id,
-                        email: user.email,
-                        name: user.name,
-                        role: user.role,
-                    };
-                } catch (error) {
-                    console.error("Auth authorize error:", error);
-                    return null;
-                }
-            },
-        }),
-    ],
-    session: {
-        strategy: "jwt",
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth authorize error:", error);
+          return null;
+        }
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as { role: string }).role;
+        token.id = user.id;
+      }
+      return token;
     },
-    callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
-                token.role = (user as { role: string }).role;
-                token.id = user.id;
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (session?.user && token) {
-                session.user.role = (token.role as string) || "CLIENT";
-                session.user.id = (token.id as string) || (token.sub as string) || "";
-            }
-            return session;
-        },
+    async session({ session, token }) {
+      if (session?.user && token) {
+        session.user.role = (token.role as string) || "CLIENT";
+        session.user.id = (token.id as string) || (token.sub as string) || "";
+      }
+      return session;
     },
-    pages: {
-        signIn: "/login",
-    },
+  },
+  pages: {
+    signIn: "/login",
+  },
 });

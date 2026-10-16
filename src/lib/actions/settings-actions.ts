@@ -1,118 +1,84 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { db, siteSettings } from "@/lib/db";
+import { eq } from "drizzle-orm";
 
-const DATABASE_FAILURE_COOLDOWN_MS = 60_000;
-
+const DATABASE_FAILURE_COOLDOWN_MS = 30_000;
 let databaseUnavailableUntil = 0;
 
-function isDatabaseConnectionError(error: unknown) {
-    if (!(error instanceof Error)) return false;
-
-    const msg = error.message.toLowerCase();
-    return (
-        error.name === "PrismaClientInitializationError" ||
-        msg.includes("can't reach database server") ||
-        msg.includes("server has closed the connection") ||
-        msg.includes("connection") && (
-            msg.includes("closed") ||
-            msg.includes("lost") ||
-            msg.includes("reset") ||
-            msg.includes("gone away")
-        )
-    );
-}
-
 function isDatabaseTemporarilyUnavailable() {
-    return Date.now() < databaseUnavailableUntil;
+  return Date.now() < databaseUnavailableUntil;
 }
 
 /**
  * Get a single site setting by key.
  */
-export async function getSetting(key: string, defaultValue: string = "") {
-    if (isDatabaseTemporarilyUnavailable()) {
-        return defaultValue;
-    }
+export async function getSetting(key: string, defaultValue: string = ""): Promise<string> {
+  if (isDatabaseTemporarilyUnavailable()) {
+    return defaultValue;
+  }
 
-    try {
-        const { prisma, withRetry } = await import("@/lib/prisma");
-        const setting = await withRetry(() =>
-            prisma.siteSetting.findUnique({ where: { key } })
-        );
-        return setting?.value ?? defaultValue;
-    } catch (error) {
-        if (isDatabaseConnectionError(error)) {
-            databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
-            console.warn(`[ZAD][db] Database unavailable while fetching setting "${key}"; using default value.`);
-            return defaultValue;
-        }
-
-        console.error(`[ZAD][db] Failed to fetch setting "${key}":`, error);
-        return defaultValue;
-    }
+  try {
+    const setting = await db.query.siteSettings.findFirst({
+      where: eq(siteSettings.key, key),
+    });
+    return setting?.value ?? defaultValue;
+  } catch (error) {
+    databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
+    console.warn(`[ZAD][db] Database unavailable while fetching setting "${key}"; using default value.`);
+    return defaultValue;
+  }
 }
-
 
 /**
  * Set a site setting and revalidate the layout.
  */
 export async function setSetting(key: string, value: string) {
-    if (isDatabaseTemporarilyUnavailable()) {
-        return { success: false, error: "Database temporarily unavailable." };
+  if (isDatabaseTemporarilyUnavailable()) {
+    return { success: false, error: "Database temporarily unavailable." };
+  }
+
+  try {
+    const existing = await db.query.siteSettings.findFirst({
+      where: eq(siteSettings.key, key),
+    });
+
+    if (existing) {
+      await db
+        .update(siteSettings)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(siteSettings.key, key));
+    } else {
+      await db.insert(siteSettings).values({
+        key,
+        value,
+      });
     }
 
-    try {
-        const { prisma, withRetry } = await import("@/lib/prisma");
-        await withRetry(() =>
-            prisma.siteSetting.upsert({
-                where: { key },
-                update: { value },
-                create: { key, value },
-            })
-        );
-
-        // Revalidation happens globally to instantly show the ribbon
-        // across all cached pages where the header/hero is.
-        revalidatePath("/", "layout");
-        return { success: true };
-    } catch (error) {
-        if (isDatabaseConnectionError(error)) {
-            databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
-            console.warn(`[ZAD][db] Database unavailable while saving setting "${key}".`);
-            return { success: false, error: "Database temporarily unavailable." };
-        }
-
-        console.error(`[ZAD][db] Failed to set setting "${key}":`, error);
-        return { success: false, error: "Failed to update setting." };
-    }
+    revalidatePath("/", "layout");
+    return { success: true };
+  } catch (error) {
+    databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
+    console.error(`[ZAD][db] Failed to set setting "${key}":`, error);
+    return { success: false, error: "Failed to update setting." };
+  }
 }
 
-
-/**
- * Upload a hero image from base64 and return the base64 data.
- * In a serverless environment like Vercel, we can't save to the filesystem,
- * so we store the base64 string directly in the database.
- */
 export async function uploadHeroImage(base64Data: string) {
-    try {
-        // Just return the base64 data to be stored in the database
-        return { success: true, path: base64Data };
-    } catch (error) {
-        console.error("Upload failed:", error);
-        return { success: false, error: "Upload failed." };
-    }
+  try {
+    return { success: true, path: base64Data };
+  } catch (error) {
+    console.error("Upload failed:", error);
+    return { success: false, error: "Upload failed." };
+  }
 }
 
-/**
- * Upload a feature background image from base64 and return the base64 data.
- */
 export async function uploadFeatureImage(base64Data: string) {
-    try {
-        // Just return the base64 data to be stored in the database
-        return { success: true, path: base64Data };
-    } catch (error) {
-        console.error("Feature upload failed:", error);
-        return { success: false, error: "Upload failed." };
-    }
+  try {
+    return { success: true, path: base64Data };
+  } catch (error) {
+    console.error("Feature upload failed:", error);
+    return { success: false, error: "Upload failed." };
+  }
 }

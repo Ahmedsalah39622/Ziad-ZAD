@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db, siteSettings } from "@/lib/db";
+import { eq } from "drizzle-orm";
 
 const PRINTED_IDS_KEY = "print_agent_printed_order_ids";
 
@@ -12,9 +13,9 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function readPrintedIds(): Promise<string[]> {
-  const setting = await prisma.siteSetting.findUnique({
-    where: { key: PRINTED_IDS_KEY },
-    select: { value: true },
+  const setting = await db.query.siteSettings.findFirst({
+    where: eq(siteSettings.key, PRINTED_IDS_KEY),
+    columns: { value: true },
   });
 
   if (!setting?.value) return [];
@@ -28,6 +29,23 @@ async function readPrintedIds(): Promise<string[]> {
   }
 }
 
+async function writePrintedIds(ids: string[]) {
+  const existing = await db.query.siteSettings.findFirst({
+    where: eq(siteSettings.key, PRINTED_IDS_KEY),
+  });
+
+  const value = JSON.stringify(ids);
+
+  if (existing) {
+    await db
+      .update(siteSettings)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(siteSettings.key, PRINTED_IDS_KEY));
+  } else {
+    await db.insert(siteSettings).values({ key: PRINTED_IDS_KEY, value });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     if (!isAuthorized(req)) {
@@ -35,7 +53,9 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const ids = Array.isArray(body?.ids) ? body.ids.filter((id: unknown) => typeof id === "string") : [];
+    const ids = Array.isArray(body?.ids)
+      ? body.ids.filter((id: unknown) => typeof id === "string")
+      : [];
 
     if (!ids.length) {
       return NextResponse.json({ ok: true, message: "No ids to ack" });
@@ -45,16 +65,15 @@ export async function POST(req: NextRequest) {
     const merged = Array.from(new Set([...current, ...ids]));
     const trimmed = merged.slice(Math.max(0, merged.length - 5000));
 
-    await prisma.siteSetting.upsert({
-      where: { key: PRINTED_IDS_KEY },
-      update: { value: JSON.stringify(trimmed) },
-      create: { key: PRINTED_IDS_KEY, value: JSON.stringify(trimmed) },
-    });
+    await writePrintedIds(trimmed);
 
     return NextResponse.json({ ok: true, acknowledged: ids.length });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to acknowledge printed orders", details: error instanceof Error ? error.message : "internal error" },
+      {
+        error: "Failed to acknowledge printed orders",
+        details: error instanceof Error ? error.message : "internal error",
+      },
       { status: 500 }
     );
   }

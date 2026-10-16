@@ -1,18 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { db, pool } from "./src/lib/db";
 
 async function main() {
-    try {
-        const products = await prisma.product.findMany({
-            take: 5
-        });
-        console.log(JSON.stringify(products, null, 2));
-    } catch (err) {
-        console.error("Error fetching products:", err);
-    } finally {
-        await prisma.$disconnect();
-    }
+  try {
+    const products = await db.query.products.findMany({
+      limit: 5,
+    });
+    console.log("Fetched products successfully:", JSON.stringify(products, null, 2));
+  } catch (err) {
+    console.error("Error fetching products:", err);
+  } finally {
+    await pool.end();
+  }
 }
 
 main();

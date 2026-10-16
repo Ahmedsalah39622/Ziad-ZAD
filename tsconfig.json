@@ -36,6 +36,7 @@
   ],
   "exclude": [
     "node_modules",
+    "prisma",
     "check-payload.ts",
     "check-user.ts",
     "list-users.ts"

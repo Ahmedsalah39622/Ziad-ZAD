@@ -1,18 +1,20 @@
-import { prisma } from "./src/lib/prisma";
+import { db, users, pool } from "./src/lib/db";
+import { eq } from "drizzle-orm";
 
 async function setAdmin() {
-    try {
-        const user = await prisma.user.update({
-            where: { email: "client@gmail.com" },
-            data: { role: "ADMIN" },
-        });
+  try {
+    const email = "client@gmail.com";
+    await db
+      .update(users)
+      .set({ role: "ADMIN", updatedAt: new Date() })
+      .where(eq(users.email, email));
 
-        console.log(`Success: Role for ${user.email} updated to ${user.role}`);
-    } catch (error) {
-        console.error("Error updating user role:", error);
-    } finally {
-        await prisma.$disconnect();
-    }
+    console.log(`Success: Role for ${email} updated to ADMIN`);
+  } catch (error) {
+    console.error("Error updating user role:", error);
+  } finally {
+    await pool.end();
+  }
 }
 
 setAdmin();

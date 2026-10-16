@@ -1,83 +1,84 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
-
-async function getPrisma() {
-    const m = await import("@/lib/prisma");
-    return m.prisma;
-}
+import { db, categories, products } from "@/lib/db";
+import { eq, count } from "drizzle-orm";
 
 async function getAuth() {
-    const m = await import("@/lib/auth");
-    return m.auth;
+  const m = await import("@/lib/auth");
+  return m.auth;
 }
 
 async function requireAdmin() {
-    const auth = await getAuth();
-    const session = await auth();
-    if (!session?.user || (session.user as { role: string }).role !== "ADMIN") {
-        throw new Error("Unauthorized");
-    }
-    return session;
-}
-
-function isTransientConnectionError(error: unknown) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P1017") {
-        return true;
-    }
-
-    if (error instanceof Error) {
-        const msg = error.message.toLowerCase();
-        return msg.includes("server has closed the connection") || msg.includes("connection") && msg.includes("closed");
-    }
-
-    return false;
-}
-
-async function withPrismaRetry<T>(operation: (prisma: Awaited<ReturnType<typeof getPrisma>>) => Promise<T>): Promise<T> {
-    const prisma = await getPrisma();
-
-    try {
-        return await operation(prisma);
-    } catch (error) {
-        if (!isTransientConnectionError(error)) {
-            throw error;
-        }
-
-        await prisma.$disconnect();
-        const freshPrisma = await getPrisma();
-        return operation(freshPrisma);
-    }
+  const auth = await getAuth();
+  const session = await auth();
+  if (!session?.user || (session.user as { role: string }).role !== "ADMIN") {
+    throw new Error("Unauthorized");
+  }
+  return session;
 }
 
 export async function getCategories() {
-    return withPrismaRetry((prisma) => prisma.category.findMany({
-        orderBy: { name: "asc" },
-        include: { _count: { select: { products: true } } },
-    }));
+  const allCategories = await db.query.categories.findMany({
+    orderBy: (tbl, { asc }) => [asc(tbl.name)],
+    with: {
+      products: {
+        columns: { id: true },
+      },
+    },
+  });
+
+  return allCategories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+    _count: { products: c.products.length },
+  }));
 }
 
 export async function createCategory(data: { name: string; slug: string }) {
-    await requireAdmin();
-    return withPrismaRetry((prisma) => prisma.category.create({ data }));
+  await requireAdmin();
+  await db.insert(categories).values({
+    name: data.name,
+    slug: data.slug,
+  });
+  return db.query.categories.findFirst({
+    where: eq(categories.slug, data.slug),
+  });
 }
 
 export async function updateCategory(
-    id: string,
-    data: { name?: string; slug?: string }
+  id: string,
+  data: { name?: string; slug?: string }
 ) {
-    await requireAdmin();
-    return withPrismaRetry((prisma) => prisma.category.update({ where: { id }, data }));
+  await requireAdmin();
+  await db
+    .update(categories)
+    .set({
+      ...(data.name ? { name: data.name } : {}),
+      ...(data.slug ? { slug: data.slug } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(categories.id, id));
+
+  return db.query.categories.findFirst({
+    where: eq(categories.id, id),
+  });
 }
 
 export async function deleteCategory(id: string) {
-    await requireAdmin();
-    return withPrismaRetry(async (prisma) => {
-        // Check if any products use this category
-        const count = await prisma.product.count({ where: { categoryId: id } });
-        if (count > 0) {
-            throw new Error("Cannot delete category with products");
-        }
-        return prisma.category.delete({ where: { id } });
-    });
+  await requireAdmin();
+
+  const [res] = await db
+    .select({ value: count() })
+    .from(products)
+    .where(eq(products.categoryId, id));
+
+  if (res && res.value > 0) {
+    throw new Error("Cannot delete category with products");
+  }
+
+  await db.delete(categories).where(eq(categories.id, id));
+  return { success: true };
 }

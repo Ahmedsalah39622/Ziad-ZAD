@@ -1,5 +1,5 @@
 import QRCode from "qrcode";
-import type { Order, OrderItem } from "@prisma/client";
+import type { Order, OrderItem } from "@/db/schema";
 
 export interface OrderWithItems extends Order {
   items: OrderItem[];

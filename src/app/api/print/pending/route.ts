@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { db, siteSettings, orders } from "@/lib/db";
+import { eq, and, notInArray, asc } from "drizzle-orm";
 
 const PRINTED_IDS_KEY = "print_agent_printed_order_ids";
 
@@ -12,9 +13,9 @@ function isAuthorized(req: NextRequest): boolean {
 }
 
 async function getPrintedIds(): Promise<string[]> {
-  const setting = await prisma.siteSetting.findUnique({
-    where: { key: PRINTED_IDS_KEY },
-    select: { value: true },
+  const setting = await db.query.siteSettings.findFirst({
+    where: eq(siteSettings.key, PRINTED_IDS_KEY),
+    columns: { value: true },
   });
 
   if (!setting?.value) return [];
@@ -36,27 +37,33 @@ export async function GET(req: NextRequest) {
 
     const printedIds = await getPrintedIds();
 
-    const orders = await prisma.order.findMany({
-      where: {
-        paymentMethod: "COD",
-        id: { notIn: printedIds.length ? printedIds : undefined },
-      },
-      include: {
+    const whereCondition =
+      printedIds.length > 0
+        ? and(eq(orders.paymentMethod, "COD"), notInArray(orders.id, printedIds))
+        : eq(orders.paymentMethod, "COD");
+
+    const pendingOrders = await db.query.orders.findMany({
+      where: whereCondition,
+      with: {
         items: {
-          include: {
+          with: {
             product: {
-              select: { name: true },
+              columns: { name: true },
             },
           },
         },
       },
-      orderBy: { createdAt: "asc" },
-      take: 10,
+      orderBy: [asc(orders.createdAt)],
+      limit: 10,
     });
 
-    const payload = orders.map((order) => {
-      const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const discountAmount = order.discountPct > 0 ? (subtotal * order.discountPct) / 100 : 0;
+    const payload = pendingOrders.map((order) => {
+      const subtotal = order.items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+      const discountAmount =
+        order.discountPct > 0 ? (subtotal * order.discountPct) / 100 : 0;
 
       return {
         id: order.id,
@@ -75,7 +82,7 @@ export async function GET(req: NextRequest) {
         shippingFee: order.shippingFee,
         total: order.total,
         items: order.items.map((item) => ({
-          name: item.product.name,
+          name: item.product?.name ?? item.productId,
           quantity: item.quantity,
           price: item.price,
           size: item.size,
@@ -87,7 +94,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ orders: payload });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch pending print orders", details: error instanceof Error ? error.message : "internal error" },
+      {
+        error: "Failed to fetch pending print orders",
+        details: error instanceof Error ? error.message : "internal error",
+      },
       { status: 500 }
     );
   }

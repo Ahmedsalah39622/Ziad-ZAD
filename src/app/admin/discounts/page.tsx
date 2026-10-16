@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { generateDiscountCodes, getDiscountCodes, updateDiscountCode, deleteDiscountCode } from "@/lib/actions/discount-actions";
-import { DiscountCode } from "@prisma/client";
+import type { DiscountCode } from "@/db/schema";
 import { Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { revalidatePath } from "next/cache";
