@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { db, pool } from "./src/lib/db";
 
 async function main() {
