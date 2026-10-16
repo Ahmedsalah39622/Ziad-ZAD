@@ -1,7 +1,7 @@
 "use server";
 
 import { db, categories, products } from "@/lib/db";
-import { eq, count } from "drizzle-orm";
+import { eq, count, asc } from "drizzle-orm";
 
 async function getAuth() {
   const m = await import("@/lib/auth");
