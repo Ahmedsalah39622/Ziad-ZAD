@@ -42,50 +42,60 @@ export async function getOrders(options?: {
   startDate?: Date;
   endDate?: Date;
 }) {
-  const { status, startDate, endDate } = options || {};
+  try {
+    const { status, startDate, endDate } = options || {};
 
-  const conditions = [];
-  if (status && status !== "ALL") {
-    conditions.push(eq(orders.status, status));
-  }
-  if (startDate) {
-    const d = new Date(startDate);
-    if (!isNaN(d.getTime())) conditions.push(gte(orders.createdAt, d));
-  }
-  if (endDate) {
-    const d = new Date(endDate);
-    if (!isNaN(d.getTime())) {
-      d.setHours(23, 59, 59, 999);
-      conditions.push(lte(orders.createdAt, d));
+    const conditions = [];
+    if (status && status !== "ALL") {
+      conditions.push(eq(orders.status, status));
     }
-  }
+    if (startDate) {
+      const d = new Date(startDate);
+      if (!isNaN(d.getTime())) conditions.push(gte(orders.createdAt, d));
+    }
+    if (endDate) {
+      const d = new Date(endDate);
+      if (!isNaN(d.getTime())) {
+        d.setHours(23, 59, 59, 999);
+        conditions.push(lte(orders.createdAt, d));
+      }
+    }
 
-  const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
+    const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-  return db.query.orders.findMany({
-    where: whereCondition,
-    with: {
-      items: {
-        with: {
-          product: true,
+    return await db.query.orders.findMany({
+      where: whereCondition,
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
         },
       },
-    },
-    orderBy: [desc(orders.createdAt)],
-  });
+      orderBy: [desc(orders.createdAt)],
+    });
+  } catch (error) {
+    console.warn("[ZAD][db] Failed to fetch orders (database unavailable):", error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 export async function getOrderById(id: string) {
-  return db.query.orders.findFirst({
-    where: eq(orders.id, id),
-    with: {
-      items: {
-        with: {
-          product: true,
+  try {
+    return await db.query.orders.findFirst({
+      where: eq(orders.id, id),
+      with: {
+        items: {
+          with: {
+            product: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.warn(`[ZAD][db] Failed to fetch order ${id}:`, error instanceof Error ? error.message : error);
+    return null;
+  }
 }
 
 export async function updateOrderStatus(id: string, status: string) {

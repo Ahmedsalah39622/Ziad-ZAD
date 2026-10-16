@@ -18,23 +18,28 @@ async function requireAdmin() {
 }
 
 export async function getCategories() {
-  const allCategories = await db.query.categories.findMany({
-    orderBy: (tbl, { asc }) => [asc(tbl.name)],
-    with: {
-      products: {
-        columns: { id: true },
+  try {
+    const allCategories = await db.query.categories.findMany({
+      orderBy: (tbl, { asc }) => [asc(tbl.name)],
+      with: {
+        products: {
+          columns: { id: true },
+        },
       },
-    },
-  });
+    });
 
-  return allCategories.map((c) => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    createdAt: c.createdAt,
-    updatedAt: c.updatedAt,
-    _count: { products: c.products.length },
-  }));
+    return allCategories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+      _count: { products: c.products.length },
+    }));
+  } catch (error) {
+    console.warn("[ZAD][db] Failed to fetch categories (database unavailable):", error instanceof Error ? error.message : error);
+    return [];
+  }
 }
 
 export async function createCategory(data: { name: string; slug: string }) {

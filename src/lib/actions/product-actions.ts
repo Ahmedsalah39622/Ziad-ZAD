@@ -26,34 +26,44 @@ type ProductQueryOptions = {
 };
 
 export async function getProducts(options?: string | ProductQueryOptions) {
-  const query = typeof options === "string" ? { search: options } : options || {};
-  const searchFilter = query.search
-    ? like(products.name, `%${query.search}%`)
-    : undefined;
+  try {
+    const query = typeof options === "string" ? { search: options } : options || {};
+    const searchFilter = query.search
+      ? like(products.name, `%${query.search}%`)
+      : undefined;
 
-  let orderBy;
-  if (query.sort === "price-desc") {
-    orderBy = [desc(products.price), desc(products.createdAt)];
-  } else if (query.sort === "price-asc") {
-    orderBy = [asc(products.price), desc(products.createdAt)];
-  } else if (query.sort === "newest") {
-    orderBy = [desc(products.createdAt)];
-  } else {
-    orderBy = [asc(products.sortOrder), desc(products.createdAt)];
+    let orderBy;
+    if (query.sort === "price-desc") {
+      orderBy = [desc(products.price), desc(products.createdAt)];
+    } else if (query.sort === "price-asc") {
+      orderBy = [asc(products.price), desc(products.createdAt)];
+    } else if (query.sort === "newest") {
+      orderBy = [desc(products.createdAt)];
+    } else {
+      orderBy = [asc(products.sortOrder), desc(products.createdAt)];
+    }
+
+    return await db.query.products.findMany({
+      where: searchFilter,
+      with: { category: true },
+      orderBy,
+    });
+  } catch (error) {
+    console.warn("[ZAD][db] Failed to fetch products (database unavailable):", error instanceof Error ? error.message : error);
+    return [];
   }
-
-  return db.query.products.findMany({
-    where: searchFilter,
-    with: { category: true },
-    orderBy,
-  });
 }
 
 export async function getProductById(id: string) {
-  return db.query.products.findFirst({
-    where: eq(products.id, id),
-    with: { category: true },
-  });
+  try {
+    return await db.query.products.findFirst({
+      where: eq(products.id, id),
+      with: { category: true },
+    });
+  } catch (error) {
+    console.warn(`[ZAD][db] Failed to fetch product ${id}:`, error instanceof Error ? error.message : error);
+    return null;
+  }
 }
 
 export async function createProduct({ payload }: { payload: string }) {
