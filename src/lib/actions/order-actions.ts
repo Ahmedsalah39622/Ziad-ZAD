@@ -9,8 +9,9 @@ import {
   users,
   discountCodes,
   generateId,
+  type Order,
 } from "@/lib/db";
-import { eq, and, gte, lte, desc, asc, count, lt, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, count, lt, sql, inArray } from "drizzle-orm";
 import { generateReceiptQR, type OrderWithItems } from "@/lib/printer/qr-receipt";
 import { getPrinterService } from "@/lib/printer/xprinter";
 
@@ -35,6 +36,51 @@ async function requireUser() {
     throw new Error("You must be logged in to complete this action");
   }
   return session;
+}
+
+/**
+ * Robust helper that attaches order items + product info to orders
+ * using standard SQL queries (100% compatible with MariaDB and MySQL).
+ */
+async function attachItemsToOrders(rawOrders: Order[]) {
+  if (!rawOrders.length) return [];
+  const orderIds = rawOrders.map((o) => o.id);
+
+  const itemRows = await db
+    .select({
+      item: orderItems,
+      productName: products.name,
+      productPrice: products.price,
+    })
+    .from(orderItems)
+    .leftJoin(products, eq(orderItems.productId, products.id))
+    .where(inArray(orderItems.orderId, orderIds));
+
+  const itemsMap = new Map<
+    string,
+    Array<
+      typeof itemRows[0]["item"] & {
+        product: { name: string; price: number };
+      }
+    >
+  >();
+
+  for (const r of itemRows) {
+    const arr = itemsMap.get(r.item.orderId) || [];
+    arr.push({
+      ...r.item,
+      product: {
+        name: r.productName ?? r.item.productId,
+        price: r.productPrice ?? r.item.price,
+      },
+    });
+    itemsMap.set(r.item.orderId, arr);
+  }
+
+  return rawOrders.map((o) => ({
+    ...o,
+    items: itemsMap.get(o.id) || [],
+  }));
 }
 
 export async function getOrders(options?: {
@@ -63,37 +109,39 @@ export async function getOrders(options?: {
 
     const whereCondition = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return await db.query.orders.findMany({
-      where: whereCondition,
-      with: {
-        items: {
-          with: {
-            product: true,
-          },
-        },
-      },
-      orderBy: [desc(orders.createdAt)],
-    });
+    const rawOrders = await db
+      .select()
+      .from(orders)
+      .where(whereCondition)
+      .orderBy(desc(orders.createdAt));
+
+    return await attachItemsToOrders(rawOrders);
   } catch (error) {
-    console.warn("[ZAD][db] Failed to fetch orders (database unavailable):", error instanceof Error ? error.message : error);
+    console.warn(
+      "[ZAD][db] Failed to fetch orders (database unavailable):",
+      error instanceof Error ? error.message : error
+    );
     return [];
   }
 }
 
 export async function getOrderById(id: string) {
   try {
-    return await db.query.orders.findFirst({
-      where: eq(orders.id, id),
-      with: {
-        items: {
-          with: {
-            product: true,
-          },
-        },
-      },
-    });
+    const rawOrders = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, id))
+      .limit(1);
+
+    if (!rawOrders.length) return null;
+
+    const [orderWithItems] = await attachItemsToOrders(rawOrders);
+    return orderWithItems || null;
   } catch (error) {
-    console.warn(`[ZAD][db] Failed to fetch order ${id}:`, error instanceof Error ? error.message : error);
+    console.warn(
+      `[ZAD][db] Failed to fetch order ${id}:`,
+      error instanceof Error ? error.message : error
+    );
     return null;
   }
 }
@@ -101,25 +149,31 @@ export async function getOrderById(id: string) {
 export async function updateOrderStatus(id: string, status: string) {
   await requireAdmin();
 
-  const existingOrder = await db.query.orders.findFirst({
-    where: eq(orders.id, id),
-    with: {
-      items: true,
-    },
-  });
+  const [existingOrder] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, id))
+    .limit(1);
 
   if (!existingOrder) {
     throw new Error("Order not found");
   }
 
+  const existingItems = await db
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.orderId, id));
+
   const isCancelling = status === "CANCELLED" && existingOrder.status !== "CANCELLED";
 
   await db.transaction(async (tx) => {
     if (isCancelling) {
-      for (const item of existingOrder.items) {
-        const product = await tx.query.products.findFirst({
-          where: eq(products.id, item.productId),
-        });
+      for (const item of existingItems) {
+        const [product] = await tx
+          .select({ id: products.id, sizes: products.sizes, stock: products.stock })
+          .from(products)
+          .where(eq(products.id, item.productId))
+          .limit(1);
 
         if (!product) continue;
 
@@ -201,32 +255,23 @@ export async function getDashboardStats(options?: {
 
     const totalProducts = totalProductsRes?.value ?? 0;
 
-    const allOrders = await db.query.orders.findMany({
-      where: whereCondition,
-      orderBy: [desc(orders.createdAt)],
-      with: {
-        items: {
-          with: {
-            product: {
-              columns: {
-                name: true,
-                price: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const rawOrders = await db
+      .select()
+      .from(orders)
+      .where(whereCondition)
+      .orderBy(desc(orders.createdAt));
 
-    const lowStockProducts = await db.query.products.findMany({
-      where: and(eq(products.active, true), lt(products.stock, 5)),
-      columns: {
-        id: true,
-        name: true,
-        stock: true,
-      },
-      orderBy: [asc(products.stock)],
-    });
+    const allOrders = await attachItemsToOrders(rawOrders);
+
+    const lowStockProducts = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        stock: products.stock,
+      })
+      .from(products)
+      .where(and(eq(products.active, true), lt(products.stock, 5)))
+      .orderBy(asc(products.stock));
 
     let totalRevenue = 0;
     const statusMap = new Map<string, number>();
@@ -364,9 +409,11 @@ export async function createOrder(data: {
   await db.transaction(async (tx) => {
     let discountPct = 0;
     if (data.discountCode) {
-      const dc = await tx.query.discountCodes.findFirst({
-        where: eq(discountCodes.code, data.discountCode),
-      });
+      const [dc] = await tx
+        .select()
+        .from(discountCodes)
+        .where(eq(discountCodes.code, data.discountCode))
+        .limit(1);
 
       if (!dc) throw new Error("Invalid discount code");
       if (dc.expiresAt && dc.expiresAt < new Date())
@@ -384,7 +431,13 @@ export async function createOrder(data: {
     const finalTotal = data.total * (1 - discountPct / 100) + (data.shippingFee || 0);
 
     const userExists = session.user?.id
-      ? await tx.query.users.findFirst({ where: eq(users.id, session.user.id) })
+      ? (
+          await tx
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.id, session.user.id))
+            .limit(1)
+        )[0]
       : null;
 
     const isOnline = data.paymentMethod && data.paymentMethod !== "COD";
@@ -418,9 +471,11 @@ export async function createOrder(data: {
         color: item.color || null,
       });
 
-      const product = await tx.query.products.findFirst({
-        where: eq(products.id, item.productId),
-      });
+      const [product] = await tx
+        .select({ id: products.id, sizes: products.sizes, stock: products.stock })
+        .from(products)
+        .where(eq(products.id, item.productId))
+        .limit(1);
 
       if (product) {
         let sizes: unknown[] = [];
@@ -452,16 +507,17 @@ export async function createOrder(data: {
     }
   });
 
-  const createdOrder = await db.query.orders.findFirst({
-    where: eq(orders.id, newOrderId),
-    with: {
-      items: true,
-    },
-  });
+  const [rawCreated] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, newOrderId))
+    .limit(1);
 
-  if (!createdOrder) {
+  if (!rawCreated) {
     throw new Error("Failed to create order");
   }
+
+  const [createdOrder] = await attachItemsToOrders([rawCreated]);
 
   // Auto-print receipt in background for COD
   if ((createdOrder.paymentMethod || "COD") === "COD" && process.env.VERCEL !== "1") {
@@ -475,23 +531,18 @@ export async function createOrder(data: {
 
 export async function printOrderReceipt(orderId: string) {
   try {
-    const order = await db.query.orders.findFirst({
-      where: eq(orders.id, orderId),
-      with: {
-        items: {
-          with: {
-            product: {
-              columns: { name: true },
-            },
-          },
-        },
-      },
-    });
+    const rawOrders = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, orderId))
+      .limit(1);
 
-    if (!order) {
+    if (!rawOrders.length) {
       console.error(`Order ${orderId} not found`);
       return { success: false, error: "Order not found" };
     }
+
+    const [order] = await attachItemsToOrders(rawOrders);
 
     const qrCode = await generateReceiptQR(order as unknown as OrderWithItems);
 

@@ -19,22 +19,26 @@ async function requireAdmin() {
 
 export async function getCategories() {
   try {
-    const allCategories = await db.query.categories.findMany({
-      orderBy: (tbl, { asc }) => [asc(tbl.name)],
-      with: {
-        products: {
-          columns: { id: true },
-        },
-      },
-    });
+    const cats = await db.select().from(categories).orderBy(asc(categories.name));
+    if (!cats.length) return [];
 
-    return allCategories.map((c) => ({
+    const counts = await db
+      .select({
+        categoryId: products.categoryId,
+        total: count(),
+      })
+      .from(products)
+      .groupBy(products.categoryId);
+
+    const countMap = new Map(counts.map((c) => [c.categoryId, c.total]));
+
+    return cats.map((c) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,
       createdAt: c.createdAt,
       updatedAt: c.updatedAt,
-      _count: { products: c.products.length },
+      _count: { products: countMap.get(c.id) || 0 },
     }));
   } catch (error) {
     console.warn("[ZAD][db] Failed to fetch categories (database unavailable):", error instanceof Error ? error.message : error);

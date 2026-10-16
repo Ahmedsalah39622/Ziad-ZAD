@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db, products } from "@/lib/db";
+import { db, products, categories } from "@/lib/db";
 import { eq, like, desc, asc, max } from "drizzle-orm";
 
 async function getAuth() {
@@ -32,22 +32,31 @@ export async function getProducts(options?: string | ProductQueryOptions) {
       ? like(products.name, `%${query.search}%`)
       : undefined;
 
-    let orderBy;
+    let orderByClause;
     if (query.sort === "price-desc") {
-      orderBy = [desc(products.price), desc(products.createdAt)];
+      orderByClause = [desc(products.price), desc(products.createdAt)];
     } else if (query.sort === "price-asc") {
-      orderBy = [asc(products.price), desc(products.createdAt)];
+      orderByClause = [asc(products.price), desc(products.createdAt)];
     } else if (query.sort === "newest") {
-      orderBy = [desc(products.createdAt)];
+      orderByClause = [desc(products.createdAt)];
     } else {
-      orderBy = [asc(products.sortOrder), desc(products.createdAt)];
+      orderByClause = [asc(products.sortOrder), desc(products.createdAt)];
     }
 
-    return await db.query.products.findMany({
-      where: searchFilter,
-      with: { category: true },
-      orderBy,
-    });
+    const rows = await db
+      .select({
+        product: products,
+        category: categories,
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(searchFilter)
+      .orderBy(...orderByClause);
+
+    return rows.map((r) => ({
+      ...r.product,
+      category: r.category,
+    }));
   } catch (error) {
     console.warn("[ZAD][db] Failed to fetch products (database unavailable):", error instanceof Error ? error.message : error);
     return [];
@@ -56,10 +65,21 @@ export async function getProducts(options?: string | ProductQueryOptions) {
 
 export async function getProductById(id: string) {
   try {
-    return await db.query.products.findFirst({
-      where: eq(products.id, id),
-      with: { category: true },
-    });
+    const rows = await db
+      .select({
+        product: products,
+        category: categories,
+      })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(eq(products.id, id))
+      .limit(1);
+
+    if (!rows.length) return null;
+    return {
+      ...rows[0].product,
+      category: rows[0].category,
+    };
   } catch (error) {
     console.warn(`[ZAD][db] Failed to fetch product ${id}:`, error instanceof Error ? error.message : error);
     return null;

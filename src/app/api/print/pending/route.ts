@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, siteSettings, orders } from "@/lib/db";
-import { eq, and, notInArray, asc } from "drizzle-orm";
+import { db, siteSettings, orders, orderItems, products } from "@/lib/db";
+import { eq, and, notInArray, asc, inArray } from "drizzle-orm";
 
 const PRINTED_IDS_KEY = "print_agent_printed_order_ids";
 
@@ -42,23 +42,53 @@ export async function GET(req: NextRequest) {
         ? and(eq(orders.paymentMethod, "COD"), notInArray(orders.id, printedIds))
         : eq(orders.paymentMethod, "COD");
 
-    const pendingOrders = await db.query.orders.findMany({
-      where: whereCondition,
-      with: {
-        items: {
-          with: {
-            product: {
-              columns: { name: true },
-            },
-          },
-        },
-      },
-      orderBy: [asc(orders.createdAt)],
-      limit: 10,
-    });
+    const pendingOrders = await db
+      .select()
+      .from(orders)
+      .where(whereCondition)
+      .orderBy(asc(orders.createdAt))
+      .limit(10);
+
+    if (!pendingOrders.length) {
+      return NextResponse.json({ orders: [] });
+    }
+
+    const orderIds = pendingOrders.map((o) => o.id);
+    const itemRows = await db
+      .select({
+        item: orderItems,
+        productName: products.name,
+      })
+      .from(orderItems)
+      .leftJoin(products, eq(orderItems.productId, products.id))
+      .where(inArray(orderItems.orderId, orderIds));
+
+    const itemsByOrder = new Map<
+      string,
+      Array<{
+        name: string;
+        quantity: number;
+        price: number;
+        size: string | null;
+        color: string | null;
+      }>
+    >();
+
+    for (const r of itemRows) {
+      const arr = itemsByOrder.get(r.item.orderId) || [];
+      arr.push({
+        name: r.productName ?? r.item.productId,
+        quantity: r.item.quantity,
+        price: r.item.price,
+        size: r.item.size,
+        color: r.item.color,
+      });
+      itemsByOrder.set(r.item.orderId, arr);
+    }
 
     const payload = pendingOrders.map((order) => {
-      const subtotal = order.items.reduce(
+      const items = itemsByOrder.get(order.id) || [];
+      const subtotal = items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       );
@@ -81,13 +111,7 @@ export async function GET(req: NextRequest) {
         discountAmount,
         shippingFee: order.shippingFee,
         total: order.total,
-        items: order.items.map((item) => ({
-          name: item.product?.name ?? item.productId,
-          quantity: item.quantity,
-          price: item.price,
-          size: item.size,
-          color: item.color,
-        })),
+        items,
       };
     });
 
