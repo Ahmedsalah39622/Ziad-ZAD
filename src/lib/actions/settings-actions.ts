@@ -24,7 +24,7 @@ export async function getSetting(key: string, defaultValue: string = ""): Promis
       where: eq(siteSettings.key, key),
     });
     return setting?.value ?? defaultValue;
-  } catch (error) {
+  } catch {
     databaseUnavailableUntil = Date.now() + DATABASE_FAILURE_COOLDOWN_MS;
     console.warn(`[ZAD][db] Database unavailable while fetching setting "${key}"; using default value.`);
     return defaultValue;
